@@ -31,6 +31,9 @@ export const usePrintStyles = () => {
           width: 100%;
           margin-bottom: 1rem;
         }
+        .print-header img {
+          height: 32px;
+        }
         .print-footer {
           visibility: visible;
           position: fixed;

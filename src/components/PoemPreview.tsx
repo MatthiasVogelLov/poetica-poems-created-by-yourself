@@ -32,7 +32,7 @@ const PoemPreview = ({
       <CardContent className="p-6 sm:p-8">
         {/* Print header - only visible when printing */}
         <div className="print-header">
-          <img src="/poetica-logo.png" alt="Poetica Logo" className="h-8 mb-4" />
+          <div className="font-serif text-xl font-medium">Poetica</div>
         </div>
         
         <PoemTitle title={title} />

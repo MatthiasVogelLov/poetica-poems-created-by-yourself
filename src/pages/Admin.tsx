@@ -7,10 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
+import StatsGrid from '@/components/admin/StatsGrid';
 
 const Admin = () => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("impressum");
+  const [activeTab, setActiveTab] = useState("stats");
   const [isLoading, setIsLoading] = useState(false);
   const [contents, setContents] = useState({
     impressum: localStorage.getItem('admin_impressum') || '',
@@ -48,7 +49,7 @@ const Admin = () => {
       
       <div className="pt-32 pb-20">
         <div className="container-narrow px-4 sm:px-8">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
               <ArrowLeft size={18} />
               <span>Zurück zur Startseite</span>
@@ -56,13 +57,18 @@ const Admin = () => {
             
             <h1 className="heading-lg mb-6 sm:mb-10">Admin-Bereich</h1>
             
-            <Tabs defaultValue="impressum" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid grid-cols-4 mb-8">
+            <Tabs defaultValue="stats" className="w-full" value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid grid-cols-5 mb-8">
+                <TabsTrigger value="stats">Statistiken</TabsTrigger>
                 <TabsTrigger value="impressum">Impressum</TabsTrigger>
                 <TabsTrigger value="datenschutz">Datenschutz</TabsTrigger>
                 <TabsTrigger value="agb">AGB</TabsTrigger>
                 <TabsTrigger value="kontakt">Kontakt</TabsTrigger>
               </TabsList>
+              
+              <TabsContent value="stats" className="focus:outline-none">
+                <StatsGrid />
+              </TabsContent>
               
               {["impressum", "datenschutz", "agb", "kontakt"].map((section) => (
                 <TabsContent key={section} value={section} className="focus:outline-none">

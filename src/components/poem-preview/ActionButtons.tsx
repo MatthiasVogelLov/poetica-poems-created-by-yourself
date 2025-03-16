@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Printer, Send, Copy, Check } from 'lucide-react';
+import { Printer, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
@@ -15,7 +15,6 @@ interface ActionButtonsProps {
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({ poem, title }) => {
   const isMobile = useIsMobile();
-  const [copied, setCopied] = useState(false);
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -63,28 +62,9 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ poem, title }) => {
     }
   };
 
-  const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText(`${title}\n\n${poem}`);
-    setCopied(true);
-    toast.success('In die Zwischenablage kopiert');
-    
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
-  };
-
   return (
     <div className="border-t pt-6 mt-6 print-actions">
       <div className="flex flex-wrap gap-2 justify-center mb-4">
-        <Button
-          onClick={handleCopyToClipboard}
-          variant="outline"
-          size={isMobile ? "sm" : "default"}
-          className="flex items-center gap-1 sm:gap-2"
-        >
-          {copied ? <Check size={isMobile ? 14 : 16} /> : <Copy size={isMobile ? 14 : 16} />}
-          <span className={isMobile ? "text-xs" : ""}>Kopieren</span>
-        </Button>
         <Button
           onClick={() => setEmailDialogOpen(true)}
           variant="outline"
