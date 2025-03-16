@@ -32,8 +32,13 @@ export function usePoemForm() {
     
     try {
       // Create Supabase client to call the edge function
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error("Supabase configuration is missing. Please check your environment variables.");
+      }
+      
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
       
       // Call our edge function
