@@ -53,7 +53,8 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       // Redirect to Stripe checkout
       if (data?.url) {
         console.log('Redirecting to:', data.url);
-        window.location.href = data.url;
+        // Use window.location.href to perform a full page redirect instead of a client-side navigation
+        window.open(data.url, '_blank') || window.location.replace(data.url);
       } else {
         console.error('No checkout URL received', data);
         throw new Error('Keine Checkout-URL erhalten');

@@ -20,12 +20,14 @@ serve(async (req) => {
 
   try {
     if (!stripeKey) {
+      console.error('Stripe API key is not configured');
       throw new Error('Stripe API key is not configured');
     }
 
     const { productId, successUrl, cancelUrl, poemTitle } = await req.json();
     
     if (!productId || !successUrl || !cancelUrl) {
+      console.error('Missing required parameters', { productId, successUrl, cancelUrl });
       throw new Error('Missing required parameters');
     }
 
