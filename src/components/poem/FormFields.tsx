@@ -1,134 +1,203 @@
 
 import React from 'react';
+import { UseFormReturn } from 'react-hook-form';
+import { 
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { PoemFormData } from '@/types/poem';
 
 interface FormFieldsProps {
-  formData: PoemFormData;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement>) => void;
+  form: UseFormReturn<PoemFormData>;
 }
 
-const FormFields: React.FC<FormFieldsProps> = ({ formData, onChange }) => {
+const FormFields: React.FC<FormFieldsProps> = ({ form }) => {
   return (
-    <fieldset className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="audience" className="block text-sm font-medium mb-2">
-            Zielgruppe
-          </label>
-          <select
-            id="audience"
+    <Form {...form}>
+      <fieldset className="space-y-5">
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
             name="audience"
-            value={formData.audience}
-            onChange={onChange}
-            className="form-select w-full"
-            required
-          >
-            <option value="kinder">Kinder</option>
-            <option value="erwachsene">Erwachsene</option>
-            <option value="partner">Partner/in</option>
-            <option value="familie">Familie</option>
-            <option value="freunde">Freunde</option>
-            <option value="kollegen">Kollegen</option>
-          </select>
-        </div>
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="block text-sm font-medium mb-2">Zielgruppe</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                  required
+                >
+                  <FormControl>
+                    <SelectTrigger className="form-select">
+                      <SelectValue placeholder="Zielgruppe auswählen" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="kinder">Kinder</SelectItem>
+                    <SelectItem value="erwachsene">Erwachsene</SelectItem>
+                    <SelectItem value="partner">Partner/in</SelectItem>
+                    <SelectItem value="familie">Familie</SelectItem>
+                    <SelectItem value="freunde">Freunde</SelectItem>
+                    <SelectItem value="kollegen">Kollegen</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div>
-          <label htmlFor="occasion" className="block text-sm font-medium mb-2">
-            Anlass
-          </label>
-          <select
-            id="occasion"
+          <FormField
+            control={form.control}
             name="occasion"
-            value={formData.occasion}
-            onChange={onChange}
-            className="form-select w-full"
-            required
-          >
-            <option value="geburtstag">Geburtstag</option>
-            <option value="hochzeit">Hochzeit</option>
-            <option value="jubilaeum">Jubiläum</option>
-            <option value="trauerfall">Trauerfall</option>
-            <option value="weihnachten">Weihnachten</option>
-            <option value="valentinstag">Valentinstag</option>
-            <option value="andere">Andere</option>
-          </select>
-        </div>
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="block text-sm font-medium mb-2">Anlass</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                  required
+                >
+                  <FormControl>
+                    <SelectTrigger className="form-select">
+                      <SelectValue placeholder="Anlass auswählen" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="geburtstag">Geburtstag</SelectItem>
+                    <SelectItem value="hochzeit">Hochzeit</SelectItem>
+                    <SelectItem value="jubilaeum">Jubiläum</SelectItem>
+                    <SelectItem value="trauerfall">Trauerfall</SelectItem>
+                    <SelectItem value="weihnachten">Weihnachten</SelectItem>
+                    <SelectItem value="valentinstag">Valentinstag</SelectItem>
+                    <SelectItem value="andere">Andere</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div>
-          <label htmlFor="contentType" className="block text-sm font-medium mb-2">
-            Inhalt
-          </label>
-          <select
-            id="contentType"
+          <FormField
+            control={form.control}
             name="contentType"
-            value={formData.contentType}
-            onChange={onChange}
-            className="form-select w-full"
-            required
-          >
-            <option value="liebe">Liebe</option>
-            <option value="freundschaft">Freundschaft</option>
-            <option value="natur">Natur</option>
-            <option value="leben">Leben</option>
-            <option value="motivation">Motivation</option>
-            <option value="humor">Humor</option>
-            <option value="trauer">Trauer</option>
-          </select>
-        </div>
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="block text-sm font-medium mb-2">Inhalt</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                  required
+                >
+                  <FormControl>
+                    <SelectTrigger className="form-select">
+                      <SelectValue placeholder="Inhalt auswählen" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="liebe">Liebe</SelectItem>
+                    <SelectItem value="freundschaft">Freundschaft</SelectItem>
+                    <SelectItem value="natur">Natur</SelectItem>
+                    <SelectItem value="leben">Leben</SelectItem>
+                    <SelectItem value="motivation">Motivation</SelectItem>
+                    <SelectItem value="humor">Humor</SelectItem>
+                    <SelectItem value="trauer">Trauer</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div>
-          <label htmlFor="style" className="block text-sm font-medium mb-2">
-            Stil
-          </label>
-          <select
-            id="style"
+          <FormField
+            control={form.control}
             name="style"
-            value={formData.style}
-            onChange={onChange}
-            className="form-select w-full"
-            required
-          >
-            <option value="klassisch">Klassisch</option>
-            <option value="modern">Modern</option>
-            <option value="romantisch">Romantisch</option>
-            <option value="humorvoll">Humorvoll</option>
-            <option value="experimentell">Experimentell</option>
-          </select>
-        </div>
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="block text-sm font-medium mb-2">Stil</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                  required
+                >
+                  <FormControl>
+                    <SelectTrigger className="form-select">
+                      <SelectValue placeholder="Stil auswählen" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="klassisch">Klassisch</SelectItem>
+                    <SelectItem value="modern">Modern</SelectItem>
+                    <SelectItem value="romantisch">Romantisch</SelectItem>
+                    <SelectItem value="humorvoll">Humorvoll</SelectItem>
+                    <SelectItem value="experimentell">Experimentell</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div className="col-span-2">
-          <label htmlFor="length" className="block text-sm font-medium mb-2">
-            Länge
-          </label>
-          <select
-            id="length"
+          <FormField
+            control={form.control}
             name="length"
-            value={formData.length}
-            onChange={onChange}
-            className="form-select w-full"
-            required
-          >
-            <option value="kurz">Kurz (4-8 Zeilen)</option>
-            <option value="mittel">Mittel (8-16 Zeilen)</option>
-            <option value="lang">Lang (16-24 Zeilen)</option>
-          </select>
-        </div>
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel className="block text-sm font-medium mb-2">Länge</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                  required
+                >
+                  <FormControl>
+                    <SelectTrigger className="form-select">
+                      <SelectValue placeholder="Länge auswählen" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="kurz">Kurz (4-8 Zeilen)</SelectItem>
+                    <SelectItem value="mittel">Mittel (8-16 Zeilen)</SelectItem>
+                    <SelectItem value="lang">Lang (16-24 Zeilen)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div className="col-span-2">
-          <label htmlFor="keywords" className="block text-sm font-medium mb-2">
-            Schlüsselwörter (optional)
-          </label>
-          <textarea
-            id="keywords"
+          <FormField
+            control={form.control}
             name="keywords"
-            value={formData.keywords}
-            onChange={onChange}
-            placeholder="Fügen Sie persönliche Details oder Schlüsselwörter hinzu..."
-            className="form-select w-full min-h-[100px] resize-y"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel className="block text-sm font-medium mb-2">
+                  Schlüsselwörter (optional)
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Fügen Sie persönliche Details oder Schlüsselwörter hinzu..."
+                    className="form-select min-h-[100px] resize-y"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-      </div>
-    </fieldset>
+      </fieldset>
+    </Form>
   );
 };
 
