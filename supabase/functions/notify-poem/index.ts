@@ -17,18 +17,18 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting notify-poem function execution');
+    console.log('[notify-poem] Starting execution with timestamp:', new Date().toISOString());
     
     if (!resendApiKey) {
-      console.error('Resend API key is not configured');
+      console.error('[notify-poem] ERROR: Resend API key is not configured');
       throw new Error('Resend API key is not configured');
     }
 
-    console.log('Resend API key found, length:', resendApiKey.length);
+    console.log('[notify-poem] Resend API key found, length:', resendApiKey.length);
     const resend = new Resend(resendApiKey);
     
     const body = await req.text();
-    console.log('Request body received:', body);
+    console.log('[notify-poem] Request body received, length:', body.length);
     
     let poemTitle, formData, poemContent;
     try {
@@ -36,20 +36,23 @@ serve(async (req) => {
       poemTitle = parsedBody.poemTitle;
       formData = parsedBody.formData;
       poemContent = parsedBody.poemContent;
+      console.log('[notify-poem] Successfully parsed request body. poemTitle:', poemTitle);
     } catch (parseError) {
-      console.error('Error parsing request body:', parseError);
+      console.error('[notify-poem] Error parsing request body:', parseError);
       throw new Error(`Failed to parse request body: ${parseError.message}`);
     }
     
     if (!poemTitle) {
-      console.error('Missing poem title');
+      console.error('[notify-poem] Missing poem title');
       throw new Error('Missing poem title');
     }
 
-    console.log('Sending poem notification:', { 
+    console.log('[notify-poem] Preparing to send poem notification:', { 
       poemTitle, 
       hasContent: !!poemContent, 
+      contentLength: poemContent?.length,
       hasFormData: !!formData,
+      formDataKeys: formData ? Object.keys(formData) : [],
       recipientEmail,
     });
 
@@ -63,7 +66,7 @@ serve(async (req) => {
       })
       .join('');
 
-    console.log('Formatted form data for email');
+    console.log('[notify-poem] Formatted form data for email');
 
     // Send email notification
     const emailPayload = {
@@ -91,22 +94,23 @@ serve(async (req) => {
       `
     };
 
-    console.log('About to send email with payload:', JSON.stringify({
+    console.log('[notify-poem] About to send email with payload:', JSON.stringify({
       to: emailPayload.to,
-      subject: emailPayload.subject
+      subject: emailPayload.subject,
+      contentLength: emailPayload.html.length,
     }));
 
     try {
       const { data, error } = await resend.emails.send(emailPayload);
 
       if (error) {
-        console.error('Error from Resend API:', error);
+        console.error('[notify-poem] Error from Resend API:', error);
         throw new Error(`Failed to send email: ${error.message}`);
       }
 
-      console.log('Email notification sent successfully:', data);
+      console.log('[notify-poem] Email notification sent successfully:', data);
     } catch (sendError) {
-      console.error('Exception while calling Resend API:', sendError);
+      console.error('[notify-poem] Exception while calling Resend API:', sendError);
       throw new Error(`Exception calling Resend API: ${sendError.message}`);
     }
 
@@ -118,7 +122,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error sending notification:', error.message, error.stack);
+    console.error('[notify-poem] Error sending notification:', error.message, error.stack);
     
     return new Response(
       JSON.stringify({ error: error.message }),

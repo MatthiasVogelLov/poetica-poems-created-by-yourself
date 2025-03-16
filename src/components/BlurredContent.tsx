@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { LockIcon, CreditCard, AlertTriangle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -51,7 +50,7 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         poemTitle,
         currentPath,
         origin: window.location.origin,
-        poemLength: poem.length
+        poemLength: poem?.length || 0
       });
       
       // Make sure to store poem data in localStorage BEFORE redirecting
@@ -62,12 +61,29 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
           timestamp: new Date().toISOString() // Add timestamp for debugging
         };
         
-        // Store in localStorage with clear key name
-        localStorage.setItem('currentPoemData', JSON.stringify(poemData));
-        console.log('Saved poem data to localStorage before payment redirect:', poemData);
-        
-        // Also store as a backup with timestamp
-        localStorage.setItem('poemData_' + new Date().getTime(), JSON.stringify(poemData));
+        try {
+          // Store in localStorage with clear key name
+          localStorage.setItem('currentPoemData', JSON.stringify(poemData));
+          console.log('Saved poem data to localStorage before payment redirect:', poemData);
+          
+          // Also store in sessionStorage as a backup
+          sessionStorage.setItem('currentPoemData', JSON.stringify(poemData));
+          console.log('Backup saved to sessionStorage');
+          
+          // Also store with a timestamp in the key to keep multiple versions
+          const backupKey = 'poemData_' + new Date().getTime();
+          localStorage.setItem(backupKey, JSON.stringify(poemData));
+          console.log('Additional backup saved with key:', backupKey);
+          
+          // Verify storage worked
+          const verifyData = localStorage.getItem('currentPoemData');
+          if (!verifyData) {
+            console.warn('WARNING: Verification failed - could not read back poem data from localStorage');
+          }
+        } catch (storageError) {
+          console.error('Error saving to localStorage:', storageError);
+          // Continue anyway, as Stripe might still work
+        }
       } else {
         console.warn('Missing poem data before payment redirect');
       }
@@ -94,6 +110,17 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       }
       
       console.log('Checkout session created:', data);
+      
+      // Last chance to verify localStorage before redirect
+      try {
+        const finalCheck = localStorage.getItem('currentPoemData');
+        console.log('Final localStorage check before redirect:', 
+          finalCheck ? 'Data found' : 'NO DATA FOUND', 
+          finalCheck ? JSON.parse(finalCheck).title : ''
+        );
+      } catch (e) {
+        console.error('Error in final localStorage check:', e);
+      }
       
       // Redirect to Stripe checkout
       if (data?.url) {

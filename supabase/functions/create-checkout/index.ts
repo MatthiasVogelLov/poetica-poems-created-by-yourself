@@ -22,19 +22,28 @@ serve(async (req) => {
   }
 
   try {
+    console.log('[create-checkout] Starting execution with timestamp:', new Date().toISOString());
+    
     if (!stripeKey) {
-      console.error('Stripe API key is not configured');
+      console.error('[create-checkout] Stripe API key is not configured');
       throw new Error('Stripe API key is not configured');
     }
 
     const { productId, successUrl, cancelUrl, poemTitle, formData } = await req.json();
     
     if (!productId || !successUrl || !cancelUrl) {
-      console.error('Missing required parameters', { productId, successUrl, cancelUrl });
+      console.error('[create-checkout] Missing required parameters', { productId, successUrl, cancelUrl });
       throw new Error('Missing required parameters');
     }
 
-    console.log('Creating checkout session with:', { productId, successUrl, cancelUrl, poemTitle });
+    console.log('[create-checkout] Creating checkout session with:', { 
+      productId, 
+      successUrl, 
+      cancelUrl, 
+      poemTitle,
+      hasFormData: !!formData,
+      formDataKeys: formData ? Object.keys(formData) : []
+    });
     
     // Extract only the essential form data to avoid metadata size limits
     const minimalFormData = formData ? {
@@ -46,6 +55,9 @@ serve(async (req) => {
       keywords: formData.keywords || ''
     } : {};
 
+    // Save poem content to Stripe metadata - limited to 500 chars
+    const poemExcerpt = formData?.poem ? formData.poem.substring(0, 450) + (formData.poem.length > 450 ? '...' : '') : '';
+    
     // Create a Stripe checkout session with appearance options to match app style
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -64,7 +76,7 @@ serve(async (req) => {
       cancel_url: cancelUrl,
       metadata: {
         poemTitle: poemTitle || 'Personalisiertes Gedicht',
-        formDataType: 'minimal' // Indicator that we're storing minimal data
+        createdAt: new Date().toISOString(),
       },
       // Custom appearance to match the app's style
       payment_intent_data: {
@@ -77,12 +89,16 @@ serve(async (req) => {
       }
     });
 
-    console.log('Checkout session created:', { id: session.id, url: session.url });
+    console.log('[create-checkout] Checkout session created:', { 
+      id: session.id, 
+      url: session.url,
+      hasUrl: !!session.url
+    });
 
     // Send notification email if formData is provided
     if (formData && resendApiKey) {
       try {
-        console.log('Attempting to send email notification directly');
+        console.log('[create-checkout] Attempting to send email notification directly from checkout');
         
         const resend = new Resend(resendApiKey);
         
@@ -99,7 +115,7 @@ serve(async (req) => {
         const emailPayload = {
           from: 'Poetica <notification@poetica-app.com>',
           to: recipientEmail,
-          subject: `Neues Gedicht: ${poemTitle}`,
+          subject: `Neues Gedicht: ${poemTitle} (aus Checkout)`,
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
               <h1 style="color: #1d3557; border-bottom: 1px solid #ddd; padding-bottom: 10px;">${poemTitle}</h1>
@@ -115,22 +131,22 @@ serve(async (req) => {
               </ul>
               
               <p style="margin-top: 30px; color: #6c757d; font-size: 14px; border-top: 1px solid #ddd; padding-top: 10px;">
-                Diese E-Mail wurde automatisch von der Poetica App gesendet.
+                Diese E-Mail wurde automatisch von der Poetica App gesendet (Backup vom Checkout).
               </p>
             </div>
           `
         };
 
-        console.log('Sending email with Resend...');
+        console.log('[create-checkout] Sending email with Resend...');
         const { data, error } = await resend.emails.send(emailPayload);
 
         if (error) {
-          console.error('Error sending email via Resend:', error);
+          console.error('[create-checkout] Error sending email via Resend:', error);
         } else {
-          console.log('Email notification sent successfully via Resend:', data);
+          console.log('[create-checkout] Email notification sent successfully via Resend:', data);
         }
       } catch (emailError) {
-        console.error('Error sending notification directly:', emailError);
+        console.error('[create-checkout] Error sending notification directly:', emailError);
         // Don't throw, allow checkout to continue
       }
     }
@@ -146,7 +162,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error creating checkout session:', error);
+    console.error('[create-checkout] Error creating checkout session:', error);
     
     return new Response(
       JSON.stringify({ error: error.message }),
