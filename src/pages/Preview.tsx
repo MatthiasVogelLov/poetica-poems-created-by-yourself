@@ -3,34 +3,41 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import PoemPreview from '../components/PoemPreview';
 import { ArrowLeft } from 'lucide-react';
-
 const Preview = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isPaid = searchParams.get('paid') === 'true';
-  
   const [poemTitle, setPoemTitle] = useState('');
   const [poemContent, setPoemContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(true);
-  
   useEffect(() => {
     if (!location.state || !location.state.formData) {
       // If someone navigates directly to this page without form data, redirect to generator
       navigate('/generator');
       return;
     }
-    
+
     // Set the poem title and content from the generated poem if available
     if (location.state.generatedPoem) {
-      const { title, poem } = location.state.generatedPoem;
+      const {
+        title,
+        poem
+      } = location.state.generatedPoem;
       setPoemTitle(title);
       setPoemContent(poem);
       setIsGenerating(false);
     } else {
       // For backwards compatibility, use the old method
-      const { audience, occasion, contentType, style, length, keywords } = location.state.formData;
-      
+      const {
+        audience,
+        occasion,
+        contentType,
+        style,
+        length,
+        keywords
+      } = location.state.formData;
+
       // Generate poem title based on form data
       let title;
       switch (occasion) {
@@ -55,14 +62,12 @@ const Preview = () => {
         default:
           title = 'Personalisiertes Gedicht';
       }
-      
       setPoemTitle(title);
-      
+
       // In a real implementation, this would be an API call to OpenAI
       // Instead of using the sample poems, we'd send the formData to an API
       const generatePoem = async () => {
         setIsGenerating(true);
-        
         try {
           // For now, we'll use a timeout and sample poems
           // In a real implementation, this would be replaced with an actual API call:
@@ -82,7 +87,7 @@ const Preview = () => {
           const data = await response.json();
           setPoemContent(data.poem);
           */
-          
+
           // For demonstration, use sample poems based on content type
           setTimeout(() => {
             const samplePoems = {
@@ -105,7 +110,6 @@ Kein Weg zu weit, kein Berg zu steil,
 Mit dir an meiner Seite, Teil für Teil,
 Erschaffen wir ein wundersames Band,
 Das uns durch alle Zeiten trägt – Hand in Hand.`,
-              
               freundschaft: `Ein Seelenecho in der Zeit,
 Zwei Wege, die sich sanft berühren.
 Vertrauen, das wie Brücken trägt,
@@ -125,7 +129,6 @@ Was uns verbindet, braucht kein Licht,
 Wächst still im Schatten wie im Glanz.
 Freundschaft, kostbares Geschenk,
 In dir liegt Heimat und Vertrauen.`,
-              
               natur: `Im Rauschen alter Eichenwipfel,
 Im zarten Grün des frühen Jahrs,
 Liegt Weisheit, die uns sanft berührt,
@@ -145,7 +148,6 @@ Die Berge stehen still und stark,
 Wie Wächter über unsre Zeit.
 In ihrer Ruhe liegt die Kraft,
 Die unsre Seelen heimwärts führt.`,
-              
               leben: `Der Weg des Lebens, verschlungen und weit,
 Führt über Gipfel und durch tiefe Täler.
 Jeder Schritt ein Atem der Zeit,
@@ -165,7 +167,6 @@ So lasst uns leben mit offenem Herzen,
 Die Tage nutzen, die uns gegeben.
 Denn im Licht wie auch in den Schmerzen,
 Liegt die wahre Schönheit vom Leben.`,
-              
               motivation: `Steh auf, wenn du gefallen bist,
 Geh weiter, wenn der Weg sich windet.
 Die größte Kraft, die in dir ist,
@@ -185,7 +186,6 @@ So folge deinem inneren Stern,
 Auch wenn er manchmal schwach nur scheint.
 Das Ziel mag heute noch so fern,
 Dein Mut hat jede Furcht vereint.`,
-              
               humor: `Im Alltag, wo die Sorgen wohnen,
 Und Ernst regiert mit strengem Blick,
 Da tanzt der Humor auf leisen Sohlen,
@@ -205,7 +205,6 @@ So lass den Humor dein Begleiter sein,
 Durch alle Höhen, alle Tiefen.
 Er macht das Herz und Leben fein,
 Lässt Freude in die Seele triefen.`,
-              
               trauer: `Im stillen Garten der Erinnerung,
 Wo Schatten leise Geschichten weben,
 Liegt verborgen eine tiefe Verbindung,
@@ -226,10 +225,10 @@ Als kostbares Geschenk im Herzen.
 Die Liebe wird sich niemals senken,
 Sie leuchtet fort durch alle Schmerzen.`
             };
-            
+
             // Select a poem based on content type, or use a default
             const poem = samplePoems[contentType] || samplePoems.liebe;
-            
+
             // Adjust poem length based on user preference
             let adjustedPoem = poem;
             if (length === 'kurz') {
@@ -244,7 +243,7 @@ Sie leuchtet fort durch alle Schmerzen.`
                 adjustedPoem = [...stanzas, stanzas[1], stanzas[0]].join('\n\n');
               }
             }
-            
+
             // If keywords were provided, try to incorporate them somehow
             if (keywords && keywords.trim()) {
               // This would be handled by the API in a real implementation
@@ -255,40 +254,30 @@ Sie leuchtet fort durch alle Schmerzen.`
 In diesem Gedicht für dich erdacht.
 Ein persönlicher Gruß, der erscheint,
 Mit Liebe und Fürsorge bedacht.`;
-                
                 adjustedPoem += personalizedStanza;
               }
             }
-            
             setPoemContent(adjustedPoem);
             setIsGenerating(false);
           }, 1500);
-          
         } catch (error) {
           console.error('Error generating poem:', error);
           setIsGenerating(false);
           setPoemContent('Es tut uns leid, beim Erstellen des Gedichts ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.');
         }
       };
-      
       generatePoem();
     }
   }, [location.state, navigate]);
-  
   const goBack = () => {
     navigate('/generator');
   };
-
-  return (
-    <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white">
       <Header />
       
       <div className="pt-32 pb-20">
         <div className="container-narrow">
-          <button 
-            onClick={goBack}
-            className="btn-ghost mb-8 inline-flex items-center gap-2"
-          >
+          <button onClick={goBack} className="btn-ghost mb-8 inline-flex items-center gap-2">
             <ArrowLeft size={16} />
             <span>Zurück zum Generator</span>
           </button>
@@ -300,25 +289,17 @@ Mit Liebe und Fürsorge bedacht.`;
             <h1 className="heading-lg mb-6 animate-slide-up">
               {isPaid ? 'Ihr Gedicht ist fertig' : 'Vorschau Ihres Gedichts'}
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '100ms' }}>
-              {isPaid 
-                ? 'Hier ist Ihr personalisiertes Gedicht. Sie können es jetzt speichern, drucken oder teilen.' 
-                : 'Hier sehen Sie eine Vorschau Ihres personalisierten Gedichts.'}
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{
+            animationDelay: '100ms'
+          }}>
+              {isPaid ? 'Hier ist Ihr personalisiertes Gedicht. Sie können es jetzt speichern, drucken oder teilen.' : 'Hier sehen Sie eine Vorschau Ihres personalisierten Gedichts.'}
             </p>
           </div>
           
-          {isGenerating ? (
-            <div className="text-center py-16">
+          {isGenerating ? <div className="text-center py-16">
               <div className="inline-block h-12 w-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin mb-4"></div>
               <p className="text-lg text-muted-foreground">Ihr Gedicht wird erstellt...</p>
-            </div>
-          ) : (
-            <PoemPreview 
-              title={poemTitle}
-              poem={poemContent}
-              isPaid={isPaid}
-            />
-          )}
+            </div> : <PoemPreview title={poemTitle} poem={poemContent} isPaid={isPaid} />}
         </div>
       </div>
       
@@ -327,7 +308,7 @@ Mit Liebe und Fürsorge bedacht.`;
         <div className="container-wide">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
-              <span className="font-serif text-xl font-medium">Poetica</span>
+              
             </div>
             <div className="flex flex-col md:flex-row gap-6 md:gap-10 text-sm text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">Impressum</a>
@@ -336,13 +317,9 @@ Mit Liebe und Fürsorge bedacht.`;
               <a href="#" className="hover:text-foreground transition-colors">Kontakt</a>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Poetica. Alle Rechte vorbehalten.
-          </div>
+          
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Preview;
