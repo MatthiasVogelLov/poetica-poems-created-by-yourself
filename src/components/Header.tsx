@@ -24,11 +24,7 @@ const Header = () => {
         
         <div className="hidden md:flex space-x-8 items-center">
           
-          <NavLink to="/generator" className={({
-          isActive
-        }) => `text-sm tracking-wide transition-all duration-200 hover:text-primary/80 ${isActive ? 'text-primary font-medium' : 'text-foreground/80'}`}>
-            Gedicht erstellen
-          </NavLink>
+          
           <button className="btn-primary">
             Anmelden
           </button>
