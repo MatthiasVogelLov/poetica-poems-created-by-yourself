@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { LockIcon, CreditCard } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface BlurredContentProps {
   children: React.ReactNode;
@@ -10,23 +12,51 @@ interface BlurredContentProps {
 const BlurredContent = ({ children }: BlurredContentProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   
-  const handlePaymentClick = () => {
-    // In a real implementation, this would trigger the payment flow
-    console.log("Payment process initiated");
+  const handlePaymentClick = async () => {
+    setIsLoading(true);
     
-    // For testing purposes, simulate a successful payment
-    setTimeout(() => {
-      // Add the paid parameter to the current URL instead of creating a new URL
+    try {
+      // Get the current URL and poem title
       const currentPath = location.pathname;
-      const searchParams = new URLSearchParams(location.search);
-      searchParams.set('paid', 'true');
+      const baseUrl = window.location.origin;
+      const successUrl = `${baseUrl}${currentPath}?paid=true`;
+      const cancelUrl = `${baseUrl}${currentPath}`;
       
-      // Navigate to the current path with the paid parameter
-      navigate(`${currentPath}?${searchParams.toString()}`, { 
-        state: location.state // Preserve the state (form data)
+      // Get the poem title from the state if available
+      const poemTitle = location.state?.generatedPoem?.title || 'Personalisiertes Gedicht';
+      
+      // Call our Supabase edge function to create a checkout session
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          productId: 'prod_Rx5lv8pz727AjU', // The product ID from Stripe
+          successUrl,
+          cancelUrl,
+          poemTitle
+        }
       });
-    }, 1000);
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      // Redirect to Stripe checkout
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Payment process error:', error);
+      toast({
+        title: "Fehler",
+        description: "Bei der Zahlungsabwicklung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -49,14 +79,24 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         </div>
         <h3 className="text-xl font-medium mb-2">Vollständiges Gedicht freischalten</h3>
         <p className="text-muted-foreground mb-6">
-          Für nur 4,99 € können Sie das vollständige Gedicht freischalten und herunterladen.
+          Für nur 0,99 € können Sie das vollständige Gedicht freischalten und herunterladen.
         </p>
         <button 
           onClick={handlePaymentClick}
+          disabled={isLoading}
           className="btn-primary w-full flex items-center justify-center gap-2"
         >
-          <CreditCard size={18} />
-          <span>Jetzt freischalten</span>
+          {isLoading ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>Wird bearbeitet...</span>
+            </>
+          ) : (
+            <>
+              <CreditCard size={18} />
+              <span>Jetzt freischalten</span>
+            </>
+          )}
         </button>
       </div>
     </div>
