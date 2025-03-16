@@ -19,6 +19,10 @@ serve(async (req) => {
   }
 
   try {
+    if (!stripeKey) {
+      throw new Error('Stripe API key is not configured');
+    }
+
     const { productId, successUrl, cancelUrl, poemTitle } = await req.json();
     
     if (!productId || !successUrl || !cancelUrl) {

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { LockIcon, CreditCard } from 'lucide-react';
+import { LockIcon, CreditCard, AlertTriangle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -15,9 +15,11 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
   const location = useLocation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const handlePaymentClick = async () => {
     setIsLoading(true);
+    setError(null);
     
     try {
       // Get the current URL and poem title
@@ -43,7 +45,7 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       
       if (error) {
         console.error('Supabase function error:', error);
-        throw new Error(error.message);
+        throw new Error(error.message || 'Fehler bei der Verbindung mit dem Zahlungsdienstleister');
       }
       
       console.log('Checkout session created:', data);
@@ -58,11 +60,14 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       }
     } catch (error) {
       console.error('Payment process error:', error);
+      setError(error.message || 'Bei der Zahlungsabwicklung ist ein Fehler aufgetreten');
+      
       toast({
         title: "Fehler",
-        description: "Bei der Zahlungsabwicklung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+        description: error.message || "Bei der Zahlungsabwicklung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
         variant: "destructive",
       });
+      
       setIsLoading(false);
     }
   };
@@ -89,6 +94,14 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         <p className="text-muted-foreground mb-6">
           Für nur 0,99 € können Sie das vollständige Gedicht freischalten und herunterladen.
         </p>
+        
+        {error && (
+          <div className="bg-destructive/10 text-destructive rounded-md p-3 mb-4 flex items-start">
+            <AlertTriangle size={16} className="mt-0.5 mr-2 flex-shrink-0" />
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
+        
         <Button 
           onClick={handlePaymentClick}
           disabled={isLoading}
