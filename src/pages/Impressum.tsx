@@ -1,10 +1,7 @@
-
 import React from 'react';
 import Header from '../components/Header';
-
 const Impressum = () => {
-  return (
-    <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white">
       <Header />
       
       <div className="pt-32 pb-20">
@@ -24,7 +21,7 @@ const Impressum = () => {
         <div className="container-wide">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
-              <span className="font-serif text-xl font-medium">Poetica</span>
+              
             </div>
             <div className="flex flex-col md:flex-row gap-6 md:gap-10 text-sm text-muted-foreground">
               <a href="/impressum" className="hover:text-foreground transition-colors">Impressum</a>
@@ -33,13 +30,9 @@ const Impressum = () => {
               <a href="/kontakt" className="hover:text-foreground transition-colors">Kontakt</a>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Poetica. Alle Rechte vorbehalten.
-          </div>
+          
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Impressum;
