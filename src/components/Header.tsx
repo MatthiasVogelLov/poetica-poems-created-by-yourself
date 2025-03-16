@@ -28,60 +28,18 @@ const Header = () => {
           Poetica
         </NavLink>
         
-        <div className="hidden md:flex space-x-8 items-center">
-          <NavLink to="/" className={({isActive}) => `text-base transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80 hover:text-foreground'}`}>
-            Startseite
-          </NavLink>
-          <NavLink to="/generator" className={({isActive}) => `text-base transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80 hover:text-foreground'}`}>
-            Gedicht erstellen
-          </NavLink>
-          <NavLink to="/impressum" className={({isActive}) => `text-base transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80 hover:text-foreground'}`}>
-            Impressum
-          </NavLink>
-          <NavLink to="/datenschutz" className={({isActive}) => `text-base transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80 hover:text-foreground'}`}>
-            Datenschutz
-          </NavLink>
-          <NavLink to="/agb" className={({isActive}) => `text-base transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80 hover:text-foreground'}`}>
-            AGB
-          </NavLink>
-          <NavLink to="/kontakt" className={({isActive}) => `text-base transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80 hover:text-foreground'}`}>
-            Kontakt
-          </NavLink>
-          <NavLink to="/admin" className={({isActive}) => `text-base transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80 hover:text-foreground'}`}>
-            Admin
-          </NavLink>
-        </div>
-        
-        {/* Mobile menu button */}
+        {/* Mobile menu button - now only toggles the logo */}
         <button onClick={toggleMenu} className="md:hidden p-2 focus:outline-none" aria-label={isMenuOpen ? "Menü schließen" : "Menü öffnen"}>
           {isMenuOpen ? <X size={20} className="text-foreground" /> : <Menu size={20} className="text-foreground" />}
         </button>
       </div>
       
-      {/* Mobile menu */}
+      {/* Mobile menu - simplified to only show the Poetica logo */}
       {isMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-md animate-fade-in">
           <div className="py-5 px-8 flex flex-col space-y-4">
-            <NavLink to="/" onClick={() => setIsMenuOpen(false)} className={({isActive}) => `text-base py-2 transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80'}`}>
-              Startseite
-            </NavLink>
-            <NavLink to="/generator" onClick={() => setIsMenuOpen(false)} className={({isActive}) => `text-base py-2 transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80'}`}>
-              Gedicht erstellen
-            </NavLink>
-            <NavLink to="/impressum" onClick={() => setIsMenuOpen(false)} className={({isActive}) => `text-base py-2 transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80'}`}>
-              Impressum
-            </NavLink>
-            <NavLink to="/datenschutz" onClick={() => setIsMenuOpen(false)} className={({isActive}) => `text-base py-2 transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80'}`}>
-              Datenschutz
-            </NavLink>
-            <NavLink to="/agb" onClick={() => setIsMenuOpen(false)} className={({isActive}) => `text-base py-2 transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80'}`}>
-              AGB
-            </NavLink>
-            <NavLink to="/kontakt" onClick={() => setIsMenuOpen(false)} className={({isActive}) => `text-base py-2 transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80'}`}>
-              Kontakt
-            </NavLink>
-            <NavLink to="/admin" onClick={() => setIsMenuOpen(false)} className={({isActive}) => `text-base py-2 transition-all duration-200 ${isActive ? 'text-primary font-medium' : 'text-foreground/80'}`}>
-              Admin
+            <NavLink to="/" onClick={() => setIsMenuOpen(false)} className="text-base py-2 transition-all duration-200 font-medium">
+              Poetica
             </NavLink>
           </div>
         </div>

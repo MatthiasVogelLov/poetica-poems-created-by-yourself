@@ -2,11 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import { Sparkles, Heart, Star, Users, Calendar, Type } from 'lucide-react';
+
 const Index = () => {
   const navigate = useNavigate();
   const goToGenerator = () => {
     navigate('/generator');
   };
+  
   return <div className="min-h-screen bg-white">
       <Header />
       
@@ -98,13 +100,13 @@ const Index = () => {
               
             </div>
             <div className="flex flex-col md:flex-row gap-6 md:gap-10 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-foreground transition-colors">Impressum</a>
-              <a href="#" className="hover:text-foreground transition-colors">Datenschutz</a>
-              <a href="#" className="hover:text-foreground transition-colors">AGB</a>
-              <a href="#" className="hover:text-foreground transition-colors">Kontakt</a>
+              <a href="/impressum" className="hover:text-foreground transition-colors">Impressum</a>
+              <a href="/datenschutz" className="hover:text-foreground transition-colors">Datenschutz</a>
+              <a href="/agb" className="hover:text-foreground transition-colors">AGB</a>
+              <a href="/kontakt" className="hover:text-foreground transition-colors">Kontakt</a>
+              <a href="/admin" className="hover:text-foreground transition-colors">Admin</a>
             </div>
           </div>
-          
         </div>
       </footer>
     </div>;

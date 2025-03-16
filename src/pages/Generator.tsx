@@ -1,6 +1,8 @@
+
 import React from 'react';
 import Header from '../components/Header';
 import PoemForm from '../components/PoemForm';
+
 const Generator = () => {
   return <div className="min-h-screen bg-white">
       <Header />
@@ -35,11 +37,12 @@ const Generator = () => {
               <a href="/datenschutz" className="hover:text-foreground transition-colors">Datenschutz</a>
               <a href="/agb" className="hover:text-foreground transition-colors">AGB</a>
               <a href="/kontakt" className="hover:text-foreground transition-colors">Kontakt</a>
+              <a href="/admin" className="hover:text-foreground transition-colors">Admin</a>
             </div>
           </div>
-          
         </div>
       </footer>
     </div>;
 };
+
 export default Generator;
