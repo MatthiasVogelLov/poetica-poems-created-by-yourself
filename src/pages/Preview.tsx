@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import PoemPreview from '../components/PoemPreview';
 import { ArrowLeft } from 'lucide-react';
@@ -16,7 +16,7 @@ const Preview = () => {
   const isMobile = useIsMobile();
   
   useEffect(() => {
-    if (isPaid && (!location.state || !location.state.generatedPoem)) {
+    if (isPaid) {
       const storedPoemData = localStorage.getItem('currentPoemData');
       if (storedPoemData) {
         try {
@@ -25,14 +25,6 @@ const Preview = () => {
             setPoemTitle(parsedData.title);
             setPoemContent(parsedData.poem);
             setIsGenerating(false);
-            
-            location.state = {
-              ...location.state,
-              generatedPoem: {
-                title: parsedData.title,
-                poem: parsedData.poem
-              }
-            };
             return;
           }
         } catch (e) {
@@ -47,10 +39,7 @@ const Preview = () => {
     }
 
     if (location.state.generatedPoem) {
-      const {
-        title,
-        poem
-      } = location.state.generatedPoem;
+      const { title, poem } = location.state.generatedPoem;
       setPoemTitle(title);
       setPoemContent(poem);
       setIsGenerating(false);
@@ -60,14 +49,7 @@ const Preview = () => {
         poem
       }));
     } else {
-      const {
-        audience,
-        occasion,
-        contentType,
-        style,
-        length,
-        keywords
-      } = location.state.formData;
+      const { audience, occasion, contentType, style, length, keywords } = location.state.formData;
 
       let title;
       switch (occasion) {
@@ -259,6 +241,18 @@ Mit Liebe und Fürsorge bedacht.`;
             }
             setPoemContent(adjustedPoem);
             setIsGenerating(false);
+            
+            localStorage.setItem('currentPoemData', JSON.stringify({
+              title,
+              poem: adjustedPoem
+            }));
+            
+            if (location.state) {
+              location.state.generatedPoem = {
+                title,
+                poem: adjustedPoem
+              };
+            }
           }, 1500);
         } catch (error) {
           console.error('Error generating poem:', error);
@@ -268,7 +262,7 @@ Mit Liebe und Fürsorge bedacht.`;
       };
       generatePoem();
     }
-  }, [location.state, navigate, isPaid, location]);
+  }, [isPaid]);
   
   const goBack = () => {
     navigate('/generator');
@@ -278,18 +272,18 @@ Mit Liebe und Fürsorge bedacht.`;
     <div className="min-h-screen bg-white">
       <Header />
       
-      <div className="pt-20 sm:pt-32 pb-10 sm:pb-20">
+      <div className="pt-20 sm:pt-28 pb-10 sm:pb-20">
         <div className="container-narrow px-4 sm:px-8">
           <button onClick={goBack} className="btn-ghost mb-6 sm:mb-8 inline-flex items-center gap-2 text-sm sm:text-base">
             <ArrowLeft size={isMobile ? 16 : 20} />
             <span>Zurück zum Generator</span>
           </button>
           
-          <div className="max-w-3xl mx-auto text-center mb-6 sm:mb-10">
-            <span className="subheading mb-2 sm:mb-4 block animate-fade-in text-xs sm:text-sm">
+          <div className="max-w-3xl mx-auto text-center mb-4 sm:mb-6">
+            <span className="subheading mb-2 sm:mb-3 block animate-fade-in text-xs sm:text-sm">
               Ihr Gedicht
             </span>
-            <h1 className="heading-lg mb-4 sm:mb-6 animate-slide-up text-2xl sm:text-4xl">
+            <h1 className="heading-lg mb-3 sm:mb-4 animate-slide-up text-2xl sm:text-4xl">
               {isPaid ? 'Ihr Gedicht ist fertig' : 'Vorschau Ihres Gedichts'}
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{

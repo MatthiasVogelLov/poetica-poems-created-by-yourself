@@ -36,11 +36,22 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       
       // Simplified form data to avoid metadata size limits
       const formData = {
-        ...location.state?.formData,
-        poem
+        audience: location.state?.formData?.audience || '',
+        occasion: location.state?.formData?.occasion || '',
+        contentType: location.state?.formData?.contentType || '',
+        style: location.state?.formData?.style || '',
+        length: location.state?.formData?.length || '',
+        keywords: location.state?.formData?.keywords || '',
+        poem: poem
       };
       
       console.log('Payment process started', { successUrl, cancelUrl, poemTitle });
+      
+      // Store the current poem data in localStorage BEFORE redirecting
+      localStorage.setItem('currentPoemData', JSON.stringify({
+        title: poemTitle,
+        poem: poem
+      }));
       
       // Call our Supabase edge function to create a checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -68,15 +79,7 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       // Redirect to Stripe checkout
       if (data?.url) {
         console.log('Redirecting to:', data.url);
-        
-        // Store the current poem data in localStorage for retrieval after payment
-        localStorage.setItem('currentPoemData', JSON.stringify({
-          title: poemTitle,
-          poem: poem
-        }));
-        
-        // Redirect to Stripe checkout page
-        window.location.replace(data.url);
+        window.location.href = data.url;
       } else {
         console.error('No checkout URL received', data);
         throw new Error('Keine Checkout-URL erhalten');

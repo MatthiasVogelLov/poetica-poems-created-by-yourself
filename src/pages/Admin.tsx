@@ -1,10 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from '@/hooks/use-toast';
+import { ArrowLeft } from 'lucide-react';
 
 const Admin = () => {
   const { toast } = useToast();
@@ -47,6 +49,11 @@ const Admin = () => {
       <div className="pt-32 pb-20">
         <div className="container-narrow px-4 sm:px-8">
           <div className="max-w-4xl mx-auto">
+            <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
+              <ArrowLeft size={18} />
+              <span>Zurück zur Startseite</span>
+            </Link>
+            
             <h1 className="heading-lg mb-6 sm:mb-10">Admin-Bereich</h1>
             
             <Tabs defaultValue="impressum" className="w-full" value={activeTab} onValueChange={setActiveTab}>
@@ -85,6 +92,23 @@ const Admin = () => {
           </div>
         </div>
       </div>
+      
+      <footer className="py-10 border-t">
+        <div className="container-wide">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-6 md:mb-0">
+              
+            </div>
+            <div className="flex flex-col md:flex-row gap-6 md:gap-10 text-sm text-muted-foreground">
+              <a href="/impressum" className="hover:text-foreground transition-colors">Impressum</a>
+              <a href="/datenschutz" className="hover:text-foreground transition-colors">Datenschutz</a>
+              <a href="/agb" className="hover:text-foreground transition-colors">AGB</a>
+              <a href="/kontakt" className="hover:text-foreground transition-colors">Kontakt</a>
+              <a href="/admin" className="hover:text-foreground transition-colors">Admin</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
