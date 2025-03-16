@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import PoemPreview from '../components/PoemPreview';
 import { ArrowLeft } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { toast } from "sonner";
 
 const Preview = () => {
   const location = useLocation();
@@ -17,7 +18,7 @@ const Preview = () => {
   const isMobile = useIsMobile();
   
   useEffect(() => {
-    // Check if payment was successful
+    // Enhanced flow for handling poem data after payment
     if (isPaid) {
       console.log('Payment successful, retrieving poem data from localStorage');
       const storedPoemData = localStorage.getItem('currentPoemData');
@@ -25,22 +26,41 @@ const Preview = () => {
       if (storedPoemData) {
         try {
           const parsedData = JSON.parse(storedPoemData);
-          console.log('Retrieved poem data:', parsedData);
+          console.log('Retrieved poem data from localStorage:', parsedData);
           
           if (parsedData.title && parsedData.poem) {
             setPoemTitle(parsedData.title);
             setPoemContent(parsedData.poem);
             setIsGenerating(false);
+            
+            // Notify user of successful unlock
+            toast.success("Gedicht erfolgreich freigeschaltet", {
+              description: "Sie können es jetzt speichern, drucken oder teilen."
+            });
+            
             return;
           } else {
             console.error('Stored poem data is missing title or poem');
+            toast.error("Fehler beim Laden des Gedichts", {
+              description: "Die gespeicherten Daten sind unvollständig."
+            });
           }
         } catch (e) {
           console.error('Error parsing stored poem data:', e);
+          toast.error("Fehler beim Laden des Gedichts", {
+            description: "Die gespeicherten Daten sind beschädigt."
+          });
         }
       } else {
-        console.error('No poem data found in localStorage');
+        console.error('No poem data found in localStorage after payment');
+        toast.error("Fehler beim Laden des Gedichts", {
+          description: "Es wurden keine gespeicherten Daten gefunden."
+        });
       }
+      
+      // If we get here, there was an error retrieving the poem data
+      setIsGenerating(false);
+      setPoemContent('Es gab ein Problem beim Laden Ihres Gedichts nach der Zahlung. Bitte kontaktieren Sie den Support.');
     }
 
     // If not returning from payment or missing data, check location state
@@ -58,11 +78,13 @@ const Preview = () => {
       setIsGenerating(false);
       
       // Save to localStorage for payment flow
-      localStorage.setItem('currentPoemData', JSON.stringify({
+      const poemData = {
         title,
-        poem
-      }));
-      console.log('Saved poem data to localStorage');
+        poem,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('currentPoemData', JSON.stringify(poemData));
+      console.log('Saved poem data to localStorage:', poemData);
     } else {
       console.log('Generating new poem based on form data');
       const { audience, occasion, contentType, style, length, keywords } = location.state.formData;
@@ -261,7 +283,8 @@ Mit Liebe und Fürsorge bedacht.`;
             // Store poem data in localStorage for payment return flow
             const poemData = {
               title,
-              poem: adjustedPoem
+              poem: adjustedPoem,
+              timestamp: new Date().toISOString()
             };
             
             localStorage.setItem('currentPoemData', JSON.stringify(poemData));

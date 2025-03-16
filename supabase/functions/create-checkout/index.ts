@@ -1,8 +1,11 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Stripe } from "https://esm.sh/stripe@12.18.0";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+const resendApiKey = Deno.env.get('RESEND_API_KEY');
+const recipientEmail = "matthiasvogel1973@gmail.com";
 const stripe = new Stripe(stripeKey as string, {
   apiVersion: '2023-10-16',
 });
@@ -77,27 +80,57 @@ serve(async (req) => {
     console.log('Checkout session created:', { id: session.id, url: session.url });
 
     // Send notification email if formData is provided
-    if (formData) {
+    if (formData && resendApiKey) {
       try {
-        // This would call another edge function to send the email
-        const notifyUrl = new URL('/functions/v1/notify-poem', req.url);
-        fetch(notifyUrl.toString(), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': req.headers.get('Authorization') || ''
-          },
-          body: JSON.stringify({
-            poemTitle,
-            formData: minimalFormData,
-            poemContent: formData.poem || ''
+        console.log('Attempting to send email notification directly');
+        
+        const resend = new Resend(resendApiKey);
+        
+        // Format the form data for the email
+        const formDataList = Object.entries(minimalFormData)
+          .filter(([key]) => key !== 'poem') // Exclude the poem content from the list
+          .map(([key, value]) => {
+            // Format the key for better readability
+            const formattedKey = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+            return `<li><strong>${formattedKey}:</strong> ${value}</li>`;
           })
-        }).catch(err => {
-          // Just log the error, don't block the checkout process
-          console.error('Failed to send notification:', err);
-        });
+          .join('');
+
+        const emailPayload = {
+          from: 'Poetica <notification@poetica-app.com>',
+          to: recipientEmail,
+          subject: `Neues Gedicht: ${poemTitle}`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #1d3557; border-bottom: 1px solid #ddd; padding-bottom: 10px;">${poemTitle}</h1>
+              
+              <h2 style="color: #457b9d; margin-top: 20px;">Gedicht</h2>
+              <div style="white-space: pre-line; font-family: 'Playfair Display', serif; background-color: #f8f9fa; padding: 20px; border-radius: 5px; line-height: 1.6;">
+                ${formData.poem || 'Kein Gedichttext verfügbar'}
+              </div>
+              
+              <h2 style="color: #457b9d; margin-top: 20px;">Gewählte Einstellungen</h2>
+              <ul style="line-height: 1.6;">
+                ${formDataList || '<li>Keine Einstellungen verfügbar</li>'}
+              </ul>
+              
+              <p style="margin-top: 30px; color: #6c757d; font-size: 14px; border-top: 1px solid #ddd; padding-top: 10px;">
+                Diese E-Mail wurde automatisch von der Poetica App gesendet.
+              </p>
+            </div>
+          `
+        };
+
+        console.log('Sending email with Resend...');
+        const { data, error } = await resend.emails.send(emailPayload);
+
+        if (error) {
+          console.error('Error sending email via Resend:', error);
+        } else {
+          console.log('Email notification sent successfully via Resend:', data);
+        }
       } catch (emailError) {
-        console.error('Error sending notification:', emailError);
+        console.error('Error sending notification directly:', emailError);
         // Don't throw, allow checkout to continue
       }
     }

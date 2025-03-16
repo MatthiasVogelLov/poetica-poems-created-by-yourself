@@ -34,7 +34,7 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       const poemTitle = location.state?.generatedPoem?.title || 'Personalisiertes Gedicht';
       const poem = location.state?.generatedPoem?.poem || '';
       
-      // Simplified form data to avoid metadata size limits
+      // Make a deep copy of all form data to avoid any reference issues
       const formData = {
         audience: location.state?.formData?.audience || '',
         occasion: location.state?.formData?.occasion || '',
@@ -50,16 +50,24 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         cancelUrl, 
         poemTitle,
         currentPath,
-        origin: window.location.origin
+        origin: window.location.origin,
+        poemLength: poem.length
       });
       
       // Make sure to store poem data in localStorage BEFORE redirecting
       if (poemTitle && poem) {
-        localStorage.setItem('currentPoemData', JSON.stringify({
+        const poemData = {
           title: poemTitle,
-          poem: poem
-        }));
-        console.log('Saved poem data to localStorage before payment redirect');
+          poem: poem,
+          timestamp: new Date().toISOString() // Add timestamp for debugging
+        };
+        
+        // Store in localStorage with clear key name
+        localStorage.setItem('currentPoemData', JSON.stringify(poemData));
+        console.log('Saved poem data to localStorage before payment redirect:', poemData);
+        
+        // Also store as a backup with timestamp
+        localStorage.setItem('poemData_' + new Date().getTime(), JSON.stringify(poemData));
       } else {
         console.warn('Missing poem data before payment redirect');
       }

@@ -17,14 +17,29 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting notify-poem function execution');
+    
     if (!resendApiKey) {
       console.error('Resend API key is not configured');
       throw new Error('Resend API key is not configured');
     }
 
+    console.log('Resend API key found, length:', resendApiKey.length);
     const resend = new Resend(resendApiKey);
     
-    const { poemTitle, formData, poemContent } = await req.json();
+    const body = await req.text();
+    console.log('Request body received:', body);
+    
+    let poemTitle, formData, poemContent;
+    try {
+      const parsedBody = JSON.parse(body);
+      poemTitle = parsedBody.poemTitle;
+      formData = parsedBody.formData;
+      poemContent = parsedBody.poemContent;
+    } catch (parseError) {
+      console.error('Error parsing request body:', parseError);
+      throw new Error(`Failed to parse request body: ${parseError.message}`);
+    }
     
     if (!poemTitle) {
       console.error('Missing poem title');
@@ -36,7 +51,6 @@ serve(async (req) => {
       hasContent: !!poemContent, 
       hasFormData: !!formData,
       recipientEmail,
-      apiKeyLength: resendApiKey ? resendApiKey.length : 0
     });
 
     // Format the form data for the email
@@ -49,8 +63,10 @@ serve(async (req) => {
       })
       .join('');
 
+    console.log('Formatted form data for email');
+
     // Send email notification
-    const { data, error } = await resend.emails.send({
+    const emailPayload = {
       from: 'Poetica <notification@poetica-app.com>',
       to: recipientEmail,
       subject: `Neues Gedicht: ${poemTitle}`,
@@ -73,14 +89,26 @@ serve(async (req) => {
           </p>
         </div>
       `
-    });
+    };
 
-    if (error) {
-      console.error('Error sending email:', error);
-      throw new Error(`Failed to send email: ${error.message}`);
+    console.log('About to send email with payload:', JSON.stringify({
+      to: emailPayload.to,
+      subject: emailPayload.subject
+    }));
+
+    try {
+      const { data, error } = await resend.emails.send(emailPayload);
+
+      if (error) {
+        console.error('Error from Resend API:', error);
+        throw new Error(`Failed to send email: ${error.message}`);
+      }
+
+      console.log('Email notification sent successfully:', data);
+    } catch (sendError) {
+      console.error('Exception while calling Resend API:', sendError);
+      throw new Error(`Exception calling Resend API: ${sendError.message}`);
     }
-
-    console.log('Email notification sent successfully:', data);
 
     return new Response(
       JSON.stringify({ success: true }),
