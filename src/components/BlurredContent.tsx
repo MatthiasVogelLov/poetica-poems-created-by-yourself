@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { LockIcon, CreditCard } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface BlurredContentProps {
   children: React.ReactNode;
@@ -9,6 +9,7 @@ interface BlurredContentProps {
 
 const BlurredContent = ({ children }: BlurredContentProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   
   const handlePaymentClick = () => {
     // In a real implementation, this would trigger the payment flow
@@ -16,11 +17,15 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
     
     // For testing purposes, simulate a successful payment
     setTimeout(() => {
-      // Navigate to the same page with a "paid" query parameter
-      const url = new URL(window.location.href);
-      url.searchParams.set('paid', 'true');
-      window.history.pushState({}, '', url);
-      window.location.reload();
+      // Add the paid parameter to the current URL instead of creating a new URL
+      const currentPath = location.pathname;
+      const searchParams = new URLSearchParams(location.search);
+      searchParams.set('paid', 'true');
+      
+      // Navigate to the current path with the paid parameter
+      navigate(`${currentPath}?${searchParams.toString()}`, { 
+        state: location.state // Preserve the state (form data)
+      });
     }, 1000);
   };
 
