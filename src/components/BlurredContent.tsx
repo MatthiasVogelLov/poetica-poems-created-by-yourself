@@ -99,9 +99,9 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
   };
 
   return (
-    <div className="relative mt-2">
-      {/* Container for the blurred content */}
-      <div className="relative overflow-hidden" style={{ maxHeight: '200px' }}>
+    <div className="relative">
+      {/* Container for the blurred content - reduced maxHeight from 200px to 150px */}
+      <div className="relative overflow-hidden" style={{ maxHeight: '150px' }}>
         {/* The actual content that will be blurred */}
         <div className="blur-[5px] opacity-60 pointer-events-none">
           {children}
@@ -111,8 +111,8 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-white/90" />
       </div>
       
-      {/* Payment call-to-action */}
-      <div className="text-center max-w-md mx-auto px-4 sm:px-6 py-6 sm:py-8 glass-card rounded-xl animate-fade-in mt-4">
+      {/* Payment call-to-action - reduced top margin from mt-4 to mt-2 */}
+      <div className="text-center max-w-md mx-auto px-4 sm:px-6 py-4 sm:py-6 glass-card rounded-xl animate-fade-in mt-2">
         <div className="mb-4 mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
           <LockIcon className="text-primary" size={20} />
         </div>

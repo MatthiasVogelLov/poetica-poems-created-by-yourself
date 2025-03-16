@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -272,7 +273,8 @@ Mit Liebe und Fürsorge bedacht.`;
     <div className="min-h-screen bg-white">
       <Header />
       
-      <div className="pt-20 sm:pt-28 pb-10 sm:pb-20">
+      {/* Reduced top padding from pt-20 sm:pt-28 to pt-16 sm:pt-20 to make poem more visible */}
+      <div className="pt-16 sm:pt-20 pb-10 sm:pb-20">
         <div className="container-narrow px-4 sm:px-8">
           <button onClick={goBack} className="btn-ghost mb-6 sm:mb-8 inline-flex items-center gap-2 text-sm sm:text-base">
             <ArrowLeft size={isMobile ? 16 : 20} />

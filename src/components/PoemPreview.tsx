@@ -91,7 +91,8 @@ const PoemPreview = ({
 
   return (
     <div className="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-sm p-4 sm:p-8 animate-fade-in poem-container">
-      <h2 className="text-xl sm:text-2xl font-serif mb-4 sm:mb-6 text-center">{title}</h2>
+      {/* Increased top margin of the title to ensure it's fully visible */}
+      <h2 className="text-xl sm:text-2xl font-serif mt-2 mb-4 sm:mb-6 text-center">{title}</h2>
       
       {isPaid ? (
         <>
@@ -133,7 +134,8 @@ const PoemPreview = ({
         </>
       ) : (
         <>
-          <div className="poem-text whitespace-pre-line mb-4 text-center text-base sm:text-lg">
+          {/* Reduced bottom margin of visible poem text to bring sections closer */}
+          <div className="poem-text whitespace-pre-line mb-2 text-center text-base sm:text-lg">
             {visibleLines.join('\n')}
           </div>
           {hiddenLines.length > 0 && (
