@@ -32,12 +32,15 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       
       // Get the poem title and form data from the state if available
       const poemTitle = location.state?.generatedPoem?.title || 'Personalisiertes Gedicht';
+      const poem = location.state?.generatedPoem?.poem || '';
+      
+      // Simplified form data to avoid metadata size limits
       const formData = {
         ...location.state?.formData,
-        poem: location.state?.generatedPoem?.poem
+        poem
       };
       
-      console.log('Payment process started', { successUrl, cancelUrl, poemTitle, formData });
+      console.log('Payment process started', { successUrl, cancelUrl, poemTitle });
       
       // Call our Supabase edge function to create a checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -55,26 +58,25 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         throw new Error(error.message || 'Fehler bei der Verbindung mit dem Zahlungsdienstleister');
       }
       
+      if (!data) {
+        console.error('No data returned from checkout function');
+        throw new Error('Keine Rückmeldung vom Zahlungsdienstleister erhalten');
+      }
+      
       console.log('Checkout session created:', data);
       
       // Redirect to Stripe checkout
       if (data?.url) {
         console.log('Redirecting to:', data.url);
         
-        // Open in a new tab if possible, otherwise redirect the current page
-        const newWindow = window.open(data.url, '_blank');
+        // Store the current poem data in localStorage for retrieval after payment
+        localStorage.setItem('currentPoemData', JSON.stringify({
+          title: poemTitle,
+          poem: poem
+        }));
         
-        // If popup was blocked or failed, redirect in the same tab
-        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-          window.location.href = data.url;
-        } else {
-          // If opened in a new tab, show a toast
-          toast({
-            title: "Zahlungsfenster geöffnet",
-            description: "Falls sich kein neues Fenster geöffnet hat, deaktivieren Sie bitte Ihren Popup-Blocker.",
-          });
-          setIsLoading(false);
-        }
+        // Redirect to Stripe checkout page
+        window.location.replace(data.url);
       } else {
         console.error('No checkout URL received', data);
         throw new Error('Keine Checkout-URL erhalten');

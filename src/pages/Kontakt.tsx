@@ -1,7 +1,18 @@
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
+
 const Kontakt = () => {
-  return <div className="min-h-screen bg-white">
+  const [content, setContent] = useState<string>('');
+
+  useEffect(() => {
+    // Load content from localStorage
+    const savedContent = localStorage.getItem('admin_kontakt');
+    setContent(savedContent || 'Platzhalter für Kontakt Inhalt.');
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-white">
       <Header />
       
       <div className="pt-32 pb-20">
@@ -10,8 +21,11 @@ const Kontakt = () => {
             <h1 className="heading-lg mb-10">Kontakt</h1>
             
             <div className="prose max-w-none">
-              {/* Content will be filled in by the user */}
-              <p className="text-muted-foreground">Platzhalter für Kontakt Inhalt.</p>
+              {content ? (
+                <div dangerouslySetInnerHTML={{ __html: content }} />
+              ) : (
+                <p className="text-muted-foreground">Platzhalter für Kontakt Inhalt.</p>
+              )}
             </div>
           </div>
         </div>
@@ -28,11 +42,13 @@ const Kontakt = () => {
               <a href="/datenschutz" className="hover:text-foreground transition-colors">Datenschutz</a>
               <a href="/agb" className="hover:text-foreground transition-colors">AGB</a>
               <a href="/kontakt" className="hover:text-foreground transition-colors">Kontakt</a>
+              <a href="/admin" className="hover:text-foreground transition-colors">Admin</a>
             </div>
           </div>
-          
         </div>
       </footer>
-    </div>;
+    </div>
+  );
 };
+
 export default Kontakt;

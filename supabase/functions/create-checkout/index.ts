@@ -32,6 +32,16 @@ serve(async (req) => {
     }
 
     console.log('Creating checkout session with:', { productId, successUrl, cancelUrl, poemTitle });
+    
+    // Extract only the essential form data to avoid metadata size limits
+    const minimalFormData = formData ? {
+      audience: formData.audience || '',
+      occasion: formData.occasion || '',
+      contentType: formData.contentType || '',
+      style: formData.style || '',
+      length: formData.length || '',
+      keywords: formData.keywords || ''
+    } : {};
 
     // Create a Stripe checkout session with appearance options to match app style
     const session = await stripe.checkout.sessions.create({
@@ -51,7 +61,7 @@ serve(async (req) => {
       cancel_url: cancelUrl,
       metadata: {
         poemTitle: poemTitle || 'Personalisiertes Gedicht',
-        formData: formData ? JSON.stringify(formData) : '{}'
+        formDataType: 'minimal' // Indicator that we're storing minimal data
       },
       // Custom appearance to match the app's style
       payment_intent_data: {
@@ -70,7 +80,6 @@ serve(async (req) => {
     if (formData) {
       try {
         // This would call another edge function to send the email
-        // We'll implement this next
         const notifyUrl = new URL('/functions/v1/notify-poem', req.url);
         fetch(notifyUrl.toString(), {
           method: 'POST',
@@ -80,7 +89,7 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             poemTitle,
-            formData,
+            formData: minimalFormData,
             poemContent: formData.poem || ''
           })
         }).catch(err => {
