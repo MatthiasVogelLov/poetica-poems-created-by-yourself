@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Stripe } from "https://esm.sh/stripe@12.18.0";
 import { Resend } from "https://esm.sh/resend@2.0.0";
@@ -72,11 +71,12 @@ serve(async (req) => {
         },
       ],
       mode: 'payment',
-      success_url: successUrl,
+      success_url: `${successUrl}&session_id={CHECKOUT_SESSION_ID}`, // Add session ID to URL
       cancel_url: cancelUrl,
       metadata: {
         poemTitle: poemTitle || 'Personalisiertes Gedicht',
         createdAt: new Date().toISOString(),
+        poemLength: formData?.poem?.length.toString() || '0',
       },
       // Custom appearance to match the app's style
       payment_intent_data: {
