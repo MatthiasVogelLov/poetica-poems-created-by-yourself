@@ -4,6 +4,7 @@ import { LockIcon, CreditCard } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 interface BlurredContentProps {
   children: React.ReactNode;
@@ -28,6 +29,8 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       // Get the poem title from the state if available
       const poemTitle = location.state?.generatedPoem?.title || 'Personalisiertes Gedicht';
       
+      console.log('Payment process started', { successUrl, cancelUrl, poemTitle });
+      
       // Call our Supabase edge function to create a checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: {
@@ -39,14 +42,19 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       });
       
       if (error) {
+        console.error('Supabase function error:', error);
         throw new Error(error.message);
       }
       
+      console.log('Checkout session created:', data);
+      
       // Redirect to Stripe checkout
       if (data?.url) {
+        console.log('Redirecting to:', data.url);
         window.location.href = data.url;
       } else {
-        throw new Error('No checkout URL received');
+        console.error('No checkout URL received', data);
+        throw new Error('Keine Checkout-URL erhalten');
       }
     } catch (error) {
       console.error('Payment process error:', error);
@@ -81,23 +89,23 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         <p className="text-muted-foreground mb-6">
           Für nur 0,99 € können Sie das vollständige Gedicht freischalten und herunterladen.
         </p>
-        <button 
+        <Button 
           onClick={handlePaymentClick}
           disabled={isLoading}
-          className="btn-primary w-full flex items-center justify-center gap-2"
+          className="w-full"
         >
           {isLoading ? (
             <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
               <span>Wird bearbeitet...</span>
             </>
           ) : (
             <>
-              <CreditCard size={18} />
+              <CreditCard size={18} className="mr-2" />
               <span>Jetzt freischalten</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );

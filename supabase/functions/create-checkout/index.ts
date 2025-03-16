@@ -25,6 +25,8 @@ serve(async (req) => {
       throw new Error('Missing required parameters');
     }
 
+    console.log('Creating checkout session with:', { productId, successUrl, cancelUrl, poemTitle });
+
     // Create a Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -45,6 +47,8 @@ serve(async (req) => {
         poemTitle: poemTitle || 'Personalisiertes Gedicht'
       }
     });
+
+    console.log('Checkout session created:', { id: session.id, url: session.url });
 
     return new Response(
       JSON.stringify({ 
