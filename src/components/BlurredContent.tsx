@@ -45,13 +45,24 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         poem: poem
       };
       
-      console.log('Payment process started', { successUrl, cancelUrl, poemTitle });
+      console.log('Payment process started', { 
+        successUrl, 
+        cancelUrl, 
+        poemTitle,
+        currentPath,
+        origin: window.location.origin
+      });
       
-      // Store the current poem data in localStorage BEFORE redirecting
-      localStorage.setItem('currentPoemData', JSON.stringify({
-        title: poemTitle,
-        poem: poem
-      }));
+      // Make sure to store poem data in localStorage BEFORE redirecting
+      if (poemTitle && poem) {
+        localStorage.setItem('currentPoemData', JSON.stringify({
+          title: poemTitle,
+          poem: poem
+        }));
+        console.log('Saved poem data to localStorage before payment redirect');
+      } else {
+        console.warn('Missing poem data before payment redirect');
+      }
       
       // Call our Supabase edge function to create a checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {

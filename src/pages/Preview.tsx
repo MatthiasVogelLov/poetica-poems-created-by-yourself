@@ -17,39 +17,54 @@ const Preview = () => {
   const isMobile = useIsMobile();
   
   useEffect(() => {
+    // Check if payment was successful
     if (isPaid) {
+      console.log('Payment successful, retrieving poem data from localStorage');
       const storedPoemData = localStorage.getItem('currentPoemData');
+      
       if (storedPoemData) {
         try {
           const parsedData = JSON.parse(storedPoemData);
+          console.log('Retrieved poem data:', parsedData);
+          
           if (parsedData.title && parsedData.poem) {
             setPoemTitle(parsedData.title);
             setPoemContent(parsedData.poem);
             setIsGenerating(false);
             return;
+          } else {
+            console.error('Stored poem data is missing title or poem');
           }
         } catch (e) {
           console.error('Error parsing stored poem data:', e);
         }
+      } else {
+        console.error('No poem data found in localStorage');
       }
     }
 
+    // If not returning from payment or missing data, check location state
     if (!location.state || !location.state.formData) {
+      console.log('No form data found, redirecting to generator');
       navigate('/generator');
       return;
     }
 
     if (location.state.generatedPoem) {
+      console.log('Using generated poem from location state');
       const { title, poem } = location.state.generatedPoem;
       setPoemTitle(title);
       setPoemContent(poem);
       setIsGenerating(false);
       
+      // Save to localStorage for payment flow
       localStorage.setItem('currentPoemData', JSON.stringify({
         title,
         poem
       }));
+      console.log('Saved poem data to localStorage');
     } else {
+      console.log('Generating new poem based on form data');
       const { audience, occasion, contentType, style, length, keywords } = location.state.formData;
 
       let title;
@@ -243,16 +258,17 @@ Mit Liebe und Fürsorge bedacht.`;
             setPoemContent(adjustedPoem);
             setIsGenerating(false);
             
-            localStorage.setItem('currentPoemData', JSON.stringify({
+            // Store poem data in localStorage for payment return flow
+            const poemData = {
               title,
               poem: adjustedPoem
-            }));
+            };
+            
+            localStorage.setItem('currentPoemData', JSON.stringify(poemData));
+            console.log('Saved new poem data to localStorage:', poemData);
             
             if (location.state) {
-              location.state.generatedPoem = {
-                title,
-                poem: adjustedPoem
-              };
+              location.state.generatedPoem = poemData;
             }
           }, 1500);
         } catch (error) {
@@ -263,7 +279,7 @@ Mit Liebe und Fürsorge bedacht.`;
       };
       generatePoem();
     }
-  }, [isPaid]);
+  }, [isPaid, location, navigate]);
   
   const goBack = () => {
     navigate('/generator');
@@ -273,7 +289,7 @@ Mit Liebe und Fürsorge bedacht.`;
     <div className="min-h-screen bg-white">
       <Header />
       
-      {/* Reduced top padding from pt-20 sm:pt-28 to pt-16 sm:pt-20 to make poem more visible */}
+      {/* Reduced top padding to make poem more visible */}
       <div className="pt-16 sm:pt-20 pb-10 sm:pb-20">
         <div className="container-narrow px-4 sm:px-8">
           <button onClick={goBack} className="btn-ghost mb-6 sm:mb-8 inline-flex items-center gap-2 text-sm sm:text-base">
@@ -313,11 +329,11 @@ Mit Liebe und Fürsorge bedacht.`;
               
             </div>
             <div className="flex flex-col md:flex-row gap-4 md:gap-10 text-xs sm:text-sm text-muted-foreground">
-              <a href="/impressum" className="hover:text-foreground transition-colors">Impressum</a>
-              <a href="/datenschutz" className="hover:text-foreground transition-colors">Datenschutz</a>
-              <a href="/agb" className="hover:text-foreground transition-colors">AGB</a>
-              <a href="/kontakt" className="hover:text-foreground transition-colors">Kontakt</a>
-              <a href="/admin" className="hover:text-foreground transition-colors">Admin</a>
+              <Link to="/impressum" className="hover:text-foreground transition-colors">Impressum</Link>
+              <Link to="/datenschutz" className="hover:text-foreground transition-colors">Datenschutz</Link>
+              <Link to="/agb" className="hover:text-foreground transition-colors">AGB</Link>
+              <Link to="/kontakt" className="hover:text-foreground transition-colors">Kontakt</Link>
+              <Link to="/admin" className="hover:text-foreground transition-colors">Admin</Link>
             </div>
           </div>
         </div>

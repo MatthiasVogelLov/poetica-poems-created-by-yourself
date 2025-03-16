@@ -4,7 +4,6 @@ import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resendApiKey = Deno.env.get('RESEND_API_KEY');
 const recipientEmail = "matthiasvogel1973@gmail.com";
-const resend = new Resend(resendApiKey);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,6 +22,8 @@ serve(async (req) => {
       throw new Error('Resend API key is not configured');
     }
 
+    const resend = new Resend(resendApiKey);
+    
     const { poemTitle, formData, poemContent } = await req.json();
     
     if (!poemTitle) {
@@ -30,7 +31,13 @@ serve(async (req) => {
       throw new Error('Missing poem title');
     }
 
-    console.log('Sending poem notification:', { poemTitle, hasContent: !!poemContent, hasFormData: !!formData });
+    console.log('Sending poem notification:', { 
+      poemTitle, 
+      hasContent: !!poemContent, 
+      hasFormData: !!formData,
+      recipientEmail,
+      apiKeyLength: resendApiKey ? resendApiKey.length : 0
+    });
 
     // Format the form data for the email
     const formDataList = Object.entries(formData || {})
@@ -83,7 +90,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error sending notification:', error);
+    console.error('Error sending notification:', error.message, error.stack);
     
     return new Response(
       JSON.stringify({ error: error.message }),
