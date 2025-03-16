@@ -1,3 +1,4 @@
+
 import React from 'react';
 import BlurredContent from './BlurredContent';
 import { Card, CardContent } from '@/components/ui/card';
