@@ -24,7 +24,7 @@ serve(async (req) => {
       throw new Error('Stripe API key is not configured');
     }
 
-    const { productId, successUrl, cancelUrl, poemTitle } = await req.json();
+    const { productId, successUrl, cancelUrl, poemTitle, formData } = await req.json();
     
     if (!productId || !successUrl || !cancelUrl) {
       console.error('Missing required parameters', { productId, successUrl, cancelUrl });
@@ -33,7 +33,7 @@ serve(async (req) => {
 
     console.log('Creating checkout session with:', { productId, successUrl, cancelUrl, poemTitle });
 
-    // Create a Stripe checkout session
+    // Create a Stripe checkout session with appearance options to match app style
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -50,11 +50,48 @@ serve(async (req) => {
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: {
-        poemTitle: poemTitle || 'Personalisiertes Gedicht'
+        poemTitle: poemTitle || 'Personalisiertes Gedicht',
+        formData: formData ? JSON.stringify(formData) : '{}'
+      },
+      // Custom appearance to match the app's style
+      payment_intent_data: {
+        description: `Freischaltung: ${poemTitle || 'Personalisiertes Gedicht'}`
+      },
+      custom_text: {
+        submit: {
+          message: 'Nach Bezahlung kehren Sie automatisch zu Ihrem Gedicht zurück.'
+        }
       }
     });
 
     console.log('Checkout session created:', { id: session.id, url: session.url });
+
+    // Send notification email if formData is provided
+    if (formData) {
+      try {
+        // This would call another edge function to send the email
+        // We'll implement this next
+        const notifyUrl = new URL('/functions/v1/notify-poem', req.url);
+        fetch(notifyUrl.toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': req.headers.get('Authorization') || ''
+          },
+          body: JSON.stringify({
+            poemTitle,
+            formData,
+            poemContent: formData.poem || ''
+          })
+        }).catch(err => {
+          // Just log the error, don't block the checkout process
+          console.error('Failed to send notification:', err);
+        });
+      } catch (emailError) {
+        console.error('Error sending notification:', emailError);
+        // Don't throw, allow checkout to continue
+      }
+    }
 
     return new Response(
       JSON.stringify({ 

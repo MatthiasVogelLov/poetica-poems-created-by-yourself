@@ -2,6 +2,8 @@
 import React, { useEffect } from 'react';
 import BlurredContent from './BlurredContent';
 import { Printer, Send, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PoemPreviewProps {
   title: string;
@@ -15,6 +17,7 @@ const PoemPreview = ({
   isPaid = false
 }: PoemPreviewProps) => {
   const lines = poem.split('\n');
+  const isMobile = useIsMobile();
 
   // For preview, show only first 10 lines if not paid
   const visibleLines = isPaid ? lines : lines.slice(0, Math.min(10, lines.length));
@@ -87,40 +90,55 @@ const PoemPreview = ({
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-sm p-8 animate-fade-in poem-container">
-      <h2 className="text-2xl font-serif mb-6 text-center">{title}</h2>
+    <div className="w-full max-w-2xl mx-auto bg-white rounded-xl shadow-sm p-4 sm:p-8 animate-fade-in poem-container">
+      <h2 className="text-xl sm:text-2xl font-serif mb-4 sm:mb-6 text-center">{title}</h2>
       
       {isPaid ? (
         <>
-          <div className="poem-text mb-10 whitespace-pre-line text-center">
+          <div className="poem-text mb-6 sm:mb-10 whitespace-pre-line text-center text-base sm:text-lg">
             {poem}
           </div>
           
-          <div className="border-t pt-6 mt-6 print-actions">
-            <div className="flex flex-wrap gap-4 justify-center">
-              <button onClick={handleEmailSend} className="btn-secondary flex items-center gap-2">
-                <Send size={16} />
-                <span>Per E-Mail senden</span>
-              </button>
-              <button onClick={handlePrint} className="btn-secondary flex items-center gap-2">
-                <Printer size={16} />
-                <span>Drucken</span>
-              </button>
-              <button onClick={handleDownload} className="btn-secondary flex items-center gap-2">
-                <Download size={16} />
-                <span>Herunterladen</span>
-              </button>
+          <div className="border-t pt-4 sm:pt-6 mt-4 sm:mt-6 print-actions">
+            <div className="flex flex-wrap gap-2 sm:gap-4 justify-center">
+              <Button
+                onClick={handleEmailSend}
+                variant="outline"
+                size={isMobile ? "sm" : "default"}
+                className="flex items-center gap-1 sm:gap-2"
+              >
+                <Send size={isMobile ? 14 : 16} />
+                <span className={isMobile ? "text-xs" : ""}>E-Mail senden</span>
+              </Button>
+              <Button
+                onClick={handlePrint}
+                variant="outline"
+                size={isMobile ? "sm" : "default"}
+                className="flex items-center gap-1 sm:gap-2"
+              >
+                <Printer size={isMobile ? 14 : 16} />
+                <span className={isMobile ? "text-xs" : ""}>Drucken</span>
+              </Button>
+              <Button
+                onClick={handleDownload}
+                variant="outline"
+                size={isMobile ? "sm" : "default"}
+                className="flex items-center gap-1 sm:gap-2"
+              >
+                <Download size={isMobile ? 14 : 16} />
+                <span className={isMobile ? "text-xs" : ""}>Herunterladen</span>
+              </Button>
             </div>
           </div>
         </>
       ) : (
         <>
-          <div className="poem-text whitespace-pre-line mb-4 text-center">
+          <div className="poem-text whitespace-pre-line mb-4 text-center text-base sm:text-lg">
             {visibleLines.join('\n')}
           </div>
           {hiddenLines.length > 0 && (
             <BlurredContent>
-              <div className="poem-text whitespace-pre-line text-center">
+              <div className="poem-text whitespace-pre-line text-center text-base sm:text-lg">
                 {hiddenLines.join('\n')}
               </div>
             </BlurredContent>

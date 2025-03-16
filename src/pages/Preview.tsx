@@ -3,6 +3,8 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import PoemPreview from '../components/PoemPreview';
 import { ArrowLeft } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 const Preview = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -11,14 +13,39 @@ const Preview = () => {
   const [poemTitle, setPoemTitle] = useState('');
   const [poemContent, setPoemContent] = useState('');
   const [isGenerating, setIsGenerating] = useState(true);
+  const isMobile = useIsMobile();
+  
   useEffect(() => {
+    if (isPaid && (!location.state || !location.state.generatedPoem)) {
+      const storedPoemData = localStorage.getItem('currentPoemData');
+      if (storedPoemData) {
+        try {
+          const parsedData = JSON.parse(storedPoemData);
+          if (parsedData.title && parsedData.poem) {
+            setPoemTitle(parsedData.title);
+            setPoemContent(parsedData.poem);
+            setIsGenerating(false);
+            
+            location.state = {
+              ...location.state,
+              generatedPoem: {
+                title: parsedData.title,
+                poem: parsedData.poem
+              }
+            };
+            return;
+          }
+        } catch (e) {
+          console.error('Error parsing stored poem data:', e);
+        }
+      }
+    }
+
     if (!location.state || !location.state.formData) {
-      // If someone navigates directly to this page without form data, redirect to generator
       navigate('/generator');
       return;
     }
 
-    // Set the poem title and content from the generated poem if available
     if (location.state.generatedPoem) {
       const {
         title,
@@ -27,8 +54,12 @@ const Preview = () => {
       setPoemTitle(title);
       setPoemContent(poem);
       setIsGenerating(false);
+      
+      localStorage.setItem('currentPoemData', JSON.stringify({
+        title,
+        poem
+      }));
     } else {
-      // For backwards compatibility, use the old method
       const {
         audience,
         occasion,
@@ -38,7 +69,6 @@ const Preview = () => {
         keywords
       } = location.state.formData;
 
-      // Generate poem title based on form data
       let title;
       switch (occasion) {
         case 'geburtstag':
@@ -64,31 +94,9 @@ const Preview = () => {
       }
       setPoemTitle(title);
 
-      // In a real implementation, this would be an API call to OpenAI
-      // Instead of using the sample poems, we'd send the formData to an API
       const generatePoem = async () => {
         setIsGenerating(true);
         try {
-          // For now, we'll use a timeout and sample poems
-          // In a real implementation, this would be replaced with an actual API call:
-          /*
-          const response = await fetch('/api/generate-poem', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              audience, 
-              occasion, 
-              contentType, 
-              style, 
-              length, 
-              keywords 
-            })
-          });
-          const data = await response.json();
-          setPoemContent(data.poem);
-          */
-
-          // For demonstration, use sample poems based on content type
           setTimeout(() => {
             const samplePoems = {
               liebe: `Wie Sonnenlicht auf sanften Wogen,
@@ -226,28 +234,20 @@ Die Liebe wird sich niemals senken,
 Sie leuchtet fort durch alle Schmerzen.`
             };
 
-            // Select a poem based on content type, or use a default
             const poem = samplePoems[contentType] || samplePoems.liebe;
 
-            // Adjust poem length based on user preference
             let adjustedPoem = poem;
             if (length === 'kurz') {
-              // For short poems, just take first 2 stanzas
               const lines = poem.split('\n');
               adjustedPoem = lines.slice(0, 8).join('\n');
             } else if (length === 'lang') {
-              // For long poems, duplicate some stanzas to make it longer
               const stanzas = poem.split('\n\n');
               if (stanzas.length > 2) {
-                // Add variation to make it look less repetitive
                 adjustedPoem = [...stanzas, stanzas[1], stanzas[0]].join('\n\n');
               }
             }
 
-            // If keywords were provided, try to incorporate them somehow
             if (keywords && keywords.trim()) {
-              // This would be handled by the API in a real implementation
-              // For now, just add a personalized stanza at the end
               const keywordsList = keywords.split(',').map(k => k.trim());
               if (keywordsList.length > 0) {
                 const personalizedStanza = `\n\nDie Worte "${keywordsList.join('" und "')}" vereint,
@@ -268,49 +268,55 @@ Mit Liebe und Fürsorge bedacht.`;
       };
       generatePoem();
     }
-  }, [location.state, navigate]);
+  }, [location.state, navigate, isPaid, location]);
+  
   const goBack = () => {
     navigate('/generator');
   };
-  return <div className="min-h-screen bg-white">
+  
+  return (
+    <div className="min-h-screen bg-white">
       <Header />
       
-      <div className="pt-32 pb-20">
-        <div className="container-narrow">
-          <button onClick={goBack} className="btn-ghost mb-8 inline-flex items-center gap-2">
-            <ArrowLeft size={16} />
+      <div className="pt-20 sm:pt-32 pb-10 sm:pb-20">
+        <div className="container-narrow px-4 sm:px-8">
+          <button onClick={goBack} className="btn-ghost mb-6 sm:mb-8 inline-flex items-center gap-2 text-sm sm:text-base">
+            <ArrowLeft size={isMobile ? 16 : 20} />
             <span>Zurück zum Generator</span>
           </button>
           
-          <div className="max-w-3xl mx-auto text-center mb-10">
-            <span className="subheading mb-4 block animate-fade-in">
+          <div className="max-w-3xl mx-auto text-center mb-6 sm:mb-10">
+            <span className="subheading mb-2 sm:mb-4 block animate-fade-in text-xs sm:text-sm">
               Ihr Gedicht
             </span>
-            <h1 className="heading-lg mb-6 animate-slide-up">
+            <h1 className="heading-lg mb-4 sm:mb-6 animate-slide-up text-2xl sm:text-4xl">
               {isPaid ? 'Ihr Gedicht ist fertig' : 'Vorschau Ihres Gedichts'}
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{
-            animationDelay: '100ms'
-          }}>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{
+              animationDelay: '100ms'
+            }}>
               {isPaid ? 'Hier ist Ihr personalisiertes Gedicht. Sie können es jetzt speichern, drucken oder teilen.' : 'Hier sehen Sie eine Vorschau Ihres personalisierten Gedichts.'}
             </p>
           </div>
           
-          {isGenerating ? <div className="text-center py-16">
-              <div className="inline-block h-12 w-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin mb-4"></div>
-              <p className="text-lg text-muted-foreground">Ihr Gedicht wird erstellt...</p>
-            </div> : <PoemPreview title={poemTitle} poem={poemContent} isPaid={isPaid} />}
+          {isGenerating ? (
+            <div className="text-center py-12 sm:py-16">
+              <div className="inline-block h-10 w-10 sm:h-12 sm:w-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin mb-4"></div>
+              <p className="text-base sm:text-lg text-muted-foreground">Ihr Gedicht wird erstellt...</p>
+            </div>
+          ) : (
+            <PoemPreview title={poemTitle} poem={poemContent} isPaid={isPaid} />
+          )}
         </div>
       </div>
       
-      {/* Footer */}
-      <footer className="py-10 border-t">
-        <div className="container-wide">
+      <footer className="py-6 sm:py-10 border-t">
+        <div className="container-wide px-4 sm:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-6 md:mb-0">
+            <div className="mb-4 md:mb-0">
               
             </div>
-            <div className="flex flex-col md:flex-row gap-6 md:gap-10 text-sm text-muted-foreground">
+            <div className="flex flex-col md:flex-row gap-4 md:gap-10 text-xs sm:text-sm text-muted-foreground">
               <a href="#" className="hover:text-foreground transition-colors">Impressum</a>
               <a href="#" className="hover:text-foreground transition-colors">Datenschutz</a>
               <a href="#" className="hover:text-foreground transition-colors">AGB</a>
@@ -320,6 +326,8 @@ Mit Liebe und Fürsorge bedacht.`;
           
         </div>
       </footer>
-    </div>;
+    </div>
+  );
 };
+
 export default Preview;

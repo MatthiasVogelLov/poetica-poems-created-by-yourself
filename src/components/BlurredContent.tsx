@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BlurredContentProps {
   children: React.ReactNode;
@@ -16,6 +17,7 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isMobile = useIsMobile();
   
   const handlePaymentClick = async () => {
     setIsLoading(true);
@@ -28,10 +30,14 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       const successUrl = `${baseUrl}${currentPath}?paid=true`;
       const cancelUrl = `${baseUrl}${currentPath}`;
       
-      // Get the poem title from the state if available
+      // Get the poem title and form data from the state if available
       const poemTitle = location.state?.generatedPoem?.title || 'Personalisiertes Gedicht';
+      const formData = {
+        ...location.state?.formData,
+        poem: location.state?.generatedPoem?.poem
+      };
       
-      console.log('Payment process started', { successUrl, cancelUrl, poemTitle });
+      console.log('Payment process started', { successUrl, cancelUrl, poemTitle, formData });
       
       // Call our Supabase edge function to create a checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -39,7 +45,8 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
           productId: 'prod_Rx5lv8pz727AjU', // The product ID from Stripe
           successUrl,
           cancelUrl,
-          poemTitle
+          poemTitle,
+          formData
         }
       });
       
@@ -53,8 +60,21 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       // Redirect to Stripe checkout
       if (data?.url) {
         console.log('Redirecting to:', data.url);
-        // Use window.location.href to perform a full page redirect instead of a client-side navigation
-        window.open(data.url, '_blank') || window.location.replace(data.url);
+        
+        // Open in a new tab if possible, otherwise redirect the current page
+        const newWindow = window.open(data.url, '_blank');
+        
+        // If popup was blocked or failed, redirect in the same tab
+        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+          window.location.href = data.url;
+        } else {
+          // If opened in a new tab, show a toast
+          toast({
+            title: "Zahlungsfenster geöffnet",
+            description: "Falls sich kein neues Fenster geöffnet hat, deaktivieren Sie bitte Ihren Popup-Blocker.",
+          });
+          setIsLoading(false);
+        }
       } else {
         console.error('No checkout URL received', data);
         throw new Error('Keine Checkout-URL erhalten');
@@ -87,7 +107,7 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       </div>
       
       {/* Payment call-to-action */}
-      <div className="text-center max-w-md mx-auto px-6 py-8 glass-card rounded-xl animate-fade-in mt-4">
+      <div className="text-center max-w-md mx-auto px-4 sm:px-6 py-6 sm:py-8 glass-card rounded-xl animate-fade-in mt-4">
         <div className="mb-4 mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
           <LockIcon className="text-primary" size={20} />
         </div>
@@ -107,6 +127,7 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
           onClick={handlePaymentClick}
           disabled={isLoading}
           className="w-full"
+          size={isMobile ? "sm" : "default"}
         >
           {isLoading ? (
             <>
