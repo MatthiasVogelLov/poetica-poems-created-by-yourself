@@ -9,9 +9,9 @@ interface LengthFieldProps {
 }
 
 const lengthOptions: SelectOption[] = [
-  { value: 'kurz', label: 'Kurz (4-8 Zeilen)' },
-  { value: 'mittel', label: 'Mittel (8-16 Zeilen)' },
-  { value: 'lang', label: 'Lang (16-24 Zeilen)' }
+  { value: 'kurz', label: 'Kurz (8-12 Zeilen)' },
+  { value: 'mittel', label: 'Mittel (12-20 Zeilen)' },
+  { value: 'lang', label: 'Lang (20-30 Zeilen)' }
 ];
 
 const LengthField: React.FC<LengthFieldProps> = ({ form }) => {

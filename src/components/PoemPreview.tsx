@@ -34,6 +34,7 @@ const PoemPreview = ({ title, poem, isPaid = false }: PoemPreviewProps) => {
           top: 0;
           width: 100%;
           padding: 2rem;
+          text-align: center;
         }
         .print-actions, .print-actions * {
           display: none !important;
@@ -86,7 +87,7 @@ const PoemPreview = ({ title, poem, isPaid = false }: PoemPreviewProps) => {
         
         {isPaid ? (
           <>
-            <div className="poem-text mb-10 whitespace-pre-line">
+            <div className="poem-text mb-10 whitespace-pre-line text-center">
               {poem}
             </div>
             
@@ -118,12 +119,12 @@ const PoemPreview = ({ title, poem, isPaid = false }: PoemPreviewProps) => {
           </>
         ) : (
           <>
-            <div className="poem-text whitespace-pre-line mb-4">
+            <div className="poem-text whitespace-pre-line mb-4 text-center">
               {visibleLines.join('\n')}
             </div>
             {hiddenLines.length > 0 && (
               <BlurredContent>
-                <div className="poem-text whitespace-pre-line">
+                <div className="poem-text whitespace-pre-line text-center">
                   {hiddenLines.join('\n')}
                 </div>
               </BlurredContent>
