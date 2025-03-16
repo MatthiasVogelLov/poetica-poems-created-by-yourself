@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { PoemFormData, initialFormData } from '@/types/poem';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 export function usePoemForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,17 +31,7 @@ export function usePoemForm() {
     }
     
     try {
-      // Create Supabase client to call the edge function
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error("Supabase configuration is missing. Please check your environment variables.");
-      }
-      
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
-      
-      // Call our edge function
+      // Call our edge function using the supabase client
       const { data: responseData, error } = await supabase.functions.invoke('generate-poem', {
         body: data
       });

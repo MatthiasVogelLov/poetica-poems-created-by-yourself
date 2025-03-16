@@ -9,6 +9,15 @@ interface StyleFieldProps {
 }
 
 const styleOptions: SelectOption[] = [
+  { value: 'sonett', label: 'Sonett' },
+  { value: 'ballade', label: 'Ballade' },
+  { value: 'ode', label: 'Ode' },
+  { value: 'hymne', label: 'Hymne' },
+  { value: 'epigramm', label: 'Epigramm' },
+  { value: 'haiku', label: 'Haiku' },
+  { value: 'tanka', label: 'Tanka' },
+  { value: 'freieverse', label: 'Freie Verse' },
+  { value: 'elfchen', label: 'Elfchen' },
   { value: 'klassisch', label: 'Klassisch' },
   { value: 'modern', label: 'Modern' },
   { value: 'romantisch', label: 'Romantisch' },
