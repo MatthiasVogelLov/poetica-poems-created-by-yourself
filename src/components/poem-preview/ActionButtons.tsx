@@ -1,25 +1,12 @@
 
 import React, { useState } from 'react';
-import { 
-  Printer, 
-  Send, 
-  Download, 
-  Copy, 
-  Share2, 
-  Facebook, 
-  Twitter, 
-  Linkedin, 
-  Check 
-} from 'lucide-react';
+import { Printer, Send, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface ActionButtonsProps {
   poem: string;
@@ -29,29 +16,51 @@ interface ActionButtonsProps {
 const ActionButtons: React.FC<ActionButtonsProps> = ({ poem, title }) => {
   const isMobile = useIsMobile();
   const [copied, setCopied] = useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [isSending, setIsSending] = useState(false);
 
   const handlePrint = () => {
     window.print();
   };
 
-  const handleEmailSend = () => {
-    // In a real implementation, this would open a modal to enter email
-    toast.info('Diese Funktion wird in Kürze verfügbar sein.');
-  };
+  const handleEmailSend = async () => {
+    if (!email) {
+      toast.error('Bitte geben Sie eine E-Mail-Adresse ein');
+      return;
+    }
 
-  const handleDownload = () => {
-    // Create a text file with the poem content
-    const element = document.createElement('a');
-    const file = new Blob([`${title}\n\n${poem}`], {
-      type: 'text/plain'
-    });
-    element.href = URL.createObjectURL(file);
-    element.download = `${title.toLowerCase().replace(/\s+/g, '-')}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-    
-    toast.success('Gedicht wurde heruntergeladen');
+    setIsSending(true);
+    try {
+      // Call Supabase Edge Function to send email
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-poem`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipientEmail: email,
+          recipientName: name,
+          poemTitle: title,
+          poemContent: poem
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Fehler beim Senden der E-Mail');
+      }
+
+      toast.success('E-Mail erfolgreich gesendet');
+      setEmailDialogOpen(false);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      toast.error('Fehler beim Senden der E-Mail');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const handleCopyToClipboard = () => {
@@ -62,25 +71,6 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ poem, title }) => {
     setTimeout(() => {
       setCopied(false);
     }, 2000);
-  };
-
-  const shareToFacebook = () => {
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(`Schau dir dieses Gedicht an: ${title}`);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank');
-  };
-
-  const shareToTwitter = () => {
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent(`Schau dir dieses Gedicht an: ${title}`);
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-  };
-
-  const shareToLinkedIn = () => {
-    const url = encodeURIComponent(window.location.href);
-    const title = encodeURIComponent('Personalisiertes Gedicht');
-    const summary = encodeURIComponent(`Schau dir dieses Gedicht an: ${title}`);
-    window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}&summary=${summary}`, '_blank');
   };
 
   return (
@@ -96,7 +86,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ poem, title }) => {
           <span className={isMobile ? "text-xs" : ""}>Kopieren</span>
         </Button>
         <Button
-          onClick={handleEmailSend}
+          onClick={() => setEmailDialogOpen(true)}
           variant="outline"
           size={isMobile ? "sm" : "default"}
           className="flex items-center gap-1 sm:gap-2"
@@ -113,44 +103,52 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ poem, title }) => {
           <Printer size={isMobile ? 14 : 16} />
           <span className={isMobile ? "text-xs" : ""}>Drucken</span>
         </Button>
-        <Button
-          onClick={handleDownload}
-          variant="outline"
-          size={isMobile ? "sm" : "default"}
-          className="flex items-center gap-1 sm:gap-2"
-        >
-          <Download size={isMobile ? 14 : 16} />
-          <span className={isMobile ? "text-xs" : ""}>Herunterladen</span>
-        </Button>
-        
-        {/* Social Media Sharing Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size={isMobile ? "sm" : "default"}
-              className="flex items-center gap-1 sm:gap-2"
-            >
-              <Share2 size={isMobile ? 14 : 16} />
-              <span className={isMobile ? "text-xs" : ""}>Teilen</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center">
-            <DropdownMenuItem onClick={shareToFacebook} className="cursor-pointer">
-              <Facebook size={16} className="mr-2" />
-              <span>Facebook</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={shareToTwitter} className="cursor-pointer">
-              <Twitter size={16} className="mr-2" />
-              <span>Twitter</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={shareToLinkedIn} className="cursor-pointer">
-              <Linkedin size={16} className="mr-2" />
-              <span>LinkedIn</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
+
+      {/* Email Dialog */}
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Gedicht per E-Mail senden</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="col-span-3"
+                placeholder="Max Mustermann"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                E-Mail
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="col-span-3"
+                placeholder="name@example.com"
+                required
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setEmailDialogOpen(false)}>
+              Abbrechen
+            </Button>
+            <Button type="button" onClick={handleEmailSend} disabled={isSending}>
+              {isSending ? 'Wird gesendet...' : 'Senden'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

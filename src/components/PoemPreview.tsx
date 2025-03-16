@@ -30,6 +30,11 @@ const PoemPreview = ({
   return (
     <Card className="w-full max-w-2xl mx-auto rounded-xl shadow-md overflow-hidden animate-fade-in poem-container transition-all hover:shadow-lg">
       <CardContent className="p-6 sm:p-8">
+        {/* Print header - only visible when printing */}
+        <div className="print-header">
+          <img src="/poetica-logo.png" alt="Poetica Logo" className="h-8 mb-4" />
+        </div>
+        
         <PoemTitle title={title} />
         
         {isPaid ? (
@@ -54,7 +59,7 @@ const PoemPreview = ({
         
         {/* Print footer - only visible when printing */}
         <div className="print-footer">
-          
+          <p>Created with poetica.advora.com</p>
         </div>
       </CardContent>
     </Card>
