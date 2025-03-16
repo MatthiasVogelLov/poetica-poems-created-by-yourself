@@ -30,7 +30,7 @@ serve(async (req) => {
       throw new Error('Missing poem title');
     }
 
-    console.log('Sending poem notification:', { poemTitle });
+    console.log('Sending poem notification:', { poemTitle, hasContent: !!poemContent, hasFormData: !!formData });
 
     // Format the form data for the email
     const formDataList = Object.entries(formData || {})
@@ -73,7 +73,7 @@ serve(async (req) => {
       throw new Error(`Failed to send email: ${error.message}`);
     }
 
-    console.log('Email notification sent:', data);
+    console.log('Email notification sent successfully:', data);
 
     return new Response(
       JSON.stringify({ success: true }),
