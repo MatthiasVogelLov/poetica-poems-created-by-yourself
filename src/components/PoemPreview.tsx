@@ -12,9 +12,9 @@ interface PoemPreviewProps {
 const PoemPreview = ({ title, poem, isPaid = false }: PoemPreviewProps) => {
   const lines = poem.split('\n');
   
-  // For preview, show only first few lines if not paid
-  const visibleLines = isPaid ? lines : lines.slice(0, Math.min(4, lines.length));
-  const hiddenLines = isPaid ? [] : lines.slice(Math.min(4, lines.length));
+  // For preview, show only first 10 lines if not paid
+  const visibleLines = isPaid ? lines : lines.slice(0, Math.min(10, lines.length));
+  const hiddenLines = isPaid ? [] : lines.slice(Math.min(10, lines.length));
   
   const handlePrint = () => {
     window.print();
@@ -73,11 +73,18 @@ const PoemPreview = ({ title, poem, isPaid = false }: PoemPreviewProps) => {
           </div>
         </>
       ) : (
-        <BlurredContent>
-          <div className="poem-text whitespace-pre-line">
+        <>
+          <div className="poem-text whitespace-pre-line mb-4">
             {visibleLines.join('\n')}
           </div>
-        </BlurredContent>
+          {hiddenLines.length > 0 && (
+            <BlurredContent>
+              <div className="poem-text whitespace-pre-line">
+                {hiddenLines.join('\n')}
+              </div>
+            </BlurredContent>
+          )}
+        </>
       )}
     </div>
   );
