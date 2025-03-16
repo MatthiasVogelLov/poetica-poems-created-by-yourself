@@ -1,23 +1,20 @@
-
 import React from 'react';
 import Header from '../components/Header';
 import PoemForm from '../components/PoemForm';
-
 const Generator = () => {
-  return (
-    <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white">
       <Header />
       
       <div className="pt-32 pb-20">
         <div className="container-narrow">
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <span className="subheading mb-4 block animate-fade-in">
-              Gedicht erstellen
-            </span>
+            
             <h1 className="heading-lg mb-6 animate-slide-up">
               Gestalten Sie Ihr persönliches Gedicht
             </h1>
-            <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto animate-slide-up" style={{
+            animationDelay: '100ms'
+          }}>
               Wählen Sie die Optionen und fügen Sie persönliche Details hinzu, um ein einzigartiges Gedicht zu erstellen.
             </p>
           </div>
@@ -45,8 +42,6 @@ const Generator = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Generator;
