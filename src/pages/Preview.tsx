@@ -275,33 +275,7 @@ Mit Liebe und Fürsorge bedacht.`;
   return <div className="min-h-screen bg-white">
       <Header />
       
-      <div className="pt-32 pb-20">
-        <div className="container-narrow">
-          <button onClick={goBack} className="btn-ghost mb-8 inline-flex items-center gap-2">
-            
-            <span>Zurück zum Generator</span>
-          </button>
-          
-          <div className="max-w-3xl mx-auto text-center mb-10">
-            <span className="subheading mb-4 block animate-fade-in">
-              Ihr Gedicht
-            </span>
-            <h1 className="heading-lg mb-6 animate-slide-up">
-              {isPaid ? 'Ihr Gedicht ist fertig' : 'Vorschau Ihres Gedichts'}
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{
-            animationDelay: '100ms'
-          }}>
-              {isPaid ? 'Hier ist Ihr personalisiertes Gedicht. Sie können es jetzt speichern, drucken oder teilen.' : 'Hier sehen Sie eine Vorschau Ihres personalisierten Gedichts.'}
-            </p>
-          </div>
-          
-          {isGenerating ? <div className="text-center py-16">
-              <div className="inline-block h-12 w-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin mb-4"></div>
-              <p className="text-lg text-muted-foreground">Ihr Gedicht wird erstellt...</p>
-            </div> : <PoemPreview title={poemTitle} poem={poemContent} isPaid={isPaid} />}
-        </div>
-      </div>
+      
       
       {/* Footer */}
       <footer className="py-10 border-t">
