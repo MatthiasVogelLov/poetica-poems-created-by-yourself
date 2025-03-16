@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
@@ -22,64 +21,72 @@ const Preview = () => {
       return;
     }
     
-    const { audience, occasion, contentType, style, length, keywords } = location.state.formData;
-    
-    // Generate poem title based on form data
-    let title;
-    switch (occasion) {
-      case 'geburtstag':
-        title = 'Geburtstagsgedicht';
-        break;
-      case 'hochzeit':
-        title = 'Hochzeitsgedicht';
-        break;
-      case 'jubilaeum':
-        title = 'Jubiläumsgedicht';
-        break;
-      case 'trauerfall':
-        title = 'Gedicht zum Gedenken';
-        break;
-      case 'weihnachten':
-        title = 'Weihnachtsgedicht';
-        break;
-      case 'valentinstag':
-        title = 'Liebesgedicht zum Valentinstag';
-        break;
-      default:
-        title = 'Personalisiertes Gedicht';
-    }
-    
-    setPoemTitle(title);
-    
-    // In a real implementation, this would be an API call to OpenAI
-    // Instead of using the sample poems, we'd send the formData to an API
-    const generatePoem = async () => {
-      setIsGenerating(true);
+    // Set the poem title and content from the generated poem if available
+    if (location.state.generatedPoem) {
+      const { title, poem } = location.state.generatedPoem;
+      setPoemTitle(title);
+      setPoemContent(poem);
+      setIsGenerating(false);
+    } else {
+      // For backwards compatibility, use the old method
+      const { audience, occasion, contentType, style, length, keywords } = location.state.formData;
       
-      try {
-        // For now, we'll use a timeout and sample poems
-        // In a real implementation, this would be replaced with an actual API call:
-        /*
-        const response = await fetch('/api/generate-poem', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            audience, 
-            occasion, 
-            contentType, 
-            style, 
-            length, 
-            keywords 
-          })
-        });
-        const data = await response.json();
-        setPoemContent(data.poem);
-        */
+      // Generate poem title based on form data
+      let title;
+      switch (occasion) {
+        case 'geburtstag':
+          title = 'Geburtstagsgedicht';
+          break;
+        case 'hochzeit':
+          title = 'Hochzeitsgedicht';
+          break;
+        case 'jubilaeum':
+          title = 'Jubiläumsgedicht';
+          break;
+        case 'trauerfall':
+          title = 'Gedicht zum Gedenken';
+          break;
+        case 'weihnachten':
+          title = 'Weihnachtsgedicht';
+          break;
+        case 'valentinstag':
+          title = 'Liebesgedicht zum Valentinstag';
+          break;
+        default:
+          title = 'Personalisiertes Gedicht';
+      }
+      
+      setPoemTitle(title);
+      
+      // In a real implementation, this would be an API call to OpenAI
+      // Instead of using the sample poems, we'd send the formData to an API
+      const generatePoem = async () => {
+        setIsGenerating(true);
         
-        // For demonstration, use sample poems based on content type
-        setTimeout(() => {
-          const samplePoems = {
-            liebe: `Wie Sonnenlicht auf sanften Wogen,
+        try {
+          // For now, we'll use a timeout and sample poems
+          // In a real implementation, this would be replaced with an actual API call:
+          /*
+          const response = await fetch('/api/generate-poem', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              audience, 
+              occasion, 
+              contentType, 
+              style, 
+              length, 
+              keywords 
+            })
+          });
+          const data = await response.json();
+          setPoemContent(data.poem);
+          */
+          
+          // For demonstration, use sample poems based on content type
+          setTimeout(() => {
+            const samplePoems = {
+              liebe: `Wie Sonnenlicht auf sanften Wogen,
 So strahlt dein Lächeln mir entgegen.
 Ein Herzschlag, der zum Himmel strebt,
 In deinen Augen Zukunft schwebt.
@@ -98,8 +105,8 @@ Kein Weg zu weit, kein Berg zu steil,
 Mit dir an meiner Seite, Teil für Teil,
 Erschaffen wir ein wundersames Band,
 Das uns durch alle Zeiten trägt – Hand in Hand.`,
-            
-            freundschaft: `Ein Seelenecho in der Zeit,
+              
+              freundschaft: `Ein Seelenecho in der Zeit,
 Zwei Wege, die sich sanft berühren.
 Vertrauen, das wie Brücken trägt,
 Wenn Stürme unsre Pfade kreuzen.
@@ -118,8 +125,8 @@ Was uns verbindet, braucht kein Licht,
 Wächst still im Schatten wie im Glanz.
 Freundschaft, kostbares Geschenk,
 In dir liegt Heimat und Vertrauen.`,
-            
-            natur: `Im Rauschen alter Eichenwipfel,
+              
+              natur: `Im Rauschen alter Eichenwipfel,
 Im zarten Grün des frühen Jahrs,
 Liegt Weisheit, die uns sanft berührt,
 Ein Flüstern aus vergangner Zeit.
@@ -138,8 +145,8 @@ Die Berge stehen still und stark,
 Wie Wächter über unsre Zeit.
 In ihrer Ruhe liegt die Kraft,
 Die unsre Seelen heimwärts führt.`,
-            
-            leben: `Der Weg des Lebens, verschlungen und weit,
+              
+              leben: `Der Weg des Lebens, verschlungen und weit,
 Führt über Gipfel und durch tiefe Täler.
 Jeder Schritt ein Atem der Zeit,
 Jede Wahl ein neues Kapitel.
@@ -158,8 +165,8 @@ So lasst uns leben mit offenem Herzen,
 Die Tage nutzen, die uns gegeben.
 Denn im Licht wie auch in den Schmerzen,
 Liegt die wahre Schönheit vom Leben.`,
-            
-            motivation: `Steh auf, wenn du gefallen bist,
+              
+              motivation: `Steh auf, wenn du gefallen bist,
 Geh weiter, wenn der Weg sich windet.
 Die größte Kraft, die in dir ist,
 Wird wach, wenn Dunkelheit dich bindet.
@@ -178,8 +185,8 @@ So folge deinem inneren Stern,
 Auch wenn er manchmal schwach nur scheint.
 Das Ziel mag heute noch so fern,
 Dein Mut hat jede Furcht vereint.`,
-            
-            humor: `Im Alltag, wo die Sorgen wohnen,
+              
+              humor: `Im Alltag, wo die Sorgen wohnen,
 Und Ernst regiert mit strengem Blick,
 Da tanzt der Humor auf leisen Sohlen,
 Und bringt uns sanft zum Glück zurück.
@@ -198,8 +205,8 @@ So lass den Humor dein Begleiter sein,
 Durch alle Höhen, alle Tiefen.
 Er macht das Herz und Leben fein,
 Lässt Freude in die Seele triefen.`,
-            
-            trauer: `Im stillen Garten der Erinnerung,
+              
+              trauer: `Im stillen Garten der Erinnerung,
 Wo Schatten leise Geschichten weben,
 Liegt verborgen eine tiefe Verbindung,
 Die stärker ist als Tod und Leben.
@@ -218,53 +225,54 @@ So tragen wir dein Angedenken,
 Als kostbares Geschenk im Herzen.
 Die Liebe wird sich niemals senken,
 Sie leuchtet fort durch alle Schmerzen.`
-          };
-    
-          // Select a poem based on content type, or use a default
-          const poem = samplePoems[contentType] || samplePoems.liebe;
-          
-          // Adjust poem length based on user preference
-          let adjustedPoem = poem;
-          if (length === 'kurz') {
-            // For short poems, just take first 2 stanzas
-            const lines = poem.split('\n');
-            adjustedPoem = lines.slice(0, 8).join('\n');
-          } else if (length === 'lang') {
-            // For long poems, duplicate some stanzas to make it longer
-            const stanzas = poem.split('\n\n');
-            if (stanzas.length > 2) {
-              // Add variation to make it look less repetitive
-              adjustedPoem = [...stanzas, stanzas[1], stanzas[0]].join('\n\n');
+            };
+            
+            // Select a poem based on content type, or use a default
+            const poem = samplePoems[contentType] || samplePoems.liebe;
+            
+            // Adjust poem length based on user preference
+            let adjustedPoem = poem;
+            if (length === 'kurz') {
+              // For short poems, just take first 2 stanzas
+              const lines = poem.split('\n');
+              adjustedPoem = lines.slice(0, 8).join('\n');
+            } else if (length === 'lang') {
+              // For long poems, duplicate some stanzas to make it longer
+              const stanzas = poem.split('\n\n');
+              if (stanzas.length > 2) {
+                // Add variation to make it look less repetitive
+                adjustedPoem = [...stanzas, stanzas[1], stanzas[0]].join('\n\n');
+              }
             }
-          }
-          
-          // If keywords were provided, try to incorporate them somehow
-          if (keywords && keywords.trim()) {
-            // This would be handled by the API in a real implementation
-            // For now, just add a personalized stanza at the end
-            const keywordsList = keywords.split(',').map(k => k.trim());
-            if (keywordsList.length > 0) {
-              const personalizedStanza = `\n\nDie Worte "${keywordsList.join('" und "')}" vereint,
+            
+            // If keywords were provided, try to incorporate them somehow
+            if (keywords && keywords.trim()) {
+              // This would be handled by the API in a real implementation
+              // For now, just add a personalized stanza at the end
+              const keywordsList = keywords.split(',').map(k => k.trim());
+              if (keywordsList.length > 0) {
+                const personalizedStanza = `\n\nDie Worte "${keywordsList.join('" und "')}" vereint,
 In diesem Gedicht für dich erdacht.
 Ein persönlicher Gruß, der erscheint,
 Mit Liebe und Fürsorge bedacht.`;
-              
-              adjustedPoem += personalizedStanza;
+                
+                adjustedPoem += personalizedStanza;
+              }
             }
-          }
+            
+            setPoemContent(adjustedPoem);
+            setIsGenerating(false);
+          }, 1500);
           
-          setPoemContent(adjustedPoem);
+        } catch (error) {
+          console.error('Error generating poem:', error);
           setIsGenerating(false);
-        }, 1500);
-        
-      } catch (error) {
-        console.error('Error generating poem:', error);
-        setIsGenerating(false);
-        setPoemContent('Es tut uns leid, beim Erstellen des Gedichts ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.');
-      }
-    };
-    
-    generatePoem();
+          setPoemContent('Es tut uns leid, beim Erstellen des Gedichts ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.');
+        }
+      };
+      
+      generatePoem();
+    }
   }, [location.state, navigate]);
   
   const goBack = () => {

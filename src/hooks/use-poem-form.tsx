@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { PoemFormData, initialFormData } from '@/types/poem';
+import { createClient } from '@supabase/supabase-js';
 
 export function usePoemForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -29,12 +30,38 @@ export function usePoemForm() {
       return;
     }
     
-    // Simulate API call to generate poem
-    setTimeout(() => {
+    try {
+      // Create Supabase client to call the edge function
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project-id.supabase.co';
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+      
+      // Call our edge function
+      const { data: responseData, error } = await supabase.functions.invoke('generate-poem', {
+        body: data
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      // Navigate to preview with form data and generated poem
+      navigate('/preview', { 
+        state: { 
+          formData: data,
+          generatedPoem: responseData
+        }
+      });
+    } catch (error) {
+      console.error('Error generating poem:', error);
+      toast({
+        title: "Fehler",
+        description: "Beim Erstellen des Gedichts ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-      // Navigate to preview with form data as state
-      navigate('/preview', { state: { formData: data } });
-    }, 1500);
+    }
   };
 
   return {
