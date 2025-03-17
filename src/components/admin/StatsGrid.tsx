@@ -130,11 +130,36 @@ const StatsGrid = () => {
         }));
 
         // Convert string counts to numbers for all stats
+        // Handle both string and number types from Supabase
+        const totalPoems = totalPoemsData?.[0]?.count 
+          ? (typeof totalPoemsData[0].count === 'string' 
+              ? parseInt(totalPoemsData[0].count) 
+              : totalPoemsData[0].count) 
+          : 0;
+          
+        const todayPoems = todayPoemsData?.[0]?.count 
+          ? (typeof todayPoemsData[0].count === 'string' 
+              ? parseInt(todayPoemsData[0].count) 
+              : todayPoemsData[0].count) 
+          : 0;
+          
+        const keywordsUsed = keywordsData?.[0]?.count 
+          ? (typeof keywordsData[0].count === 'string' 
+              ? parseInt(keywordsData[0].count) 
+              : keywordsData[0].count) 
+          : 0;
+          
+        const keywordsTodayUsed = keywordsTodayData?.[0]?.count 
+          ? (typeof keywordsTodayData[0].count === 'string' 
+              ? parseInt(keywordsTodayData[0].count) 
+              : keywordsTodayData[0].count) 
+          : 0;
+
         setStats({
-          totalPoems: totalPoemsData?.[0]?.count ? parseInt(totalPoemsData[0].count) : 0,
-          todayPoems: todayPoemsData?.[0]?.count ? parseInt(todayPoemsData[0].count) : 0,
-          keywordsUsed: keywordsData?.[0]?.count ? parseInt(keywordsData[0].count) : 0,
-          keywordsTodayUsed: keywordsTodayData?.[0]?.count ? parseInt(keywordsTodayData[0].count) : 0,
+          totalPoems,
+          todayPoems,
+          keywordsUsed,
+          keywordsTodayUsed,
           audienceData: formattedAudienceData,
           occasionData: formattedOccasionData,
           styleData: formattedStyleData,
