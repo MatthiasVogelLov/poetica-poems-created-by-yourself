@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +16,32 @@ export const usePaymentProcess = () => {
     setError(null);
     
     try {
+      // Check if user is admin - if so, bypass payment
+      const isAdminLoggedIn = localStorage.getItem('admin_authenticated') === 'true';
+      
+      if (isAdminLoggedIn) {
+        // Admin bypass - show success toast and redirect with paid=true parameter
+        console.log('Admin payment bypass activated');
+        toast({
+          title: "Admin-Bypass aktiviert",
+          description: "Als Administrator können Sie das vollständige Gedicht ohne Zahlung ansehen.",
+        });
+        
+        // Create URL with paid parameter
+        const currentPath = location.pathname;
+        const paidUrl = `${currentPath}?paid=true`;
+        
+        // Redirect to the same page with paid=true
+        navigate(paidUrl, { 
+          state: location.state,
+          replace: true 
+        });
+        
+        setIsLoading(false);
+        return;
+      }
+      
+      // Regular payment flow for non-admin users
       // Get the current URL and poem title
       const currentPath = location.pathname;
       const baseUrl = window.location.origin;

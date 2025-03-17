@@ -53,6 +53,7 @@ export const generateDummyStats = () => {
     { name: 'Gedichte gedruckt', value: Math.floor(Math.random() * 800) + 400, todayValue: Math.floor(Math.random() * 15) + 5 },
     { name: 'Gedichte per E-Mail', value: Math.floor(Math.random() * 500) + 250, todayValue: Math.floor(Math.random() * 12) + 3 },
     { name: 'Mit individuellen Wörtern', value: Math.floor(Math.random() * 1500) + 750, todayValue: Math.floor(Math.random() * 30) + 10 },
+    { name: 'Tell-a-Friend', value: Math.floor(Math.random() * 200) + 50, todayValue: Math.floor(Math.random() * 8) + 1 },
   ];
 
   // Poem count with custom keywords

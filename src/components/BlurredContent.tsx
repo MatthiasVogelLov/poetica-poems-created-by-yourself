@@ -17,12 +17,14 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         {children}
       </BlurredPoemSection>
       
-      {/* Removed margin-top to reduce space between sections */}
-      <BlurredContentCard 
-        isLoading={isLoading} 
-        error={error} 
-        onPaymentClick={handlePaymentClick} 
-      />
+      {/* Payment card is now positioned with negative margin for closer placement */}
+      <div className="mt-[-20px]">
+        <BlurredContentCard 
+          isLoading={isLoading} 
+          error={error} 
+          onPaymentClick={handlePaymentClick} 
+        />
+      </div>
     </div>
   );
 };
