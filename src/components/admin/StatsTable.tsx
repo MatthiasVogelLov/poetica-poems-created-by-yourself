@@ -11,12 +11,13 @@ export interface StatItem {
 interface StatsTableProps {
   title: string;
   data: StatItem[];
+  hideTitle?: boolean;
 }
 
-const StatsTable = ({ title, data }: StatsTableProps) => {
+const StatsTable = ({ title, data, hideTitle = false }: StatsTableProps) => {
   return (
     <div>
-      <h3 className="text-lg font-medium mb-4">{title}</h3>
+      {!hideTitle && <h3 className="text-lg font-medium mb-4">{title}</h3>}
       <Table>
         <TableHeader>
           <TableRow>

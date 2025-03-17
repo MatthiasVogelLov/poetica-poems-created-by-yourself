@@ -7,6 +7,7 @@ import KeywordsCard from './KeywordsCard';
 import CategoryTabs from './CategoryTabs';
 import StatsLoadingState from './StatsLoadingState';
 import StatsErrorState from './StatsErrorState';
+import DownloadButton from './DownloadButton';
 
 const StatsGrid = () => {
   const { stats, loading, error } = useStatsData();
@@ -21,7 +22,10 @@ const StatsGrid = () => {
 
   return (
     <div className="w-full space-y-6">
-      <h2 className="text-2xl font-semibold mb-4">Statistiken</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold">Statistiken</h2>
+        <DownloadButton allStats={stats} />
+      </div>
       
       <StatsOverview 
         totalPoems={stats.totalPoems} 
