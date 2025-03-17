@@ -21,7 +21,12 @@ export interface StatsData {
   featureData: StatItem[];
 }
 
-export const useStatsData = () => {
+interface UseStatsDataProps {
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export const useStatsData = ({ startDate, endDate }: UseStatsDataProps = {}) => {
   const [stats, setStats] = useState<StatsData>({
     totalPoems: 0,
     todayPoems: 0,
@@ -41,10 +46,19 @@ export const useStatsData = () => {
     try {
       setLoading(true);
       
+      // Prepare date filters
+      const today = new Date(new Date().setHours(0, 0, 0, 0));
+      const todayISOString = today.toISOString();
+      
+      // For filtered queries
+      let startDateFilter = startDate ? startDate.toISOString() : null;
+      let endDateFilter = endDate ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString() : null;
+      
       // Get total poems
-      const { data: totalPoemsData, error: totalPoemsError } = await supabase
-        .from('poem_stats')
-        .select('count');
+      let query = supabase.from('poem_stats').select('count');
+      if (startDateFilter) query = query.gte('created_at', startDateFilter);
+      if (endDateFilter) query = query.lte('created_at', endDateFilter);
+      const { data: totalPoemsData, error: totalPoemsError } = await query;
       
       if (totalPoemsError) throw new Error(totalPoemsError.message);
       
@@ -52,15 +66,15 @@ export const useStatsData = () => {
       const { data: todayPoemsData, error: todayPoemsError } = await supabase
         .from('poem_stats')
         .select('count')
-        .gte('created_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString());
+        .gte('created_at', todayISOString);
       
       if (todayPoemsError) throw new Error(todayPoemsError.message);
       
       // Get keywords stats
-      const { data: keywordsData, error: keywordsError } = await supabase
-        .from('poem_stats')
-        .select('count')
-        .eq('has_keywords', true);
+      let keywordsQuery = supabase.from('poem_stats').select('count').eq('has_keywords', true);
+      if (startDateFilter) keywordsQuery = keywordsQuery.gte('created_at', startDateFilter);
+      if (endDateFilter) keywordsQuery = keywordsQuery.lte('created_at', endDateFilter);
+      const { data: keywordsData, error: keywordsError } = await keywordsQuery;
       
       if (keywordsError) throw new Error(keywordsError.message);
       
@@ -69,42 +83,37 @@ export const useStatsData = () => {
         .from('poem_stats')
         .select('count')
         .eq('has_keywords', true)
-        .gte('created_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString());
+        .gte('created_at', todayISOString);
       
       if (keywordsTodayError) throw new Error(keywordsTodayError.message);
       
       // Get audience stats
-      const { data: audienceData, error: audienceError } = await supabase
-        .from('audience_stats')
-        .select('*');
+      let audienceQuery = supabase.from('audience_stats').select('*');
+      const { data: audienceData, error: audienceError } = await audienceQuery;
       
       if (audienceError) throw new Error(audienceError.message);
       
       // Get occasion stats
-      const { data: occasionData, error: occasionError } = await supabase
-        .from('occasion_stats')
-        .select('*');
+      let occasionQuery = supabase.from('occasion_stats').select('*');
+      const { data: occasionData, error: occasionError } = await occasionQuery;
       
       if (occasionError) throw new Error(occasionError.message);
       
       // Get style stats
-      const { data: styleData, error: styleError } = await supabase
-        .from('style_stats')
-        .select('*');
+      let styleQuery = supabase.from('style_stats').select('*');
+      const { data: styleData, error: styleError } = await styleQuery;
       
       if (styleError) throw new Error(styleError.message);
       
       // Get length stats
-      const { data: lengthData, error: lengthError } = await supabase
-        .from('length_stats')
-        .select('*');
+      let lengthQuery = supabase.from('length_stats').select('*');
+      const { data: lengthData, error: lengthError } = await lengthQuery;
       
       if (lengthError) throw new Error(lengthError.message);
       
       // Get feature usage stats
-      const { data: featureData, error: featureError } = await supabase
-        .from('feature_usage_stats')
-        .select('*');
+      let featureQuery = supabase.from('feature_usage_stats').select('*');
+      const { data: featureData, error: featureError } = await featureQuery;
       
       if (featureError) throw new Error(featureError.message);
 
@@ -193,13 +202,13 @@ export const useStatsData = () => {
   useEffect(() => {
     fetchStats();
     
-    // Set up polling to refresh stats every 5 minutes
+    // Clear polling interval when dates change to avoid multiple fetches
     const interval = setInterval(() => {
       fetchStats();
     }, 5 * 60 * 1000);
     
     return () => clearInterval(interval);
-  }, [toast]);
+  }, [startDate, endDate, toast]);
 
-  return { stats, loading, error };
+  return { stats, loading, error, refreshStats: fetchStats };
 };

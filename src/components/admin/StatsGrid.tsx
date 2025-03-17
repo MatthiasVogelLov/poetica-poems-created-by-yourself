@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useStatsData } from '@/hooks/use-stats-data';
 import StatsOverview from './StatsOverview';
 import FeatureUsageCard from './FeatureUsageCard';
@@ -8,9 +8,17 @@ import CategoryTabs from './CategoryTabs';
 import StatsLoadingState from './StatsLoadingState';
 import StatsErrorState from './StatsErrorState';
 import DownloadButton from './DownloadButton';
+import DateRangeFilter from './DateRangeFilter';
 
 const StatsGrid = () => {
-  const { stats, loading, error } = useStatsData();
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const { stats, loading, error } = useStatsData({ startDate, endDate });
+
+  const handleResetDates = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
+  };
 
   if (loading) {
     return <StatsLoadingState />;
@@ -26,6 +34,14 @@ const StatsGrid = () => {
         <h2 className="text-2xl font-semibold">Statistiken</h2>
         <DownloadButton allStats={stats} />
       </div>
+      
+      <DateRangeFilter 
+        startDate={startDate}
+        endDate={endDate}
+        onStartDateChange={setStartDate}
+        onEndDateChange={setEndDate}
+        onReset={handleResetDates}
+      />
       
       <StatsOverview 
         totalPoems={stats.totalPoems} 
