@@ -30,7 +30,7 @@ const StatsGrid = () => {
     <div className="w-full space-y-6">
       <h2 className="text-2xl font-semibold mb-4">Statistiken</h2>
       
-      <Alert className="mb-6" variant="info">
+      <Alert className="mb-6">
         <InfoIcon className="h-4 w-4" />
         <AlertTitle>Hinweis</AlertTitle>
         <AlertDescription>
