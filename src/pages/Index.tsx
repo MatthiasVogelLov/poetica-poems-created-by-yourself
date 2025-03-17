@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import TellAFriend from '../components/TellAFriend';
 import { Sparkles, Heart, Star, Users, Calendar, Type } from 'lucide-react';
 
 const Index = () => {
@@ -86,9 +87,12 @@ const Index = () => {
           <p className="text-primary-foreground/80 text-lg mb-10 max-w-2xl mx-auto">
             Erstellen Sie noch heute ein einzigartiges, personalisiertes Gedicht und überraschen Sie Ihre Liebsten.
           </p>
-          <button onClick={goToGenerator} className="bg-white text-primary hover:bg-white/90 btn-primary px-8 py-3 text-base">
-            Jetzt starten
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button onClick={goToGenerator} className="bg-white text-primary hover:bg-white/90 btn-primary px-8 py-3 text-base">
+              Jetzt starten
+            </button>
+            <TellAFriend />
+          </div>
         </div>
       </section>
       
@@ -182,6 +186,6 @@ const steps = [{
   description: "Fügen Sie optional persönliche Schlüsselwörter hinzu, um das Gedicht individueller zu gestalten."
 }, {
   title: "Generieren & Teilen",
-  description: "Erhalten Sie Ihr Gedicht, speichern Sie es oder teilen Sie es direkt mit Ihren Liebsten."
+  description: "Erhalten Sie Ihr Gedicht, speichern Sie es oder teilen Sie direkt mit Ihren Liebsten."
 }];
 export default Index;

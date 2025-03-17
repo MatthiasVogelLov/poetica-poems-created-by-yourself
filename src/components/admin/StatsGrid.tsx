@@ -1,10 +1,8 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { ChartContainer, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Dummy statistics data - in a real app, this would come from a database
 const generateDummyStats = () => {
@@ -41,6 +39,17 @@ const generateDummyStats = () => {
     { name: 'Romantisch', value: Math.floor(Math.random() * 900) + 450, todayValue: Math.floor(Math.random() * 18) + 5 },
   ];
 
+  // Poem count for each length
+  const lengthData = [
+    { name: 'Kurz', value: Math.floor(Math.random() * 1200) + 600, todayValue: Math.floor(Math.random() * 25) + 8 },
+    { name: 'Mittel', value: Math.floor(Math.random() * 900) + 450, todayValue: Math.floor(Math.random() * 18) + 6 },
+    { name: 'Lang', value: Math.floor(Math.random() * 600) + 300, todayValue: Math.floor(Math.random() * 12) + 4 },
+  ];
+
+  // Poem count with custom keywords
+  const keywordsUsed = Math.floor(Math.random() * 2500) + 1200;
+  const keywordsTodayUsed = Math.floor(Math.random() * 40) + 15;
+
   const totalPoems = audienceData.reduce((sum, item) => sum + item.value, 0);
   const todayPoems = audienceData.reduce((sum, item) => sum + item.todayValue, 0);
 
@@ -49,30 +58,30 @@ const generateDummyStats = () => {
     todayPoems,
     audienceData,
     occasionData,
-    styleData
+    styleData,
+    lengthData,
+    keywordsUsed,
+    keywordsTodayUsed
   };
 };
 
-const stats = generateDummyStats();
-
-const chartConfig = {
-  total: {
-    label: "Gesamt",
-    theme: {
-      light: "#3182CE",
-      dark: "#3182CE",
-    },
-  },
-  today: {
-    label: "Heute",
-    theme: {
-      light: "#DD6B20",
-      dark: "#DD6B20",
-    },
-  },
-};
-
 const StatsGrid = () => {
+  const [stats, setStats] = useState(generateDummyStats());
+  
+  // In a real app, you would fetch data from an API or database
+  // useEffect(() => {
+  //   async function fetchStats() {
+  //     try {
+  //       const response = await fetch('/api/stats');
+  //       const data = await response.json();
+  //       setStats(data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch statistics:", error);
+  //     }
+  //   }
+  //   fetchStats();
+  // }, []);
+
   return (
     <div className="w-full space-y-6">
       <h2 className="text-2xl font-semibold mb-4">Statistiken</h2>
@@ -91,45 +100,41 @@ const StatsGrid = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="text-lg font-medium mb-2">Gedichte mit individuellen Schlüsselwörtern</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Metrik</TableHead>
+                <TableHead className="text-right">Gesamt</TableHead>
+                <TableHead className="text-right">Heute</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell>Mit Schlüsselwörtern</TableCell>
+                <TableCell className="text-right">{stats.keywordsUsed.toLocaleString()}</TableCell>
+                <TableCell className="text-right">{stats.keywordsTodayUsed}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
       
       <Tabs defaultValue="audience">
-        <TabsList className="grid grid-cols-3 w-full mb-6">
+        <TabsList className="grid grid-cols-4 w-full mb-6">
           <TabsTrigger value="audience">Zielgruppe</TabsTrigger>
           <TabsTrigger value="occasion">Anlass</TabsTrigger>
           <TabsTrigger value="style">Stil</TabsTrigger>
+          <TabsTrigger value="length">Länge</TabsTrigger>
         </TabsList>
         
         <TabsContent value="audience">
           <Card>
             <CardContent className="p-6 pt-8">
               <h3 className="text-lg font-medium mb-4">Gedichte nach Zielgruppe</h3>
-              <div className="mb-8">
-                <ChartContainer 
-                  config={chartConfig} 
-                  className="aspect-[4/3] w-full h-[300px]"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={stats.audienceData.map(item => ({ 
-                        name: item.name, 
-                        total: item.value,
-                        today: item.todayValue
-                      }))}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
-                    >
-                      <XAxis dataKey="name" angle={-45} textAnchor="end" height={70} />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="total" name="Gesamt" fill="#3182CE" />
-                      <Bar dataKey="today" name="Heute" fill="#DD6B20" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-                <ChartLegend className="mt-4 justify-center">
-                  <ChartLegendContent />
-                </ChartLegend>
-              </div>
-              
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -156,33 +161,6 @@ const StatsGrid = () => {
           <Card>
             <CardContent className="p-6 pt-8">
               <h3 className="text-lg font-medium mb-4">Gedichte nach Anlass</h3>
-              <div className="mb-8">
-                <ChartContainer 
-                  config={chartConfig} 
-                  className="aspect-[4/3] w-full h-[300px]"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={stats.occasionData.map(item => ({ 
-                        name: item.name, 
-                        total: item.value,
-                        today: item.todayValue
-                      }))}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
-                    >
-                      <XAxis dataKey="name" angle={-45} textAnchor="end" height={70} />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="total" name="Gesamt" fill="#3182CE" />
-                      <Bar dataKey="today" name="Heute" fill="#DD6B20" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-                <ChartLegend className="mt-4 justify-center">
-                  <ChartLegendContent />
-                </ChartLegend>
-              </div>
-              
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -209,33 +187,6 @@ const StatsGrid = () => {
           <Card>
             <CardContent className="p-6 pt-8">
               <h3 className="text-lg font-medium mb-4">Gedichte nach Stil</h3>
-              <div className="mb-8">
-                <ChartContainer 
-                  config={chartConfig} 
-                  className="aspect-[4/3] w-full h-[300px]"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={stats.styleData.map(item => ({ 
-                        name: item.name, 
-                        total: item.value,
-                        today: item.todayValue
-                      }))}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
-                    >
-                      <XAxis dataKey="name" angle={-45} textAnchor="end" height={70} />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="total" name="Gesamt" fill="#3182CE" />
-                      <Bar dataKey="today" name="Heute" fill="#DD6B20" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-                <ChartLegend className="mt-4 justify-center">
-                  <ChartLegendContent />
-                </ChartLegend>
-              </div>
-              
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -246,6 +197,32 @@ const StatsGrid = () => {
                 </TableHeader>
                 <TableBody>
                   {stats.styleData.map((item) => (
+                    <TableRow key={item.name}>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell className="text-right">{item.value.toLocaleString()}</TableCell>
+                      <TableCell className="text-right">{item.todayValue}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="length">
+          <Card>
+            <CardContent className="p-6 pt-8">
+              <h3 className="text-lg font-medium mb-4">Gedichte nach Länge</h3>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Länge</TableHead>
+                    <TableHead className="text-right">Gesamt</TableHead>
+                    <TableHead className="text-right">Heute</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {stats.lengthData.map((item) => (
                     <TableRow key={item.name}>
                       <TableCell>{item.name}</TableCell>
                       <TableCell className="text-right">{item.value.toLocaleString()}</TableCell>
