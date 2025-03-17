@@ -40,6 +40,39 @@ export function usePoemForm() {
         throw new Error(error.message);
       }
       
+      // Track poem generation in our stats
+      try {
+        await supabase.functions.invoke('track-stats', {
+          body: {
+            action: 'poem_generated',
+            data: {
+              audience: data.audience,
+              occasion: data.occasion,
+              contentType: data.contentType,
+              style: data.style,
+              length: data.length,
+              keywords: data.keywords
+            }
+          }
+        });
+        
+        // If keywords were used, track them separately
+        if (data.keywords) {
+          await supabase.functions.invoke('track-stats', {
+            body: {
+              action: 'keyword_used',
+              data: {
+                keywords: data.keywords,
+                poemId: responseData.id // If the poem ID is available from the response
+              }
+            }
+          });
+        }
+      } catch (trackError) {
+        // Don't stop the flow if tracking fails
+        console.error('Error tracking poem generation:', trackError);
+      }
+      
       // Navigate to preview with form data and generated poem
       navigate('/preview', { 
         state: { 

@@ -9,10 +9,147 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      feature_usage: {
+        Row: {
+          created_at: string | null
+          feature_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          feature_name: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          feature_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      keyword_usage: {
+        Row: {
+          created_at: string | null
+          id: string
+          keyword: string
+          poem_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          keyword: string
+          poem_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          keyword?: string
+          poem_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "keyword_usage_poem_id_fkey"
+            columns: ["poem_id"]
+            isOneToOne: false
+            referencedRelation: "poem_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poem_stats: {
+        Row: {
+          audience: string | null
+          content_type: string | null
+          created_at: string | null
+          has_keywords: boolean | null
+          id: string
+          length: string | null
+          occasion: string | null
+          payment_status: string | null
+          style: string | null
+        }
+        Insert: {
+          audience?: string | null
+          content_type?: string | null
+          created_at?: string | null
+          has_keywords?: boolean | null
+          id?: string
+          length?: string | null
+          occasion?: string | null
+          payment_status?: string | null
+          style?: string | null
+        }
+        Update: {
+          audience?: string | null
+          content_type?: string | null
+          created_at?: string | null
+          has_keywords?: boolean | null
+          id?: string
+          length?: string | null
+          occasion?: string | null
+          payment_status?: string | null
+          style?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      audience_stats: {
+        Row: {
+          audience: string | null
+          today: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
+      daily_stats: {
+        Row: {
+          day: string | null
+          paid_poems: number | null
+          poems_with_keywords: number | null
+          total_poems: number | null
+        }
+        Relationships: []
+      }
+      feature_usage_stats: {
+        Row: {
+          feature_name: string | null
+          today: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
+      length_stats: {
+        Row: {
+          length: string | null
+          today: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
+      occasion_stats: {
+        Row: {
+          occasion: string | null
+          today: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
+      style_stats: {
+        Row: {
+          style: string | null
+          today: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
+      tell_a_friend_stats: {
+        Row: {
+          today: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

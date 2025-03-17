@@ -6,38 +6,190 @@ import CategoryTabs from './CategoryTabs';
 import StatsTable from './StatsTable';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { InfoIcon } from 'lucide-react';
-import { generateDummyStats } from './statsData';
+import { InfoIcon, AlertTriangleIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const StatsGrid = () => {
-  const [stats, setStats] = useState(generateDummyStats());
+  const [stats, setStats] = useState({
+    totalPoems: 0,
+    todayPoems: 0,
+    keywordsUsed: 0,
+    keywordsTodayUsed: 0,
+    audienceData: [],
+    occasionData: [],
+    styleData: [],
+    lengthData: [],
+    featureData: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
   
-  // In a real app, you would fetch data from an API or database
-  // useEffect(() => {
-  //   async function fetchStats() {
-  //     try {
-  //       const response = await fetch('/api/stats');
-  //       const data = await response.json();
-  //       setStats(data);
-  //     } catch (error) {
-  //       console.error("Failed to fetch statistics:", error);
-  //     }
-  //   }
-  //   fetchStats();
-  // }, []);
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        setLoading(true);
+        
+        // Get total poems
+        const { data: totalPoemsData, error: totalPoemsError } = await supabase
+          .from('poem_stats')
+          .select('count');
+        
+        if (totalPoemsError) throw new Error(totalPoemsError.message);
+        
+        // Get today's poems
+        const { data: todayPoemsData, error: todayPoemsError } = await supabase
+          .from('poem_stats')
+          .select('count')
+          .gte('created_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString());
+        
+        if (todayPoemsError) throw new Error(todayPoemsError.message);
+        
+        // Get keywords stats
+        const { data: keywordsData, error: keywordsError } = await supabase
+          .from('poem_stats')
+          .select('count')
+          .eq('has_keywords', true);
+        
+        if (keywordsError) throw new Error(keywordsError.message);
+        
+        // Get today's keywords
+        const { data: keywordsTodayData, error: keywordsTodayError } = await supabase
+          .from('poem_stats')
+          .select('count')
+          .eq('has_keywords', true)
+          .gte('created_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString());
+        
+        if (keywordsTodayError) throw new Error(keywordsTodayError.message);
+        
+        // Get audience stats
+        const { data: audienceData, error: audienceError } = await supabase
+          .from('audience_stats')
+          .select('*');
+        
+        if (audienceError) throw new Error(audienceError.message);
+        
+        // Get occasion stats
+        const { data: occasionData, error: occasionError } = await supabase
+          .from('occasion_stats')
+          .select('*');
+        
+        if (occasionError) throw new Error(occasionError.message);
+        
+        // Get style stats
+        const { data: styleData, error: styleError } = await supabase
+          .from('style_stats')
+          .select('*');
+        
+        if (styleError) throw new Error(styleError.message);
+        
+        // Get length stats
+        const { data: lengthData, error: lengthError } = await supabase
+          .from('length_stats')
+          .select('*');
+        
+        if (lengthError) throw new Error(lengthError.message);
+        
+        // Get feature usage stats
+        const { data: featureData, error: featureError } = await supabase
+          .from('feature_usage_stats')
+          .select('*');
+        
+        if (featureError) throw new Error(featureError.message);
+
+        // Format data for our components
+        const formattedAudienceData = (audienceData || []).map(item => ({
+          name: item.audience || 'Unspecified',
+          value: parseInt(item.total) || 0,
+          todayValue: parseInt(item.today) || 0
+        }));
+        
+        const formattedOccasionData = (occasionData || []).map(item => ({
+          name: item.occasion || 'Unspecified',
+          value: parseInt(item.total) || 0,
+          todayValue: parseInt(item.today) || 0
+        }));
+        
+        const formattedStyleData = (styleData || []).map(item => ({
+          name: item.style || 'Unspecified',
+          value: parseInt(item.total) || 0,
+          todayValue: parseInt(item.today) || 0
+        }));
+        
+        const formattedLengthData = (lengthData || []).map(item => ({
+          name: item.length || 'Unspecified',
+          value: parseInt(item.total) || 0,
+          todayValue: parseInt(item.today) || 0
+        }));
+        
+        const formattedFeatureData = (featureData || []).map(item => ({
+          name: item.feature_name || 'Unspecified',
+          value: parseInt(item.total) || 0,
+          todayValue: parseInt(item.today) || 0
+        }));
+
+        setStats({
+          totalPoems: parseInt(totalPoemsData?.[0]?.count || '0'),
+          todayPoems: parseInt(todayPoemsData?.[0]?.count || '0'),
+          keywordsUsed: parseInt(keywordsData?.[0]?.count || '0'),
+          keywordsTodayUsed: parseInt(keywordsTodayData?.[0]?.count || '0'),
+          audienceData: formattedAudienceData,
+          occasionData: formattedOccasionData,
+          styleData: formattedStyleData,
+          lengthData: formattedLengthData,
+          featureData: formattedFeatureData
+        });
+        
+        setLoading(false);
+      } catch (err) {
+        console.error("Failed to fetch statistics:", err);
+        setError(err.message);
+        setLoading(false);
+        
+        toast({
+          title: "Fehler beim Laden der Statistiken",
+          description: err.message,
+          variant: "destructive",
+        });
+      }
+    }
+    
+    fetchStats();
+    
+    // Set up polling to refresh stats every 5 minutes
+    const interval = setInterval(() => {
+      fetchStats();
+    }, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, [toast]);
+
+  if (loading) {
+    return (
+      <div className="w-full p-8 text-center">
+        <p>Statistiken werden geladen...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full p-8">
+        <Alert variant="destructive">
+          <AlertTriangleIcon className="h-4 w-4" />
+          <AlertTitle>Fehler</AlertTitle>
+          <AlertDescription>
+            Die Statistiken konnten nicht geladen werden: {error}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-6">
       <h2 className="text-2xl font-semibold mb-4">Statistiken</h2>
-      
-      <Alert className="mb-6">
-        <InfoIcon className="h-4 w-4" />
-        <AlertTitle>Hinweis</AlertTitle>
-        <AlertDescription>
-          Diese Statistiken werden derzeit mit Beispieldaten generiert. 
-          Um echte Daten anzuzeigen, müsste eine Datenbank-Integration implementiert werden.
-        </AlertDescription>
-      </Alert>
       
       <h3 className="text-xl font-medium mb-3">Übersicht Gedichte</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

@@ -141,6 +141,22 @@ export const usePaymentProcess = () => {
         console.error('Error in final localStorage check:', e);
       }
       
+      // Track payment attempt in our stats
+      try {
+        const poemId = data.poemId || null;
+        if (poemId) {
+          await supabase.functions.invoke('track-stats', {
+            body: {
+              action: 'payment_started',
+              data: { poemId }
+            }
+          });
+        }
+      } catch (trackError) {
+        // Don't stop the payment flow if tracking fails
+        console.error('Error tracking payment attempt:', trackError);
+      }
+      
       // Redirect to Stripe checkout
       if (data?.url) {
         console.log('Redirecting to:', data.url);

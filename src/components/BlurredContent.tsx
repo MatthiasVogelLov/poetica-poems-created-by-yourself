@@ -18,7 +18,7 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       </BlurredPoemSection>
       
       {/* Payment card is now positioned with negative margin for closer placement */}
-      <div className="mt-[-20px]">
+      <div className="mt-[-40px]">
         <BlurredContentCard 
           isLoading={isLoading} 
           error={error} 

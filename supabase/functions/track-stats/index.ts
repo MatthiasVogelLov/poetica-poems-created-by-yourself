@@ -59,7 +59,9 @@ serve(async (req) => {
       case 'keyword_used':
         // Track keywords used
         if (data.keywords && data.poemId) {
-          const keywords = data.keywords.split(',').map(k => k.trim());
+          const keywords = Array.isArray(data.keywords) 
+            ? data.keywords 
+            : data.keywords.split(',').map(k => k.trim());
           
           for (const keyword of keywords) {
             if (keyword) {
@@ -73,6 +75,15 @@ serve(async (req) => {
           }
         }
         result = { success: true };
+        break;
+
+      case 'tell_a_friend':
+        // Track tell-a-friend usage
+        result = await supabase
+          .from('feature_usage')
+          .insert({
+            feature_name: 'tell_a_friend'
+          });
         break;
 
       default:
