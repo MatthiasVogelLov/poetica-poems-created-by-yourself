@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import StatCard from './StatCard';
 import KeywordsStatsTable from './KeywordsStatsTable';
 import CategoryTabs from './CategoryTabs';
+import StatsTable from './StatsTable';
 import { Card, CardContent } from '@/components/ui/card';
 import { generateDummyStats } from './statsData';
 
@@ -32,11 +33,20 @@ const StatsGrid = () => {
         <StatCard title="Gedichte heute" value={stats.todayPoems} />
       </div>
 
-      <Card>
+      <Card className="mb-6">
         <CardContent className="p-6">
           <KeywordsStatsTable 
             keywordsUsed={stats.keywordsUsed} 
             keywordsTodayUsed={stats.keywordsTodayUsed} 
+          />
+        </CardContent>
+      </Card>
+      
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <StatsTable 
+            title="Feature Nutzung" 
+            data={stats.featureData} 
           />
         </CardContent>
       </Card>

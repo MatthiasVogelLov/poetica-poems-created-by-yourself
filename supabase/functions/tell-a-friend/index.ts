@@ -35,7 +35,7 @@ serve(async (req) => {
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'Poetica <empfehlung@poetica.advora.com>',
+      from: 'Poetica <info@advora.com>',
       to: recipientEmail,
       subject: 'Eine Empfehlung für dich: Poetica - Erstelle personalisierte Gedichte',
       html: `

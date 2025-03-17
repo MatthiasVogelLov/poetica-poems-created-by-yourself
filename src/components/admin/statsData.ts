@@ -46,6 +46,14 @@ export const generateDummyStats = () => {
     { name: 'Mittel', value: Math.floor(Math.random() * 900) + 450, todayValue: Math.floor(Math.random() * 18) + 6 },
     { name: 'Lang', value: Math.floor(Math.random() * 600) + 300, todayValue: Math.floor(Math.random() * 12) + 4 },
   ];
+  
+  // Feature usage statistics
+  const featureData: StatItem[] = [
+    { name: 'Empfehlungen gesendet', value: Math.floor(Math.random() * 300) + 100, todayValue: Math.floor(Math.random() * 10) + 2 },
+    { name: 'Gedichte gedruckt', value: Math.floor(Math.random() * 800) + 400, todayValue: Math.floor(Math.random() * 15) + 5 },
+    { name: 'Gedichte per E-Mail', value: Math.floor(Math.random() * 500) + 250, todayValue: Math.floor(Math.random() * 12) + 3 },
+    { name: 'Mit individuellen Wörtern', value: Math.floor(Math.random() * 1500) + 750, todayValue: Math.floor(Math.random() * 30) + 10 },
+  ];
 
   // Poem count with custom keywords
   const keywordsUsed = Math.floor(Math.random() * 2500) + 1200;
@@ -61,6 +69,7 @@ export const generateDummyStats = () => {
     occasionData,
     styleData,
     lengthData,
+    featureData,
     keywordsUsed,
     keywordsTodayUsed
   };

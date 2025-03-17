@@ -29,6 +29,8 @@ const TellAFriend = () => {
     setIsLoading(true);
 
     try {
+      console.log("Sending recommendation email to:", email);
+      
       const { error } = await supabase.functions.invoke('tell-a-friend', {
         body: {
           recipientEmail: email,
@@ -37,6 +39,10 @@ const TellAFriend = () => {
       });
 
       if (error) throw error;
+
+      // In a real application, we would track this referral in the database
+      // For now, we're just displaying a success message
+      console.log("Recommendation email sent successfully");
 
       toast({
         title: "Nachricht gesendet",
@@ -47,12 +53,13 @@ const TellAFriend = () => {
       setEmail('');
       setMessage('Hallo,\n\nIch habe diese tolle Webseite zum Erstellen personalisierter Gedichte entdeckt und dachte, das könnte dich interessieren!\n\nSchau sie dir an: https://poetica.advora.com');
     } catch (error) {
+      console.error("Error sending recommendation:", error);
+      
       toast({
         title: "Fehler",
         description: "Die Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
         variant: "destructive"
       });
-      console.error("Error sending recommendation:", error);
     } finally {
       setIsLoading(false);
     }
