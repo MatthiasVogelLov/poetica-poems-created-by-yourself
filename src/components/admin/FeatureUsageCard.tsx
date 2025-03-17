@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import StatsTable from './StatsTable';
-import { StatItem } from '@/hooks/use-stats-data';
+import { StatItem } from '@/types/stats';
 import DownloadButton from './DownloadButton';
 
 interface FeatureUsageCardProps {

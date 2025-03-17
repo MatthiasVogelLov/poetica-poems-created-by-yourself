@@ -1,5 +1,4 @@
-
-import { StatItem } from "@/hooks/use-stats-data";
+import { StatItem, StatsData } from "@/types/stats";
 
 /**
  * Converts stat data to CSV format
@@ -64,19 +63,7 @@ export const downloadData = (
 /**
  * Create a full dataset with all statistics
  */
-export const createFullDataset = (
-  stats: {
-    totalPoems: number;
-    todayPoems: number;
-    keywordsUsed: number;
-    keywordsTodayUsed: number;
-    audienceData: StatItem[];
-    occasionData: StatItem[];
-    styleData: StatItem[];
-    lengthData: StatItem[];
-    featureData: StatItem[];
-  }
-): string => {
+export const createFullDataset = (stats: StatsData): string => {
   // Create a comprehensive JSON object with all stats
   const fullData = {
     overview: {

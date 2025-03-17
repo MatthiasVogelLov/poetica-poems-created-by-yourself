@@ -1,12 +1,6 @@
-
 import React from 'react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-
-export interface StatItem {
-  name: string;
-  value: number;
-  todayValue: number;
-}
+import { StatItem } from '@/types/stats';
 
 interface StatsTableProps {
   title: string;

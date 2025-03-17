@@ -2,7 +2,8 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import StatsTable, { StatItem } from './StatsTable';
+import StatsTable from './StatsTable';
+import { StatItem } from '@/types/stats';
 import DownloadButton from './DownloadButton';
 
 interface CategoryTabsProps {

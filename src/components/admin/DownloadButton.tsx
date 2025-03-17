@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
@@ -15,8 +14,7 @@ import {
   downloadData,
   createFullDataset
 } from '@/utils/exportData';
-import { StatItem } from '@/hooks/use-stats-data';
-import { StatsData } from '@/hooks/use-stats-data';
+import { StatItem, StatsData } from '@/types/stats';
 
 interface DownloadButtonProps {
   currentData?: StatItem[];
