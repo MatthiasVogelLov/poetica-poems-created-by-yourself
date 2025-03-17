@@ -98,42 +98,43 @@ const StatsGrid = () => {
         
         if (featureError) throw new Error(featureError.message);
 
-        // Format data for our components
+        // Format data for our components - Convert string values to numbers
         const formattedAudienceData = (audienceData || []).map(item => ({
           name: item.audience || 'Unspecified',
-          value: parseInt(item.total) || 0,
-          todayValue: parseInt(item.today) || 0
+          value: typeof item.total === 'string' ? parseInt(item.total) || 0 : item.total || 0,
+          todayValue: typeof item.today === 'string' ? parseInt(item.today) || 0 : item.today || 0
         }));
         
         const formattedOccasionData = (occasionData || []).map(item => ({
           name: item.occasion || 'Unspecified',
-          value: parseInt(item.total) || 0,
-          todayValue: parseInt(item.today) || 0
+          value: typeof item.total === 'string' ? parseInt(item.total) || 0 : item.total || 0,
+          todayValue: typeof item.today === 'string' ? parseInt(item.today) || 0 : item.today || 0
         }));
         
         const formattedStyleData = (styleData || []).map(item => ({
           name: item.style || 'Unspecified',
-          value: parseInt(item.total) || 0,
-          todayValue: parseInt(item.today) || 0
+          value: typeof item.total === 'string' ? parseInt(item.total) || 0 : item.total || 0,
+          todayValue: typeof item.today === 'string' ? parseInt(item.today) || 0 : item.today || 0
         }));
         
         const formattedLengthData = (lengthData || []).map(item => ({
           name: item.length || 'Unspecified',
-          value: parseInt(item.total) || 0,
-          todayValue: parseInt(item.today) || 0
+          value: typeof item.total === 'string' ? parseInt(item.total) || 0 : item.total || 0,
+          todayValue: typeof item.today === 'string' ? parseInt(item.today) || 0 : item.today || 0
         }));
         
         const formattedFeatureData = (featureData || []).map(item => ({
           name: item.feature_name || 'Unspecified',
-          value: parseInt(item.total) || 0,
-          todayValue: parseInt(item.today) || 0
+          value: typeof item.total === 'string' ? parseInt(item.total) || 0 : item.total || 0,
+          todayValue: typeof item.today === 'string' ? parseInt(item.today) || 0 : item.today || 0
         }));
 
+        // Convert string counts to numbers for all stats
         setStats({
-          totalPoems: parseInt(totalPoemsData?.[0]?.count || '0'),
-          todayPoems: parseInt(todayPoemsData?.[0]?.count || '0'),
-          keywordsUsed: parseInt(keywordsData?.[0]?.count || '0'),
-          keywordsTodayUsed: parseInt(keywordsTodayData?.[0]?.count || '0'),
+          totalPoems: totalPoemsData?.[0]?.count ? parseInt(totalPoemsData[0].count) : 0,
+          todayPoems: todayPoemsData?.[0]?.count ? parseInt(todayPoemsData[0].count) : 0,
+          keywordsUsed: keywordsData?.[0]?.count ? parseInt(keywordsData[0].count) : 0,
+          keywordsTodayUsed: keywordsTodayData?.[0]?.count ? parseInt(keywordsTodayData[0].count) : 0,
           audienceData: formattedAudienceData,
           occasionData: formattedOccasionData,
           styleData: formattedStyleData,
