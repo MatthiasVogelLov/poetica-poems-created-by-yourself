@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Stripe } from "https://esm.sh/stripe@12.18.0";
 import { Resend } from "https://esm.sh/resend@2.0.0";
@@ -65,7 +66,7 @@ serve(async (req) => {
           price_data: {
             currency: 'eur',
             product: productId,
-            unit_amount: 99, // €0.99 in cents
+            unit_amount: 99, // €0.99
           },
           quantity: 1,
         },
@@ -113,7 +114,7 @@ serve(async (req) => {
           .join('');
 
         const emailPayload = {
-          from: 'Poetica <notification@poetica-app.com>',
+          from: 'Poetica <notification@poetica.apvora.com>',
           to: recipientEmail,
           subject: `Neues Gedicht: ${poemTitle} (aus Checkout)`,
           html: `

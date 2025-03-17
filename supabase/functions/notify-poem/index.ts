@@ -70,7 +70,7 @@ serve(async (req) => {
 
     // Send email notification
     const emailPayload = {
-      from: 'Poetica <notification@poetica-app.com>',
+      from: 'Poetica <notification@poetica.apvora.com>',
       to: recipientEmail,
       subject: `Neues Gedicht: ${poemTitle}`,
       html: `

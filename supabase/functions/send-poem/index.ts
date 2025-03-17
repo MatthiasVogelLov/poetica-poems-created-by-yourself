@@ -35,7 +35,7 @@ serve(async (req) => {
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'Poetica <poem@poetica.advora.com>',
+      from: 'Poetica <poem@poetica.apvora.com>',
       to: recipientEmail,
       subject: `Ihr Gedicht: ${poemTitle}`,
       html: `
@@ -51,10 +51,6 @@ serve(async (req) => {
           <div style="font-family: 'Playfair Display', serif; white-space: pre-line; text-align: center; background-color: #f8f9fa; padding: 20px; border-radius: 5px; line-height: 1.6; margin-bottom: 30px;">
             ${poemContent}
           </div>
-          
-          <p style="text-align: center; font-size: 14px; color: #6c757d; border-top: 1px solid #eaeaea; padding-top: 20px; margin-top: 30px;">
-            Created with <a href="https://poetica.advora.com" style="color: #1d3557; text-decoration: none;">poetica.advora.com</a>
-          </p>
         </div>
       `,
     });

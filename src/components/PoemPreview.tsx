@@ -57,10 +57,7 @@ const PoemPreview = ({
           </>
         )}
         
-        {/* Print footer - only visible when printing */}
-        <div className="print-footer">
-          <p>Created with poetica.advora.com</p>
-        </div>
+        {/* Removed print footer with "Created with poetica.advora.com" */}
       </CardContent>
     </Card>
   );

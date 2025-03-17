@@ -17,6 +17,7 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         {children}
       </BlurredPoemSection>
       
+      {/* Removed margin-top to reduce space between sections */}
       <BlurredContentCard 
         isLoading={isLoading} 
         error={error} 
