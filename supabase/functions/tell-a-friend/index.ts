@@ -35,7 +35,7 @@ serve(async (req) => {
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'Poetica <info@advora.com>',
+      from: 'Poetica <noreply@poetica.apvora.com>',
       to: recipientEmail,
       subject: 'Eine Empfehlung für dich: Poetica - Erstelle personalisierte Gedichte',
       html: `
@@ -49,7 +49,7 @@ serve(async (req) => {
           </div>
           
           <p style="text-align: center; font-size: 14px; color: #6c757d; border-top: 1px solid #eaeaea; padding-top: 20px; margin-top: 30px;">
-            Diese E-Mail wurde über <a href="https://poetica.advora.com" style="color: #1d3557; text-decoration: none;">poetica.advora.com</a> versendet
+            Diese E-Mail wurde über <a href="https://poetica.apvora.com" style="color: #1d3557; text-decoration: none;">poetica.apvora.com</a> versendet
           </p>
         </div>
       `,
