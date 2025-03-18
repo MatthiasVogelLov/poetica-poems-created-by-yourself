@@ -26,7 +26,7 @@ serve(async (req) => {
     console.log('Resend API key found');
     const resend = new Resend(resendApiKey);
     const body = await req.text();
-    const { recipientEmail, recipientName, poemTitle, poemContent } = JSON.parse(body);
+    const { recipientEmail, recipientName, poemTitle, poemContent, personalMessage } = JSON.parse(body);
     
     console.log(`Sending email to: ${recipientEmail}, Poem: ${poemTitle}`);
     
@@ -43,6 +43,12 @@ serve(async (req) => {
           <div style="text-align: left; margin-bottom: 20px;">
             <h1 style="font-family: serif; font-size: 24px; margin: 0;">Poetica</h1>
           </div>
+          
+          ${personalMessage ? `
+          <div style="margin-bottom: 30px; padding: 15px; background-color: #f9f9f9; border-radius: 5px; border-left: 4px solid #1d3557;">
+            <p style="font-style: italic; margin: 0;">${personalMessage}</p>
+          </div>
+          ` : ''}
           
           <h1 style="font-family: 'Playfair Display', serif; text-align: center; color: #1d3557; margin-bottom: 20px;">
             ${poemTitle}
