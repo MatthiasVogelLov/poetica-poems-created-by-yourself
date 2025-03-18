@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import TellAFriend from '../components/TellAFriend';
 import { Sparkles, Heart, Star, Users, Calendar, Type } from 'lucide-react';
@@ -101,14 +101,16 @@ const Index = () => {
         <div className="container-wide">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
-              
+              <Link to="/" className="font-serif text-xl font-medium">
+                Poetica
+              </Link>
             </div>
             <div className="flex flex-col md:flex-row gap-6 md:gap-10 text-sm text-muted-foreground">
-              <a href="/impressum" className="hover:text-foreground transition-colors">Impressum</a>
-              <a href="/datenschutz" className="hover:text-foreground transition-colors">Datenschutz</a>
-              <a href="/agb" className="hover:text-foreground transition-colors">AGB</a>
-              <a href="/kontakt" className="hover:text-foreground transition-colors">Kontakt</a>
-              <a href="/admin" className="hover:text-foreground transition-colors">Admin</a>
+              <Link to="/impressum" className="hover:text-foreground transition-colors">Impressum</Link>
+              <Link to="/datenschutz" className="hover:text-foreground transition-colors">Datenschutz</Link>
+              <Link to="/agb" className="hover:text-foreground transition-colors">AGB</Link>
+              <Link to="/kontakt" className="hover:text-foreground transition-colors">Kontakt</Link>
+              <Link to="/admin" className="hover:text-foreground transition-colors">Admin</Link>
             </div>
           </div>
         </div>
@@ -189,3 +191,4 @@ const steps = [{
   description: "Erhalten Sie Ihr Gedicht, speichern Sie es oder teilen Sie direkt mit Ihren Liebsten."
 }];
 export default Index;
+
