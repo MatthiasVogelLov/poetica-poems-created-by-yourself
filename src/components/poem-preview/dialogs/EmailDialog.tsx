@@ -33,10 +33,25 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
   const [name, setName] = useState('');
   const [personalMessage, setPersonalMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
+
+  const validateEmail = (email: string) => {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  };
 
   const handleEmailSend = async () => {
+    // Reset debug info
+    setDebugInfo(null);
+    
+    // Input validation
     if (!email) {
       toast.error('Bitte geben Sie eine E-Mail-Adresse ein');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      toast.error('Bitte geben Sie eine gültige E-Mail-Adresse ein');
       return;
     }
 
@@ -47,26 +62,42 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
 
     setIsSending(true);
     try {
-      console.log('Sending email to:', email);
-      console.log('Poem content length:', poem.length);
-      console.log('Title:', title);
+      // Additional logging to help with debugging
+      console.log('Sending email request with the following data:');
+      console.log('- Email:', email);
+      console.log('- Name:', name);
+      console.log('- Poem title length:', title.length);
+      console.log('- Poem content length:', poem.length);
+      console.log('- Personal message length:', personalMessage?.length || 0);
+
+      const payload = {
+        recipientEmail: email,
+        recipientName: name || 'Empfänger', // Default name if not provided
+        poemTitle: title,
+        poemContent: poem,
+        personalMessage: personalMessage
+      };
+
+      console.log('Full payload being sent:', JSON.stringify(payload));
 
       const { data, error } = await supabase.functions.invoke('send-poem', {
-        body: {
-          recipientEmail: email,
-          recipientName: name,
-          poemTitle: title,
-          poemContent: poem,
-          personalMessage: personalMessage
-        }
+        body: payload
       });
       
       if (error) {
         console.error('Error from Edge Function:', error);
+        setDebugInfo(`Edge Function error: ${JSON.stringify(error)}`);
         throw new Error(error.message || 'Fehler beim Senden der E-Mail');
       }
 
       console.log('Email send response:', data);
+      
+      if (!data || !data.success) {
+        const errorMsg = data?.error || 'Unbekannter Fehler beim Senden';
+        setDebugInfo(`API response error: ${JSON.stringify(data)}`);
+        throw new Error(errorMsg);
+      }
+
       toast.success('E-Mail erfolgreich gesendet');
       onOpenChange(false);
       setEmail('');
@@ -75,6 +106,11 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
     } catch (error) {
       console.error('Error sending email:', error);
       toast.error(`Fehler beim Senden der E-Mail: ${error.message || 'Unbekannter Fehler'}`);
+      
+      // Set debug info if not already set
+      if (!debugInfo) {
+        setDebugInfo(`Exception: ${error.message || 'Unbekannter Fehler'}`);
+      }
     } finally {
       setIsSending(false);
     }
@@ -86,6 +122,7 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
       setEmail('');
       setName('');
       setPersonalMessage('');
+      setDebugInfo(null);
     }
   };
 
@@ -137,6 +174,13 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
               placeholder="Fügen Sie hier eine persönliche Nachricht hinzu..."
             />
           </div>
+          
+          {debugInfo && (
+            <div className="col-span-4 bg-amber-50 p-2 text-xs text-amber-900 rounded border border-amber-200 mt-2">
+              <p className="font-semibold">Debug-Information:</p>
+              <p className="break-all">{debugInfo}</p>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button type="button" variant="outline" onClick={handleCloseDialog} disabled={isSending}>
