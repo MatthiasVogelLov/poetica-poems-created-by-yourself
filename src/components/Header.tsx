@@ -25,9 +25,7 @@ const Header = () => {
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-6">
-          <NavLink to="/generator" className="text-base transition-all duration-200 hover:text-primary font-medium">
-            Gedicht erstellen
-          </NavLink>
+          
           
           <NavigationMenu>
             <NavigationMenuList>
