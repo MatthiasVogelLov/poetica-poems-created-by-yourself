@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface EmailDialogProps {
   poem: string;
@@ -39,8 +40,17 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
       return;
     }
 
+    if (!poem || !title) {
+      toast.error('Gedicht oder Titel fehlt');
+      return;
+    }
+
     setIsSending(true);
     try {
+      console.log('Sending email to:', email);
+      console.log('Poem content length:', poem.length);
+      console.log('Title:', title);
+
       const { data, error } = await supabase.functions.invoke('send-poem', {
         body: {
           recipientEmail: email,
@@ -52,22 +62,35 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
       });
       
       if (error) {
+        console.error('Error from Edge Function:', error);
         throw new Error(error.message || 'Fehler beim Senden der E-Mail');
       }
 
+      console.log('Email send response:', data);
       toast.success('E-Mail erfolgreich gesendet');
       onOpenChange(false);
+      setEmail('');
+      setName('');
       setPersonalMessage('');
     } catch (error) {
       console.error('Error sending email:', error);
-      toast.error('Fehler beim Senden der E-Mail');
+      toast.error(`Fehler beim Senden der E-Mail: ${error.message || 'Unbekannter Fehler'}`);
     } finally {
       setIsSending(false);
     }
   };
 
+  const handleCloseDialog = () => {
+    if (!isSending) {
+      onOpenChange(false);
+      setEmail('');
+      setName('');
+      setPersonalMessage('');
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleCloseDialog}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Gedicht per E-Mail senden</DialogTitle>
@@ -116,11 +139,16 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
           </div>
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button type="button" variant="outline" onClick={handleCloseDialog} disabled={isSending}>
             Abbrechen
           </Button>
           <Button type="button" onClick={handleEmailSend} disabled={isSending}>
-            {isSending ? 'Wird gesendet...' : 'Senden'}
+            {isSending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Wird gesendet...
+              </>
+            ) : 'Senden'}
           </Button>
         </DialogFooter>
       </DialogContent>

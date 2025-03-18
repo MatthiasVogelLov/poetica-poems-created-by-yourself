@@ -17,30 +17,60 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Executing send-poem function');
+    console.log('[send-poem] Starting execution with timestamp:', new Date().toISOString());
     
     if (!resendApiKey) {
-      console.error('Resend API key is not configured');
+      console.error('[send-poem] ERROR: Resend API key is not configured');
       throw new Error('Resend API key is not configured');
     }
 
-    console.log('Resend API key found');
+    console.log('[send-poem] Resend API key found, length:', resendApiKey.length);
     const resend = new Resend(resendApiKey);
-    const body = await req.text();
-    console.log('Request body:', body);
     
-    const { recipientEmail, recipientName, poemTitle, poemContent, personalMessage } = JSON.parse(body);
+    let body;
+    try {
+      body = await req.text();
+      console.log('[send-poem] Request body received, length:', body.length);
+      console.log('[send-poem] Request body (first 200 chars):', body.substring(0, 200));
+    } catch (parseError) {
+      console.error('[send-poem] Error reading request body:', parseError);
+      throw new Error('Failed to read request body');
+    }
     
-    console.log(`Sending email to: ${recipientEmail}, Poem: ${poemTitle}`);
+    let parsedBody;
+    try {
+      parsedBody = JSON.parse(body);
+      console.log('[send-poem] Successfully parsed request body');
+    } catch (parseError) {
+      console.error('[send-poem] Error parsing request body as JSON:', parseError);
+      throw new Error('Failed to parse request body as JSON');
+    }
+    
+    const { recipientEmail, recipientName, poemTitle, poemContent, personalMessage } = parsedBody;
+    
+    console.log('[send-poem] Extracted data:', { 
+      recipientEmail, 
+      recipientName: recipientName ? 'Present' : 'Missing',
+      poemTitle, 
+      poemContentLength: poemContent?.length,
+      hasPersonalMessage: !!personalMessage
+    });
     
     if (!recipientEmail || !poemTitle || !poemContent) {
-      throw new Error('Missing required fields');
+      console.error('[send-poem] Missing required fields:', {
+        hasRecipientEmail: !!recipientEmail,
+        hasPoemTitle: !!poemTitle,
+        hasPoemContent: !!poemContent
+      });
+      throw new Error('Missing required fields for email');
     }
 
-    const { data, error } = await resend.emails.send({
+    console.log('[send-poem] Preparing to send email to:', recipientEmail, 'with CC to:', adminEmail);
+
+    const emailPayload = {
       from: 'Poetica <poem@poetica.apvora.com>',
-      to: recipientEmail,
-      cc: adminEmail, // Always CC the admin on all emails
+      to: [recipientEmail],
+      cc: [adminEmail], // Always CC the admin on all emails
       subject: `Ihr Gedicht: ${poemTitle}`,
       html: `
         <div style="font-family: serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -67,14 +97,32 @@ serve(async (req) => {
           </p>
         </div>
       `,
-    });
+    };
+
+    console.log('[send-poem] Sending email with payload:', JSON.stringify({
+      to: emailPayload.to,
+      cc: emailPayload.cc,
+      subject: emailPayload.subject,
+      contentLength: emailPayload.html.length,
+    }));
+
+    let result;
+    try {
+      result = await resend.emails.send(emailPayload);
+      console.log('[send-poem] Raw result from Resend API:', JSON.stringify(result));
+    } catch (sendError) {
+      console.error('[send-poem] Exception while calling Resend API:', sendError);
+      throw new Error(`Exception calling Resend API: ${sendError.message}`);
+    }
+
+    const { data, error } = result;
 
     if (error) {
-      console.error('Error sending email:', error);
+      console.error('[send-poem] Error from Resend API:', error);
       throw new Error(`Failed to send email: ${error.message}`);
     }
 
-    console.log('Email sent successfully:', data);
+    console.log('[send-poem] Email sent successfully:', data);
 
     return new Response(
       JSON.stringify({ success: true, data }),
@@ -84,7 +132,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error handling request:', error.message, error.stack);
+    console.error('[send-poem] Error handling request:', error.message, error.stack);
     
     return new Response(
       JSON.stringify({ error: error.message }),
