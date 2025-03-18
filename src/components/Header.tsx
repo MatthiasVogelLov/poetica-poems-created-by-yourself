@@ -30,14 +30,10 @@ const Header = () => {
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-6">
-          <NavLink to="/generator" className="text-base transition-all duration-200 hover:text-primary font-medium">
-            Gedicht erstellen
-          </NavLink>
-          
+          {/* Navigation items removed as per visual edit */}
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger>Mehr</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="grid gap-3 p-4 w-[200px]">
                     <NavLink to="/impressum" className="text-sm hover:text-primary transition-colors">
@@ -71,9 +67,6 @@ const Header = () => {
       {/* Mobile menu */}
       {isMenuOpen && <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-md animate-fade-in">
           <div className="py-5 px-8 flex flex-col space-y-4">
-            <NavLink to="/generator" onClick={() => setIsMenuOpen(false)} className="text-base py-2 transition-all duration-200 font-medium">
-              Gedicht erstellen
-            </NavLink>
             <NavLink to="/impressum" onClick={() => setIsMenuOpen(false)} className="text-base py-2 transition-all duration-200">
               Impressum
             </NavLink>

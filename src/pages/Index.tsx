@@ -191,4 +191,3 @@ const steps = [{
   description: "Erhalten Sie Ihr Gedicht, speichern Sie es oder teilen Sie direkt mit Ihren Liebsten."
 }];
 export default Index;
-
