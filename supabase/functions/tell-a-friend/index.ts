@@ -1,43 +1,56 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { 
+  corsHeaders,
+  handleCorsPreflightRequest,
+  parseRequestBody,
+  createErrorResponse,
+  createSuccessResponse,
+  formatTextWithLineBreaks
+} from "../_shared/email-utils.ts";
 
 const resendApiKey = Deno.env.get('RESEND_API_KEY');
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+interface TellAFriendRequest {
+  recipientEmail: string;
+  message: string;
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     console.log('Executing tell-a-friend function');
     
+    // Validate Resend API key
     if (!resendApiKey) {
       console.error('Resend API key is not configured');
-      throw new Error('Resend API key is not configured');
+      return createErrorResponse('Resend API key is not configured', 500);
     }
 
     console.log('Resend API key found');
     const resend = new Resend(resendApiKey);
-    const body = await req.text();
-    const { recipientEmail, message } = JSON.parse(body);
     
+    // Parse request body
+    const { data, error } = await parseRequestBody<TellAFriendRequest>(req);
+    if (error) return createErrorResponse(error);
+    
+    const { recipientEmail, message } = data!;
     console.log(`Sending recommendation email to: ${recipientEmail}`);
     
+    // Validate required fields
     if (!recipientEmail || !message) {
-      throw new Error('Missing required fields');
+      return createErrorResponse('Missing required fields');
     }
 
     // Format message to preserve line breaks
-    const formattedMessage = message.replace(/\n/g, '<br />');
+    const formattedMessage = formatTextWithLineBreaks(message);
 
-    const { data, error } = await resend.emails.send({
+    // Send email
+    const emailResult = await resend.emails.send({
       from: 'Poetica <noreply@poetica.apvora.com>',
       to: recipientEmail,
       subject: 'Eine Empfehlung für dich: Poetica - Erstelle personalisierte Gedichte',
@@ -58,29 +71,15 @@ serve(async (req) => {
       `,
     });
 
-    if (error) {
-      console.error('Error sending email:', error);
-      throw new Error(`Failed to send email: ${error.message}`);
+    if (emailResult.error) {
+      console.error('Error sending email:', emailResult.error);
+      return createErrorResponse(`Failed to send email: ${emailResult.error.message}`, 400, emailResult.error);
     }
 
-    console.log('Email sent successfully:', data);
-
-    return new Response(
-      JSON.stringify({ success: true, data }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
-      }
-    );
+    console.log('Email sent successfully:', emailResult.data);
+    return createSuccessResponse(emailResult.data);
   } catch (error) {
     console.error('Error handling request:', error.message);
-    
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400
-      }
-    );
+    return createErrorResponse(error.message, 500, { stack: error.stack });
   }
 });

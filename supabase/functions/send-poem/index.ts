@@ -1,20 +1,31 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { 
+  corsHeaders,
+  handleCorsPreflightRequest,
+  parseRequestBody,
+  createErrorResponse,
+  createSuccessResponse,
+  formatTextWithLineBreaks,
+  formatPoemForEmail
+} from "../_shared/email-utils.ts";
 
 const resendApiKey = Deno.env.get('RESEND_API_KEY');
 const adminEmail = "matthiasvogel1973@gmail.com"; // Admin email for CC
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+interface SendPoemRequest {
+  recipientEmail: string;
+  recipientName?: string;
+  poemTitle: string;
+  poemContent: string;
+  personalMessage?: string;
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
 
   try {
     const startTime = new Date();
@@ -23,44 +34,17 @@ serve(async (req) => {
     // Validate Resend API key
     if (!resendApiKey) {
       console.error('[send-poem] CRITICAL ERROR: Resend API key is not configured');
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Resend API key is not configured on the server'
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500
-        }
-      );
+      return createErrorResponse('Resend API key is not configured on the server', 500);
     }
 
     console.log(`[send-poem] Resend API key found, length: ${resendApiKey.length}`);
     const resend = new Resend(resendApiKey);
     
-    // Parse request body
-    let body;
-    let parsedBody;
+    // Parse and validate request body
+    const { data, error } = await parseRequestBody<SendPoemRequest>(req);
+    if (error) return createErrorResponse(error, 400);
     
-    try {
-      body = await req.json();
-      console.log('[send-poem] Request body received successfully');
-    } catch (parseError) {
-      console.error('[send-poem] Error reading request body:', parseError);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Failed to read request body, make sure it is valid JSON' 
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400
-        }
-      );
-    }
-    
-    // Extract required fields and validate
-    const { recipientEmail, recipientName, poemTitle, poemContent, personalMessage } = body;
+    const { recipientEmail, recipientName, poemTitle, poemContent, personalMessage } = data!;
     
     console.log('[send-poem] Extracted data:', { 
       recipientEmail, 
@@ -72,47 +56,22 @@ serve(async (req) => {
     
     // Validate required fields
     if (!recipientEmail) {
-      console.error('[send-poem] Missing recipient email address');
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Recipient email address is required' 
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400
-        }
-      );
+      return createErrorResponse('Recipient email address is required', 400);
     }
     
     if (!poemTitle || !poemContent) {
-      console.error('[send-poem] Missing poem title or content');
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Poem title and content are required' 
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400
-        }
-      );
+      return createErrorResponse('Poem title and content are required', 400);
     }
 
     console.log(`[send-poem] Preparing to send email to: ${recipientEmail}, with CC to: ${adminEmail}`);
 
-    // Format poem content to preserve line breaks and stanzas
-    const formattedPoemContent = poemContent
-      .split('\n\n') // Split by double line breaks (stanzas)
-      .map(stanza => {
-        // For each stanza, wrap each line in a paragraph tag
-        return stanza
-          .split('\n')
-          .map(line => `<p style="margin: 0; line-height: 1.6;">${line || '&nbsp;'}</p>`)
-          .join('');
-      })
-      .map(stanza => `<div style="margin-bottom: 1em;">${stanza}</div>`) // Wrap each stanza in a div with bottom margin
-      .join('');
+    // Format poem content for email
+    const formattedPoemContent = formatPoemForEmail(poemContent);
+    
+    // Format personal message if present
+    const formattedPersonalMessage = personalMessage 
+      ? formatTextWithLineBreaks(personalMessage)
+      : null;
 
     // Prepare email
     const emailPayload = {
@@ -126,9 +85,9 @@ serve(async (req) => {
             <h1 style="font-family: serif; font-size: 24px; margin: 0;">Poetica</h1>
           </div>
           
-          ${personalMessage ? `
+          ${formattedPersonalMessage ? `
           <div style="margin-bottom: 30px; padding: 15px; background-color: #f9f9f9; border-radius: 5px; border-left: 4px solid #1d3557;">
-            <p style="font-style: italic; margin: 0;">${personalMessage.replace(/\n/g, '<br />')}</p>
+            <p style="font-style: italic; margin: 0;">${formattedPersonalMessage}</p>
           </div>
           ` : ''}
           
@@ -162,62 +121,27 @@ serve(async (req) => {
       
       console.log('[send-poem] Raw result from Resend API:', JSON.stringify(result));
       
-      const { data, error } = result;
-
-      if (error) {
-        console.error('[send-poem] Error returned from Resend API:', error);
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: `Resend API error: ${error.message}`, 
-            details: error 
-          }),
-          { 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 400
-          }
-        );
+      if (result.error) {
+        console.error('[send-poem] Error returned from Resend API:', result.error);
+        return createErrorResponse(`Resend API error: ${result.error.message}`, 400, result.error);
       }
 
-      console.log('[send-poem] Email sent successfully:', data);
+      console.log('[send-poem] Email sent successfully:', result.data);
       const endTime = new Date();
       const executionTime = endTime.getTime() - startTime.getTime();
       console.log(`[send-poem] Function completed in ${executionTime}ms`);
 
-      return new Response(
-        JSON.stringify({ success: true, data }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200
-        }
-      );
+      return createSuccessResponse(result.data);
     } catch (sendError) {
       console.error('[send-poem] Exception while calling Resend API:', sendError);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: `Exception calling Resend API: ${sendError.message}`,
-          stack: sendError.stack
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500
-        }
-      );
+      return createErrorResponse(`Exception calling Resend API: ${sendError.message}`, 500, {
+        stack: sendError.stack
+      });
     }
   } catch (error) {
     console.error('[send-poem] Unhandled error:', error.message, error.stack);
-    
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: `Unhandled server error: ${error.message}`,
-        stack: error.stack 
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
-      }
-    );
+    return createErrorResponse(`Unhandled server error: ${error.message}`, 500, {
+      stack: error.stack
+    });
   }
 });
