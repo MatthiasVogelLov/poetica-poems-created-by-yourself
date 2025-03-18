@@ -19,7 +19,7 @@ const GeneratorFooter = () => {
             <Link to="/agb" className="hover:text-foreground transition-colors">AGB</Link>
             <Link to="/kontakt" className="hover:text-foreground transition-colors">Kontakt</Link>
             <Link to="/admin" className="hover:text-foreground transition-colors">Admin</Link>
-            <div className="md:hidden">
+            <div className="hidden md:block">
               <TellAFriend />
             </div>
           </div>

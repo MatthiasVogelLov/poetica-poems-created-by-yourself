@@ -1,10 +1,13 @@
+
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) {
@@ -16,7 +19,9 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
   return <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${isScrolled ? 'py-4 bg-white/80 backdrop-blur-md shadow-sm' : 'py-6 bg-transparent'}`}>
       <div className="container-wide flex items-center justify-between">
         <NavLink to="/" className="font-serif text-xl md:text-2xl font-medium transition-all duration-300 hover:opacity-70">
@@ -25,12 +30,14 @@ const Header = () => {
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-6">
-          
+          <NavLink to="/generator" className="text-base transition-all duration-200 hover:text-primary font-medium">
+            Gedicht erstellen
+          </NavLink>
           
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                
+                <NavigationMenuTrigger>Mehr</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="grid gap-3 p-4 w-[200px]">
                     <NavLink to="/impressum" className="text-sm hover:text-primary transition-colors">
@@ -86,4 +93,5 @@ const Header = () => {
         </div>}
     </header>;
 };
+
 export default Header;
