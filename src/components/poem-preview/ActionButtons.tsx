@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Printer, Send, Share2, Facebook, Instagram, Twitter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -36,25 +35,18 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ poem, title }) => {
 
     setIsSending(true);
     try {
-      // Call Supabase Edge Function to send email
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-poem`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('send-poem', {
+        body: {
           recipientEmail: email,
           recipientName: name,
           poemTitle: title,
           poemContent: poem,
           personalMessage: personalMessage
-        }),
+        }
       });
-
-      const result = await response.json();
       
-      if (!response.ok) {
-        throw new Error(result.error || 'Fehler beim Senden der E-Mail');
+      if (error) {
+        throw new Error(error.message || 'Fehler beim Senden der E-Mail');
       }
 
       toast.success('E-Mail erfolgreich gesendet');
@@ -80,12 +72,13 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ poem, title }) => {
         shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(poemText)}`;
         break;
       case 'instagram':
-        // Instagram doesn't support direct sharing via URL, inform the user
-        toast.info('Instagram unterstützt kein direktes Teilen. Bitte machen Sie einen Screenshot und teilen Sie ihn manuell.');
+        toast.info('Instagram unterstützt kein direktes Teilen. Bitte machen Sie einen Screenshot und teilen Sie ihn über die Instagram-App.', {
+          duration: 5000,
+          description: "Tippen Sie auf den Bildschirm und halten Sie gedrückt, um einen Screenshot zu machen."
+        });
         setShareDialogOpen(false);
         return;
       default:
-        // Direct copy to clipboard
         navigator.clipboard.writeText(poemText)
           .then(() => toast.success('Gedicht in die Zwischenablage kopiert'))
           .catch(() => toast.error('Fehler beim Kopieren'));
@@ -129,7 +122,6 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ poem, title }) => {
         </Button>
       </div>
 
-      {/* Email Dialog */}
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -189,7 +181,6 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ poem, title }) => {
         </DialogContent>
       </Dialog>
 
-      {/* Share Dialog */}
       <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

@@ -29,6 +29,7 @@ serve(async (req) => {
     
     const body = await req.text();
     console.log('[notify-poem] Request body received, length:', body.length);
+    console.log('[notify-poem] Request body:', body.substring(0, 200) + '...'); // Log part of the body for debugging
     
     let poemTitle, formData, poemContent;
     try {
@@ -75,7 +76,7 @@ serve(async (req) => {
       subject: `Neues Gedicht: ${poemTitle}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #1d3557; border-bottom: 1px solid #ddd; padding-bottom: 10px;">${poemTitle}</h1>
+          <h1 style="color: #1d3557; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Neues Gedicht erstellt: ${poemTitle}</h1>
           
           <h2 style="color: #457b9d; margin-top: 20px;">Gedicht</h2>
           <div style="white-space: pre-line; font-family: 'Playfair Display', serif; background-color: #f8f9fa; padding: 20px; border-radius: 5px; line-height: 1.6;">
@@ -88,7 +89,7 @@ serve(async (req) => {
           </ul>
           
           <p style="margin-top: 30px; color: #6c757d; font-size: 14px; border-top: 1px solid #ddd; padding-top: 10px;">
-            Diese E-Mail wurde automatisch von der Poetica App gesendet.
+            Diese E-Mail wurde automatisch von der Poetica App gesendet am ${new Date().toLocaleString('de-DE')}.
           </p>
         </div>
       `

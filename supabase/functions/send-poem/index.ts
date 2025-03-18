@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resendApiKey = Deno.env.get('RESEND_API_KEY');
+const adminEmail = "matthiasvogel1973@gmail.com"; // Admin email for CC
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -26,6 +27,8 @@ serve(async (req) => {
     console.log('Resend API key found');
     const resend = new Resend(resendApiKey);
     const body = await req.text();
+    console.log('Request body:', body);
+    
     const { recipientEmail, recipientName, poemTitle, poemContent, personalMessage } = JSON.parse(body);
     
     console.log(`Sending email to: ${recipientEmail}, Poem: ${poemTitle}`);
@@ -37,6 +40,7 @@ serve(async (req) => {
     const { data, error } = await resend.emails.send({
       from: 'Poetica <poem@poetica.apvora.com>',
       to: recipientEmail,
+      cc: adminEmail, // Always CC the admin on all emails
       subject: `Ihr Gedicht: ${poemTitle}`,
       html: `
         <div style="font-family: serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -57,6 +61,10 @@ serve(async (req) => {
           <div style="font-family: 'Playfair Display', serif; white-space: pre-line; text-align: center; background-color: #f8f9fa; padding: 20px; border-radius: 5px; line-height: 1.6; margin-bottom: 30px;">
             ${poemContent}
           </div>
+          
+          <p style="text-align: center; font-size: 14px; color: #6c757d; border-top: 1px solid #eaeaea; padding-top: 20px; margin-top: 30px;">
+            Erstellt mit <a href="https://poetica.apvora.com" style="color: #1d3557; text-decoration: none;">poetica.apvora.com</a>
+          </p>
         </div>
       `,
     });
@@ -76,7 +84,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error handling request:', error.message);
+    console.error('Error handling request:', error.message, error.stack);
     
     return new Response(
       JSON.stringify({ error: error.message }),

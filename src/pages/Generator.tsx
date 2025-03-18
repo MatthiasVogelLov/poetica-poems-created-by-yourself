@@ -6,6 +6,7 @@ import HeaderContent from '../components/generator/HeaderContent';
 import GeneratorFooter from '../components/GeneratorFooter';
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from 'react-router-dom';
+import { toast } from "sonner";
 
 const Generator = () => {
   const location = useLocation();
@@ -16,15 +17,24 @@ const Generator = () => {
     const notifyAdmin = async () => {
       if (location.state?.generatedPoem) {
         try {
+          console.log('Sending admin notification about new poem:', 
+            location.state.generatedPoem.title);
+          
           // Send notification to admin about new poem
-          await supabase.functions.invoke('notify-poem', {
+          const { data, error } = await supabase.functions.invoke('notify-poem', {
             body: {
               poemTitle: location.state.generatedPoem.title,
               poemContent: location.state.generatedPoem.poem,
               formData: location.state.formData
             }
           });
-          console.log('Admin notification sent');
+          
+          if (error) {
+            console.error('Error sending admin notification:', error);
+            return;
+          }
+          
+          console.log('Admin notification sent successfully:', data);
         } catch (error) {
           console.error('Failed to send admin notification:', error);
         }

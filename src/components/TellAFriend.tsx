@@ -5,12 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { X, Loader2 } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 
 const TellAFriend = () => {
-  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('Hallo,\n\nIch habe diese tolle Webseite zum Erstellen personalisierter Gedichte entdeckt und dachte, das könnte dich interessieren!\n\nSchau sie dir an: https://poetica.advora.com');
   const [isLoading, setIsLoading] = useState(false);
@@ -18,10 +17,8 @@ const TellAFriend = () => {
 
   const handleSendEmail = async () => {
     if (!email) {
-      toast({
-        title: "Fehler",
-        description: "Bitte geben Sie eine E-Mail-Adresse ein.",
-        variant: "destructive"
+      toast.error("Fehler", {
+        description: "Bitte geben Sie eine E-Mail-Adresse ein."
       });
       return;
     }
@@ -31,7 +28,7 @@ const TellAFriend = () => {
     try {
       console.log("Sending recommendation email to:", email);
       
-      const { error } = await supabase.functions.invoke('tell-a-friend', {
+      const { data, error } = await supabase.functions.invoke('tell-a-friend', {
         body: {
           recipientEmail: email,
           message: message
@@ -40,13 +37,10 @@ const TellAFriend = () => {
 
       if (error) throw error;
 
-      // In a real application, we would track this referral in the database
-      // For now, we're just displaying a success message
       console.log("Recommendation email sent successfully");
 
-      toast({
-        title: "Nachricht gesendet",
-        description: "Ihre Empfehlung wurde erfolgreich versendet.",
+      toast.success("Nachricht gesendet", {
+        description: "Ihre Empfehlung wurde erfolgreich versendet."
       });
 
       setIsOpen(false);
@@ -55,10 +49,8 @@ const TellAFriend = () => {
     } catch (error) {
       console.error("Error sending recommendation:", error);
       
-      toast({
-        title: "Fehler",
-        description: "Die Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
-        variant: "destructive"
+      toast.error("Fehler", {
+        description: "Die Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es später erneut."
       });
     } finally {
       setIsLoading(false);
