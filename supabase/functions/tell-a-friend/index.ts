@@ -34,6 +34,9 @@ serve(async (req) => {
       throw new Error('Missing required fields');
     }
 
+    // Format message to preserve line breaks
+    const formattedMessage = message.replace(/\n/g, '<br />');
+
     const { data, error } = await resend.emails.send({
       from: 'Poetica <noreply@poetica.apvora.com>',
       to: recipientEmail,
@@ -44,8 +47,8 @@ serve(async (req) => {
             <h1 style="font-family: serif; font-size: 24px; margin: 0;">Poetica</h1>
           </div>
           
-          <div style="font-family: 'Helvetica', sans-serif; white-space: pre-line; text-align: left; background-color: #f8f9fa; padding: 20px; border-radius: 5px; line-height: 1.6; margin-bottom: 30px;">
-            ${message}
+          <div style="font-family: 'Helvetica', sans-serif; text-align: left; background-color: #f8f9fa; padding: 20px; border-radius: 5px; line-height: 1.6; margin-bottom: 30px;">
+            ${formattedMessage}
           </div>
           
           <p style="text-align: center; font-size: 14px; color: #6c757d; border-top: 1px solid #eaeaea; padding-top: 20px; margin-top: 30px;">

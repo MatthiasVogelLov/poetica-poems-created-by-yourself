@@ -101,6 +101,19 @@ serve(async (req) => {
 
     console.log(`[send-poem] Preparing to send email to: ${recipientEmail}, with CC to: ${adminEmail}`);
 
+    // Format poem content to preserve line breaks and stanzas
+    const formattedPoemContent = poemContent
+      .split('\n\n') // Split by double line breaks (stanzas)
+      .map(stanza => {
+        // For each stanza, wrap each line in a paragraph tag
+        return stanza
+          .split('\n')
+          .map(line => `<p style="margin: 0; line-height: 1.6;">${line || '&nbsp;'}</p>`)
+          .join('');
+      })
+      .map(stanza => `<div style="margin-bottom: 1em;">${stanza}</div>`) // Wrap each stanza in a div with bottom margin
+      .join('');
+
     // Prepare email
     const emailPayload = {
       from: 'Poetica <poem@poetica.apvora.com>',
@@ -115,7 +128,7 @@ serve(async (req) => {
           
           ${personalMessage ? `
           <div style="margin-bottom: 30px; padding: 15px; background-color: #f9f9f9; border-radius: 5px; border-left: 4px solid #1d3557;">
-            <p style="font-style: italic; margin: 0;">${personalMessage}</p>
+            <p style="font-style: italic; margin: 0;">${personalMessage.replace(/\n/g, '<br />')}</p>
           </div>
           ` : ''}
           
@@ -123,8 +136,8 @@ serve(async (req) => {
             ${poemTitle}
           </h1>
           
-          <div style="font-family: 'Playfair Display', serif; white-space: pre-line; text-align: center; background-color: #f8f9fa; padding: 20px; border-radius: 5px; line-height: 1.6; margin-bottom: 30px;">
-            ${poemContent}
+          <div style="font-family: 'Playfair Display', serif; text-align: center; background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px;">
+            ${formattedPoemContent}
           </div>
           
           <p style="text-align: center; font-size: 14px; color: #6c757d; border-top: 1px solid #eaeaea; padding-top: 20px; margin-top: 30px;">

@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Bug } from 'lucide-react';
 
 interface EmailDialogProps {
   poem: string;
@@ -34,6 +34,7 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
   const [personalMessage, setPersonalMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
+  const [showDebug, setShowDebug] = useState(false);
 
   const validateEmail = (email: string) => {
     const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -175,10 +176,25 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
             />
           </div>
           
-          {debugInfo && (
+          {debugInfo && showDebug && (
             <div className="col-span-4 bg-amber-50 p-2 text-xs text-amber-900 rounded border border-amber-200 mt-2">
               <p className="font-semibold">Debug-Information:</p>
               <p className="break-all">{debugInfo}</p>
+            </div>
+          )}
+          
+          {debugInfo && (
+            <div className="flex justify-end">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="sm" 
+                className="flex items-center text-muted-foreground text-xs"
+                onClick={() => setShowDebug(!showDebug)}
+              >
+                <Bug className="h-3 w-3 mr-1" />
+                {showDebug ? 'Debug ausblenden' : 'Debug anzeigen'}
+              </Button>
             </div>
           )}
         </div>
