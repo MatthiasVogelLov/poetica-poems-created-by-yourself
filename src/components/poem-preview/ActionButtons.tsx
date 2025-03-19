@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Printer, Send, Share2, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import EmailDialog from './dialogs/EmailDialog';
 import ShareDialog from './dialogs/ShareDialog';
 import jsPDF from 'jspdf';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 interface ActionButtonsProps {
   poem: string;
