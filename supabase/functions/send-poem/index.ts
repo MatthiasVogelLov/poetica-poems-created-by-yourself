@@ -73,103 +73,103 @@ serve(async (req) => {
       ? formatTextWithLineBreaks(personalMessage)
       : null;
 
-    // Prepare email to recipient
-    const emailPayload = {
-      from: 'Poetica <poem@poetica.apvora.com>',
-      to: [recipientEmail],
-      cc: [adminEmail], // Always CC the admin
-      subject: `Ihr Gedicht: ${poemTitle}`,
-      html: `
-        <div style="font-family: serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="text-align: left; margin-bottom: 20px;">
-            <h1 style="font-family: serif; font-size: 24px; margin: 0;">Poetica</h1>
-          </div>
-          
-          ${formattedPersonalMessage ? `
-          <div style="margin-bottom: 30px; padding: 15px; background-color: #f9f9f9; border-radius: 5px; border-left: 4px solid #1d3557;">
-            <p style="font-style: italic; margin: 0;">${formattedPersonalMessage}</p>
-          </div>
-          ` : ''}
-          
-          <h1 style="font-family: 'Playfair Display', serif; text-align: center; color: #1d3557; margin-bottom: 20px;">
-            ${poemTitle}
-          </h1>
-          
-          <div style="font-family: 'Playfair Display', serif; text-align: center; background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px;">
-            ${formattedPoemContent}
-          </div>
-          
-          <p style="text-align: center; font-size: 14px; color: #6c757d; border-top: 1px solid #eaeaea; padding-top: 20px; margin-top: 30px;">
-            Erstellt mit <a href="https://poetica.apvora.com" style="color: #1d3557; text-decoration: none;">poetica.apvora.com</a>
-          </p>
-        </div>
-      `,
-    };
-
-    // Logging the email payload (excluding content for brevity)
-    console.log('[send-poem] Sending email with payload:', JSON.stringify({
-      from: emailPayload.from,
-      to: emailPayload.to,
-      cc: emailPayload.cc,
-      subject: emailPayload.subject,
-      htmlLength: emailPayload.html.length,
-    }));
-
-    // Send email
     try {
-      // Send the email to the recipient with CC to admin
-      const result = await resend.emails.send(emailPayload);
+      // Send the main email to the recipient (without CC to ensure delivery)
+      const result = await resend.emails.send({
+        from: 'Poetica <poem@poetica.apvora.com>',
+        to: [recipientEmail],
+        subject: `Ihr Gedicht: ${poemTitle}`,
+        html: `
+          <div style="font-family: serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: left; margin-bottom: 20px;">
+              <h1 style="font-family: serif; font-size: 24px; margin: 0;">Poetica</h1>
+            </div>
+            
+            ${formattedPersonalMessage ? `
+            <div style="margin-bottom: 30px; padding: 15px; background-color: #f9f9f9; border-radius: 5px; border-left: 4px solid #1d3557;">
+              <p style="font-style: italic; margin: 0;">${formattedPersonalMessage}</p>
+            </div>
+            ` : ''}
+            
+            <h1 style="font-family: 'Playfair Display', serif; text-align: center; color: #1d3557; margin-bottom: 20px;">
+              ${poemTitle}
+            </h1>
+            
+            <div style="font-family: 'Playfair Display', serif; text-align: center; background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px;">
+              ${formattedPoemContent}
+            </div>
+            
+            <p style="text-align: center; font-size: 14px; color: #6c757d; border-top: 1px solid #eaeaea; padding-top: 20px; margin-top: 30px;">
+              Erstellt mit <a href="https://poetica.apvora.com" style="color: #1d3557; text-decoration: none;">poetica.apvora.com</a>
+            </p>
+          </div>
+        `,
+      });
       
-      console.log('[send-poem] Raw result from Resend API:', JSON.stringify(result));
-      
-      if (result.error) {
-        console.error('[send-poem] Error returned from Resend API:', result.error);
-        return createErrorResponse(`Resend API error: ${result.error.message}`, 400, result.error);
-      }
+      console.log('[send-poem] Email to recipient sent:', JSON.stringify({
+        success: !result.error,
+        error: result.error,
+        data: result.data
+      }));
 
-      // Send a separate admin notification to ensure they receive it
-      // This acts as a backup mechanism in case the CC fails
-      try {
-        const adminNotification = await resend.emails.send({
-          from: 'Poetica <poem@poetica.apvora.com>',
-          to: [adminEmail],
-          subject: `[ADMIN COPY] Gedicht gesendet: ${poemTitle}`,
-          html: `
-            <div style="font-family: serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <div style="text-align: left; margin-bottom: 20px;">
-                <h1 style="font-family: serif; font-size: 24px; margin: 0;">Poetica - Admin Benachrichtigung</h1>
-              </div>
-              
-              <p style="margin-bottom: 20px;">
-                Ein Gedicht wurde an <strong>${recipientEmail}</strong> gesendet.
-              </p>
-              
-              <h2 style="font-family: 'Playfair Display', serif; color: #1d3557; margin-bottom: 10px;">
-                ${poemTitle}
-              </h2>
-              
-              <div style="font-family: 'Playfair Display', serif; background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px;">
-                ${formattedPoemContent}
+      // Now, always send a separate copy to admin regardless of the main email status
+      const adminResult = await resend.emails.send({
+        from: 'Poetica <poem@poetica.apvora.com>',
+        to: [adminEmail],
+        subject: `[ADMIN COPY] Gedicht gesendet: ${poemTitle}`,
+        html: `
+          <div style="font-family: serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: left; margin-bottom: 20px; background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
+              <h1 style="font-family: serif; font-size: 24px; margin: 0;">Poetica - Admin Benachrichtigung</h1>
+              <p style="margin: 10px 0 0 0;">Ein Gedicht wurde gesendet</p>
+            </div>
+            
+            <div style="margin: 20px 0; padding: 10px; background-color: #e8f4ff; border-radius: 5px;">
+              <p><strong>Empfänger:</strong> ${recipientEmail}</p>
+              <p><strong>Name:</strong> ${recipientName || 'Nicht angegeben'}</p>
+              <p><strong>Gesendet am:</strong> ${new Date().toLocaleString('de-DE')}</p>
+            </div>
+            
+            <h2 style="font-family: 'Playfair Display', serif; color: #1d3557; margin-bottom: 10px;">
+              ${poemTitle}
+            </h2>
+            
+            <div style="font-family: 'Playfair Display', serif; background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px;">
+              ${formattedPoemContent}
+            </div>
+            
+            ${formattedPersonalMessage ? `
+            <div style="margin-top: 20px;">
+              <h3>Persönliche Nachricht:</h3>
+              <div style="padding: 10px; background-color: #f9f9f9; border-radius: 5px; border-left: 4px solid #1d3557;">
+                <p style="font-style: italic; margin: 0;">${formattedPersonalMessage}</p>
               </div>
             </div>
-          `,
-        });
-        
-        console.log('[send-poem] Admin notification sent:', JSON.stringify({
-          success: !adminNotification.error,
-          error: adminNotification.error
-        }));
-      } catch (adminError) {
-        // Log the error but don't fail the entire request if only the admin notification fails
-        console.error('[send-poem] Error sending admin notification:', adminError);
+            ` : ''}
+          </div>
+        `,
+      });
+      
+      console.log('[send-poem] Admin copy email sent:', JSON.stringify({
+        success: !adminResult.error,
+        error: adminResult.error,
+        data: adminResult.data
+      }));
+
+      // Return success as long as the main email was sent
+      if (result.error) {
+        console.error('[send-poem] Error sending main email:', result.error);
+        return createErrorResponse(`Error sending email: ${result.error.message}`, 400, result.error);
       }
 
-      console.log('[send-poem] Email sent successfully:', result.data);
       const endTime = new Date();
       const executionTime = endTime.getTime() - startTime.getTime();
       console.log(`[send-poem] Function completed in ${executionTime}ms`);
 
-      return createSuccessResponse(result.data);
+      return createSuccessResponse({
+        id: result.data?.id,
+        adminCopySent: !adminResult.error
+      });
     } catch (sendError) {
       console.error('[send-poem] Exception while calling Resend API:', sendError);
       return createErrorResponse(`Exception calling Resend API: ${sendError.message}`, 500, {

@@ -2,13 +2,12 @@
 import React, { useState } from 'react';
 import { useStatsData } from '@/hooks/use-stats-data';
 import StatsOverview from './StatsOverview';
-import FeatureUsageCard from './FeatureUsageCard';
-import KeywordsCard from './KeywordsCard';
-import CategoryTabs from './CategoryTabs';
+import UnifiedStatsTable from './UnifiedStatsTable';
+import DateRangeFilter from './DateRangeFilter';
 import StatsLoadingState from './StatsLoadingState';
 import StatsErrorState from './StatsErrorState';
 import DownloadButton from './DownloadButton';
-import DateRangeFilter from './DateRangeFilter';
+import { Card, CardContent } from '@/components/ui/card';
 
 const StatsGrid = () => {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -49,20 +48,25 @@ const StatsGrid = () => {
         keywordsUsed={stats.keywordsUsed}
       />
 
-      <h3 className="text-xl font-medium mb-3">Feature-Nutzung</h3>
-      <FeatureUsageCard featureData={stats.featureData} />
-      
-      <KeywordsCard 
-        keywordsUsed={stats.keywordsUsed} 
-        keywordsTodayUsed={stats.keywordsTodayUsed}
-      />
-      
-      <CategoryTabs 
-        audienceData={stats.audienceData}
-        occasionData={stats.occasionData}
-        styleData={stats.styleData}
-        lengthData={stats.lengthData}
-      />
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <h3 className="text-xl font-medium mb-4">Vollständige Statistiken</h3>
+          <UnifiedStatsTable 
+            featureData={stats.featureData}
+            audienceData={stats.audienceData}
+            occasionData={stats.occasionData}
+            styleData={stats.styleData}
+            lengthData={stats.lengthData}
+            keywordsData={[
+              { 
+                name: 'Mit Schlüsselwörtern', 
+                value: stats.keywordsUsed, 
+                todayValue: stats.keywordsTodayUsed 
+              }
+            ]}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 };
