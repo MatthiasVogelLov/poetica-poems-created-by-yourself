@@ -1,4 +1,3 @@
-
 import { StatItem, StatsData } from "@/types/stats";
 import jsPDF from "jspdf";
 

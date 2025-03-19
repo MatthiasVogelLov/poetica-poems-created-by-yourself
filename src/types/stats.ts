@@ -3,6 +3,7 @@ export interface StatItem {
   name: string;
   value: number;
   todayValue: number;
+  category?: string;
 }
 
 export interface StatsData {
