@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Facebook, Instagram, Twitter, Share2, TikTok } from 'lucide-react';
+import { Facebook, Instagram, Twitter, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -76,7 +76,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
     onOpenChange(false);
   };
 
-  // Custom TikTok icon
+  // Custom TikTok icon as inline SVG component
   const TikTokIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
       {...props}
