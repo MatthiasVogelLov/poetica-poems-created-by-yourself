@@ -73,7 +73,7 @@ serve(async (req) => {
       ? formatTextWithLineBreaks(personalMessage)
       : null;
 
-    // Prepare email
+    // Prepare email to recipient
     const emailPayload = {
       from: 'Poetica <poem@poetica.apvora.com>',
       to: [recipientEmail],
@@ -117,6 +117,7 @@ serve(async (req) => {
 
     // Send email
     try {
+      // Send the email to the recipient with CC to admin
       const result = await resend.emails.send(emailPayload);
       
       console.log('[send-poem] Raw result from Resend API:', JSON.stringify(result));
@@ -124,6 +125,43 @@ serve(async (req) => {
       if (result.error) {
         console.error('[send-poem] Error returned from Resend API:', result.error);
         return createErrorResponse(`Resend API error: ${result.error.message}`, 400, result.error);
+      }
+
+      // Send a separate admin notification to ensure they receive it
+      // This acts as a backup mechanism in case the CC fails
+      try {
+        const adminNotification = await resend.emails.send({
+          from: 'Poetica <poem@poetica.apvora.com>',
+          to: [adminEmail],
+          subject: `[ADMIN COPY] Gedicht gesendet: ${poemTitle}`,
+          html: `
+            <div style="font-family: serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <div style="text-align: left; margin-bottom: 20px;">
+                <h1 style="font-family: serif; font-size: 24px; margin: 0;">Poetica - Admin Benachrichtigung</h1>
+              </div>
+              
+              <p style="margin-bottom: 20px;">
+                Ein Gedicht wurde an <strong>${recipientEmail}</strong> gesendet.
+              </p>
+              
+              <h2 style="font-family: 'Playfair Display', serif; color: #1d3557; margin-bottom: 10px;">
+                ${poemTitle}
+              </h2>
+              
+              <div style="font-family: 'Playfair Display', serif; background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px;">
+                ${formattedPoemContent}
+              </div>
+            </div>
+          `,
+        });
+        
+        console.log('[send-poem] Admin notification sent:', JSON.stringify({
+          success: !adminNotification.error,
+          error: adminNotification.error
+        }));
+      } catch (adminError) {
+        // Log the error but don't fail the entire request if only the admin notification fails
+        console.error('[send-poem] Error sending admin notification:', adminError);
       }
 
       console.log('[send-poem] Email sent successfully:', result.data);
