@@ -10,11 +10,11 @@ import {
   DialogFooter,
   DialogDescription
 } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Loader2, Bug } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { validateEmail } from '@/utils/validation';
+import EmailForm from './EmailForm';
+import EmailDebugInfo from './EmailDebugInfo';
 
 interface EmailDialogProps {
   poem: string;
@@ -34,12 +34,6 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
   const [personalMessage, setPersonalMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
-  const [showDebug, setShowDebug] = useState(false);
-
-  const validateEmail = (email: string) => {
-    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
-  };
 
   const handleEmailSend = async () => {
     // Reset debug info
@@ -136,68 +130,18 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
             Teilen Sie Ihr Gedicht per E-Mail mit Freunden oder Familie.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="col-span-3"
-              placeholder="Max Mustermann"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              E-Mail
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="col-span-3"
-              placeholder="name@example.com"
-              required
-            />
-          </div>
-          <div className="grid grid-cols-4 gap-4">
-            <Label htmlFor="message" className="text-right pt-2">
-              Nachricht
-            </Label>
-            <Textarea
-              id="message"
-              value={personalMessage}
-              onChange={(e) => setPersonalMessage(e.target.value)}
-              className="col-span-3 min-h-[100px]"
-              placeholder="Fügen Sie hier eine persönliche Nachricht hinzu..."
-            />
-          </div>
-          
-          {debugInfo && showDebug && (
-            <div className="col-span-4 bg-amber-50 p-2 text-xs text-amber-900 rounded border border-amber-200 mt-2">
-              <p className="font-semibold">Debug-Information:</p>
-              <p className="break-all">{debugInfo}</p>
-            </div>
-          )}
-          
-          {debugInfo && (
-            <div className="flex justify-end">
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="sm" 
-                className="flex items-center text-muted-foreground text-xs"
-                onClick={() => setShowDebug(!showDebug)}
-              >
-                <Bug className="h-3 w-3 mr-1" />
-                {showDebug ? 'Debug ausblenden' : 'Debug anzeigen'}
-              </Button>
-            </div>
-          )}
-        </div>
+        
+        <EmailForm
+          email={email}
+          setEmail={setEmail}
+          name={name}
+          setName={setName}
+          personalMessage={personalMessage}
+          setPersonalMessage={setPersonalMessage}
+        />
+        
+        <EmailDebugInfo debugInfo={debugInfo} />
+        
         <DialogFooter>
           <Button type="button" variant="outline" onClick={handleCloseDialog} disabled={isSending}>
             Abbrechen
