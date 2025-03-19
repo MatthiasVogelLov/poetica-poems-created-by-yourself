@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -22,18 +22,19 @@ const Header = () => {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  return <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${isScrolled ? 'py-4 bg-white/80 backdrop-blur-md shadow-sm' : 'py-6 bg-transparent'}`}>
+  return (
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${isScrolled ? 'py-4 bg-white/80 backdrop-blur-md shadow-sm' : 'py-6 bg-transparent'}`}>
       <div className="container-wide flex items-center justify-between">
         <NavLink to="/" className="font-serif text-xl md:text-2xl font-medium transition-all duration-300 hover:opacity-70">
           Poetica
         </NavLink>
         
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation - Simplified as per your visual edit */}
         <div className="hidden md:flex items-center space-x-6">
-          {/* Navigation items removed as per visual edit */}
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
+                <NavigationMenuTrigger className="text-sm">Rechtliches</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="grid gap-3 p-4 w-[200px]">
                     <NavLink to="/impressum" className="text-sm hover:text-primary transition-colors">
@@ -65,7 +66,8 @@ const Header = () => {
       </div>
       
       {/* Mobile menu */}
-      {isMenuOpen && <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-md animate-fade-in">
+      {isMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-md animate-fade-in">
           <div className="py-5 px-8 flex flex-col space-y-4">
             <NavLink to="/impressum" onClick={() => setIsMenuOpen(false)} className="text-base py-2 transition-all duration-200">
               Impressum
@@ -83,8 +85,10 @@ const Header = () => {
               Admin
             </NavLink>
           </div>
-        </div>}
-    </header>;
+        </div>
+      )}
+    </header>
+  );
 };
 
 export default Header;
