@@ -56,8 +56,6 @@ const PoemPreview = ({
             )}
           </>
         )}
-        
-        {/* Removed print footer with "Created with poetica.advora.com" */}
       </CardContent>
     </Card>
   );

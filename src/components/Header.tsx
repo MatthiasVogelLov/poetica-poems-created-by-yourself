@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -28,36 +27,6 @@ const Header = () => {
         <NavLink to="/" className="font-serif text-xl md:text-2xl font-medium transition-all duration-300 hover:opacity-70">
           Poetica
         </NavLink>
-        
-        {/* Desktop Navigation - Simplified as per your visual edit */}
-        <div className="hidden md:flex items-center space-x-6">
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="text-sm">Rechtliches</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="grid gap-3 p-4 w-[200px]">
-                    <NavLink to="/impressum" className="text-sm hover:text-primary transition-colors">
-                      Impressum
-                    </NavLink>
-                    <NavLink to="/datenschutz" className="text-sm hover:text-primary transition-colors">
-                      Datenschutz
-                    </NavLink>
-                    <NavLink to="/agb" className="text-sm hover:text-primary transition-colors">
-                      AGB
-                    </NavLink>
-                    <NavLink to="/kontakt" className="text-sm hover:text-primary transition-colors">
-                      Kontakt
-                    </NavLink>
-                    <NavLink to="/admin" className="text-sm hover:text-primary transition-colors">
-                      Admin
-                    </NavLink>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
         
         {/* Mobile menu button */}
         <button onClick={toggleMenu} className="md:hidden p-2 focus:outline-none" aria-label={isMenuOpen ? "Menü schließen" : "Menü öffnen"}>
