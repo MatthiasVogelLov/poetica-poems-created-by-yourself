@@ -16,6 +16,8 @@ export interface StatsData {
   styleData: StatItem[];
   lengthData: StatItem[];
   featureData: StatItem[];
+  subscribersCount?: number;
+  subscribersTodayCount?: number;
 }
 
 export interface UseStatsDataProps {

@@ -19,6 +19,8 @@ const emptyStatsData: StatsData = {
   styleData: [],
   lengthData: [],
   featureData: [],
+  subscribersCount: 0,
+  subscribersTodayCount: 0,
 };
 
 export const useCombinedStats = ({ startDate, endDate }: UseStatsDataProps = {}) => {
@@ -43,6 +45,10 @@ export const useCombinedStats = ({ startDate, endDate }: UseStatsDataProps = {})
   const { lengthData, loading: lengthLoading, error: lengthError } = useLengthStats();
   const { featureData, loading: featureLoading, error: featureError } = useFeatureStats();
   
+  // Simulate subscriber data (in a real app, this would come from a real hook)
+  const subscribersCount = featureData.find(item => item.name === "Gedichte per E-Mail")?.value || 0;
+  const subscribersTodayCount = featureData.find(item => item.name === "Gedichte per E-Mail")?.todayValue || 0;
+  
   // Combine all stats into a single object
   useEffect(() => {
     setStats({
@@ -54,7 +60,9 @@ export const useCombinedStats = ({ startDate, endDate }: UseStatsDataProps = {})
       occasionData,
       styleData,
       lengthData,
-      featureData
+      featureData,
+      subscribersCount,
+      subscribersTodayCount
     });
     
     // Check if all data is loaded
@@ -96,6 +104,8 @@ export const useCombinedStats = ({ startDate, endDate }: UseStatsDataProps = {})
     styleData, 
     lengthData, 
     featureData,
+    subscribersCount,
+    subscribersTodayCount,
     poemCountsLoading,
     audienceLoading,
     occasionLoading,

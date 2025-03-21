@@ -27,6 +27,15 @@ const StatsGrid = () => {
     return <StatsErrorState error={error} />;
   }
 
+  // Prepare subscriber data
+  const subscriberData = [
+    { 
+      name: 'Abonnenten', 
+      value: stats.subscribersCount || 0, 
+      todayValue: stats.subscribersTodayCount || 0 
+    }
+  ];
+
   return (
     <div className="w-full space-y-6">
       <div className="flex justify-between items-center mb-4">
@@ -46,6 +55,8 @@ const StatsGrid = () => {
         totalPoems={stats.totalPoems} 
         todayPoems={stats.todayPoems} 
         keywordsUsed={stats.keywordsUsed}
+        subscribersCount={stats.subscribersCount || 0}
+        subscribersTodayCount={stats.subscribersTodayCount || 0}
       />
 
       <Card className="mb-6">
@@ -64,6 +75,7 @@ const StatsGrid = () => {
                 todayValue: stats.keywordsTodayUsed 
               }
             ]}
+            subscriberData={subscriberData}
           />
         </CardContent>
       </Card>

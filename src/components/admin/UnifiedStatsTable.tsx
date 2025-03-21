@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { StatItem } from '@/types/stats';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import DownloadButton from './DownloadButton';
 
 interface UnifiedStatsTableProps {
@@ -12,6 +12,7 @@ interface UnifiedStatsTableProps {
   styleData: StatItem[];
   lengthData: StatItem[];
   keywordsData: StatItem[];
+  subscriberData?: StatItem[];
 }
 
 const UnifiedStatsTable = ({ 
@@ -20,7 +21,8 @@ const UnifiedStatsTable = ({
   occasionData, 
   styleData, 
   lengthData,
-  keywordsData
+  keywordsData,
+  subscriberData = []
 }: UnifiedStatsTableProps) => {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   
@@ -32,6 +34,7 @@ const UnifiedStatsTable = ({
     ...styleData.map(item => ({ ...item, category: 'Stil' })),
     ...lengthData.map(item => ({ ...item, category: 'Länge' })),
     ...keywordsData.map(item => ({ ...item, category: 'Schlüsselwörter' })),
+    ...subscriberData.map(item => ({ ...item, category: 'Abonnenten' })),
   ];
 
   // Get data based on active category
@@ -55,17 +58,25 @@ const UnifiedStatsTable = ({
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <Tabs defaultValue="all" value={activeCategory} onValueChange={setActiveCategory} className="w-full">
-          <TabsList className="grid grid-cols-7 mb-4">
-            <TabsTrigger value="all">Alle</TabsTrigger>
-            <TabsTrigger value="Feature-Nutzung">Features</TabsTrigger>
-            <TabsTrigger value="Zielgruppe">Zielgruppe</TabsTrigger>
-            <TabsTrigger value="Anlass">Anlass</TabsTrigger>
-            <TabsTrigger value="Stil">Stil</TabsTrigger>
-            <TabsTrigger value="Länge">Länge</TabsTrigger>
-            <TabsTrigger value="Schlüsselwörter">Schlüsselwörter</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="w-full max-w-xs">
+          <Select value={activeCategory} onValueChange={setActiveCategory}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Kategorie wählen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle</SelectItem>
+              <SelectItem value="Feature-Nutzung">Features</SelectItem>
+              <SelectItem value="Zielgruppe">Zielgruppe</SelectItem>
+              <SelectItem value="Anlass">Anlass</SelectItem>
+              <SelectItem value="Stil">Stil</SelectItem>
+              <SelectItem value="Länge">Länge</SelectItem>
+              <SelectItem value="Schlüsselwörter">Schlüsselwörter</SelectItem>
+              {subscriberData.length > 0 && (
+                <SelectItem value="Abonnenten">Abonnenten</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
         
         <div className="flex-shrink-0 ml-4">
           <DownloadButton 
