@@ -3,13 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import TellAFriend from '../components/TellAFriend';
 import { Sparkles, Heart, Star, Users, Calendar, Type } from 'lucide-react';
-
 const Index = () => {
   const navigate = useNavigate();
   const goToGenerator = () => {
     navigate('/generator');
   };
-  
   return <div className="min-h-screen bg-white">
       <Header />
       
@@ -17,9 +15,7 @@ const Index = () => {
       <section className="pt-32 pb-20 md:pt-40 md:pb-32">
         <div className="container-wide">
           <div className="max-w-3xl mx-auto text-center">
-            <span className="inline-block px-3 py-1 bg-primary/10 rounded-full text-primary text-sm font-medium mb-6 animate-fade-in">
-              Personalisierte Gedichte in Sekunden
-            </span>
+            <span className="inline-block px-3 py-1 bg-primary/10 rounded-full text-primary text-sm font-medium mb-6 animate-fade-in">Personalisierte Gedichte in Sekunden mit KI-Unterstützung selbst geschrieben</span>
             <h1 className="heading-xl mb-6 animate-slide-up">
               Berührende Gedichte für jeden Anlass
             </h1>
