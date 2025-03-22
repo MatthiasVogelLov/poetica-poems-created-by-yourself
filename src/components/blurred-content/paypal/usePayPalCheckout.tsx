@@ -15,6 +15,18 @@ export const usePayPalCheckout = () => {
       const { title, poem } = location.state.generatedPoem;
       savePoemToLocalStorage(title, poem);
       console.log('Saved poem data before PayPal payment:', { title });
+      
+      // Add additional backup to session storage
+      try {
+        sessionStorage.setItem('poemBackup', JSON.stringify({
+          title,
+          poem,
+          timestamp: new Date().toISOString()
+        }));
+        console.log('Additional backup saved to sessionStorage');
+      } catch (e) {
+        console.error('Error saving to sessionStorage:', e);
+      }
     }
   };
   
@@ -35,6 +47,13 @@ export const usePayPalCheckout = () => {
       
       // Get poem title if available
       const poemTitle = location.state?.generatedPoem?.title || 'Personalisiertes Gedicht';
+      
+      console.log('PayPal checkout parameters:', {
+        successUrl,
+        cancelUrl,
+        poemTitle,
+        currentRoute: location.pathname
+      });
       
       // Call the create-paypal-checkout function via Supabase
       const response = await supabase.functions.invoke('create-paypal-checkout', {
@@ -78,7 +97,11 @@ export const usePayPalCheckout = () => {
         
         // Redirect to PayPal
         console.log('Redirecting to PayPal URL:', data.url);
-        window.location.href = data.url;
+        
+        // Add a delay to make sure console logs are visible
+        setTimeout(() => {
+          window.location.href = data.url;
+        }, 100);
         
         toast.info('PayPal Checkout', {
           description: 'Sie werden zu PayPal weitergeleitet...'
