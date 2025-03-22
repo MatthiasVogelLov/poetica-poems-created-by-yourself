@@ -82,7 +82,7 @@ serve(async (req) => {
         html: `
           <div style="font-family: serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: left; margin-bottom: 20px;">
-              <h1 style="font-family: serif; font-size: 24px; margin: 0;">Poetica</h1>
+              <h1 style="font-family: serif; font-size: 24px; font-style: italic; margin: 0;">Poetica</h1>
             </div>
             
             ${formattedPersonalMessage ? `
@@ -120,7 +120,7 @@ serve(async (req) => {
         html: `
           <div style="font-family: serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="text-align: left; margin-bottom: 20px; background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
-              <h1 style="font-family: serif; font-size: 24px; margin: 0;">Poetica - Admin Benachrichtigung</h1>
+              <h1 style="font-family: serif; font-size: 24px; font-style: italic; margin: 0;">Poetica - Admin Benachrichtigung</h1>
               <p style="margin: 10px 0 0 0;">Ein Gedicht wurde gesendet</p>
             </div>
             
@@ -130,7 +130,7 @@ serve(async (req) => {
               <p><strong>Gesendet am:</strong> ${new Date().toLocaleString('de-DE')}</p>
             </div>
             
-            <h2 style="font-family: 'Playfair Display', serif; color: #1d3557; margin-bottom: 10px;">
+            <h2 style="font-family: 'Playfair Display', serif; color: #1d3557; margin-bottom: 10px; text-align: center;">
               ${poemTitle}
             </h2>
             

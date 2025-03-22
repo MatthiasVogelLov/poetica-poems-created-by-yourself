@@ -9,6 +9,7 @@ interface OccasionFieldProps {
 }
 
 const occasionOptions: SelectOption[] = [
+  { value: 'ostern', label: 'Ostern' },
   { value: 'geburtstag', label: 'Geburtstag' },
   { value: 'hochzeit', label: 'Hochzeit' },
   { value: 'jubilaeum', label: 'Jubiläum' },

@@ -45,7 +45,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ poem, title }) => {
     doc.setLineWidth(0.2);
     doc.rect(margin, margin, contentWidth, pageHeight - (margin * 2));
     
-    // Header - Poetica logo (using the same font style)
+    // Header - Poetica logo with italic styling
     doc.setFontSize(24);
     doc.setFont('times', 'italic');
     doc.text('Poetica', margin, margin + 10);

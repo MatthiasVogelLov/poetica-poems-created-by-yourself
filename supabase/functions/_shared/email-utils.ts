@@ -80,15 +80,17 @@ export function formatTextWithLineBreaks(text: string): string {
  * with enhanced styling
  */
 export function formatPoemForEmail(poemContent: string): string {
-  return poemContent
-    .split('\n\n') // Split by double line breaks (stanzas)
+  // First split by double line breaks (stanzas)
+  const stanzas = poemContent.split(/\n\s*\n/);
+  
+  return stanzas
     .map(stanza => {
       // For each stanza, wrap each line in a paragraph tag with improved styling
       return stanza
         .split('\n')
-        .map(line => `<p style="margin: 0; line-height: 1.8; font-size: 15px;">${line || '&nbsp;'}</p>`)
+        .map(line => `<p style="margin: 0; line-height: 1.8; font-size: 15px; text-align: center;">${line || '&nbsp;'}</p>`)
         .join('');
     })
-    .map(stanza => `<div style="margin-bottom: 1.5em; padding: 0.5em 0;">${stanza}</div>`) // Wrap each stanza in a div with bottom margin
+    .map(stanza => `<div style="margin-bottom: 2em; padding: 0;">${stanza}</div>`) // Wrap each stanza in a div with bottom margin
     .join('');
 }
