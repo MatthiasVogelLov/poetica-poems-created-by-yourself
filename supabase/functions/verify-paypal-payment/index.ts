@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders, handleCorsPreflightRequest, createErrorResponse, createSuccessResponse } from "../_shared/email-utils.ts";
 
@@ -16,9 +17,18 @@ serve(async (req) => {
     console.log('[verify-paypal-payment] Starting execution with timestamp:', new Date().toISOString());
     console.log('[verify-paypal-payment] Using PayPal environment: LIVE');
     
-    if (!paypalClientId || !paypalSecretKey) {
-      console.error('[verify-paypal-payment] PayPal credentials are not configured');
-      return createErrorResponse('PayPal credentials are not configured', 500);
+    // Debug credentials (partially masked)
+    if (paypalClientId) {
+      const maskedClientId = paypalClientId.substring(0, 4) + '...' + paypalClientId.substring(paypalClientId.length - 4);
+      console.log('[verify-paypal-payment] Using PayPal Client ID:', maskedClientId);
+    } else {
+      console.error('[verify-paypal-payment] PayPal Client ID is not configured');
+      return createErrorResponse('PayPal Client ID is not configured', 500);
+    }
+
+    if (!paypalSecretKey) {
+      console.error('[verify-paypal-payment] PayPal Secret Key is not configured');
+      return createErrorResponse('PayPal Secret Key is not configured', 500);
     }
 
     // Parse request body
@@ -44,11 +54,17 @@ serve(async (req) => {
     console.log('[verify-paypal-payment] Requesting PayPal access token...');
     console.log('[verify-paypal-payment] PayPal API URL:', `${paypalBaseUrl}/v1/oauth2/token`);
     
+    const credentials = `${paypalClientId}:${paypalSecretKey}`;
+    const encodedCredentials = btoa(credentials);
+    
+    console.log('[verify-paypal-payment] Authorization header type:', 
+      `Basic ${encodedCredentials.substring(0, 5)}...`);
+    
     const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${btoa(`${paypalClientId}:${paypalSecretKey}`)}`
+        'Authorization': `Basic ${encodedCredentials}`
       },
       body: 'grant_type=client_credentials'
     });
@@ -58,8 +74,16 @@ serve(async (req) => {
     
     if (!authResponse.ok) {
       let errorText = '';
+      let errorJson = null;
+      
       try {
         errorText = await authResponse.text();
+        try {
+          errorJson = JSON.parse(errorText);
+          console.error('[verify-paypal-payment] PayPal auth error JSON:', errorJson);
+        } catch (e) {
+          // Not JSON, use text
+        }
       } catch (e) {
         errorText = 'Could not read error response body';
       }
@@ -68,13 +92,15 @@ serve(async (req) => {
         status: authStatus,
         error: errorText
       });
+      
       return createErrorResponse(`Failed to authenticate with PayPal: ${errorText}`, 500);
     }
     
     let authData;
     try {
       authData = await authResponse.json();
-      console.log('[verify-paypal-payment] PayPal auth successful, token received');
+      console.log('[verify-paypal-payment] PayPal auth successful, token received (partial):', 
+        authData.access_token ? authData.access_token.substring(0, 5) + '...' : 'No token');
     } catch (jsonError) {
       console.error('[verify-paypal-payment] Error parsing auth response:', jsonError);
       return createErrorResponse('Error parsing PayPal authentication response', 500);
@@ -97,8 +123,16 @@ serve(async (req) => {
     
     if (!orderResponse.ok) {
       let errorText = '';
+      let errorJson = null;
+      
       try {
         errorText = await orderResponse.text();
+        try {
+          errorJson = JSON.parse(errorText);
+          console.error('[verify-paypal-payment] PayPal order verification error JSON:', errorJson);
+        } catch (e) {
+          // Not JSON, use text
+        }
       } catch (e) {
         errorText = 'Could not read error response body';
       }
@@ -107,6 +141,7 @@ serve(async (req) => {
         status: orderStatus,
         error: errorText
       });
+      
       return createErrorResponse(`Failed to verify PayPal order: ${errorText}`, 500);
     }
     
@@ -131,7 +166,8 @@ serve(async (req) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authData.access_token}`
+          'Authorization': `Bearer ${authData.access_token}`,
+          'PayPal-Request-Id': `poetica-capture-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`
         }
       });
       
@@ -140,8 +176,16 @@ serve(async (req) => {
       
       if (!captureResponse.ok) {
         let errorText = '';
+        let errorJson = null;
+        
         try {
           errorText = await captureResponse.text();
+          try {
+            errorJson = JSON.parse(errorText);
+            console.error('[verify-paypal-payment] PayPal capture error JSON:', errorJson);
+          } catch (e) {
+            // Not JSON, use text
+          }
         } catch (e) {
           errorText = 'Could not read error response body';
         }
@@ -150,6 +194,7 @@ serve(async (req) => {
           status: captureStatus,
           error: errorText
         });
+        
         return createErrorResponse(`Failed to capture PayPal payment: ${errorText}`, 500);
       }
       

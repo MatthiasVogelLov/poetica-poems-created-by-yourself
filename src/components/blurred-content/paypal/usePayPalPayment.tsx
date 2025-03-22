@@ -18,21 +18,30 @@ export const usePayPalPayment = () => {
       console.log('Verifying PayPal payment for order:', orderId);
       setIsVerifying(true);
       
-      const { data, error } = await supabase.functions.invoke('verify-paypal-payment', {
+      const response = await supabase.functions.invoke('verify-paypal-payment', {
         body: { orderId }
       });
       
-      if (error) {
-        console.error('Error verifying PayPal payment:', error);
-        throw new Error(error.message || 'Fehler bei der Verifizierung der PayPal-Zahlung');
+      // Check for errors in the response
+      if (response.error) {
+        console.error('Error response from verify-paypal-payment function:', response.error);
+        throw new Error(response.error.message || 'Fehler bei der Verifizierung der PayPal-Zahlung');
+      }
+
+      // Check if data exists and is correctly formatted
+      if (!response.data) {
+        console.error('Empty response data from verify-paypal-payment function');
+        throw new Error('Keine Antwort vom Zahlungsdienstleister erhalten');
       }
       
-      if (!data.verified) {
-        console.error('PayPal payment not verified, status:', data.status);
-        throw new Error(`PayPal-Zahlung konnte nicht verifiziert werden (Status: ${data.status})`);
+      console.log('PayPal verification response:', response.data);
+      
+      if (!response.data.verified) {
+        console.error('PayPal payment not verified, status:', response.data.status);
+        throw new Error(`PayPal-Zahlung konnte nicht verifiziert werden (Status: ${response.data.status})`);
       }
       
-      console.log('PayPal payment verified successfully:', data);
+      console.log('PayPal payment verified successfully:', response.data);
       return true;
     } catch (error) {
       console.error('PayPal verification error:', error);

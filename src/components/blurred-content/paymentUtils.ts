@@ -1,3 +1,4 @@
+
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { PaymentProvider } from './types';
@@ -105,7 +106,7 @@ export const trackPaymentAttempt = async (poemId: string, provider: PaymentProvi
 export const processStripeCheckout = async (paymentData: any) => {
   const { successUrl, cancelUrl, poemTitle, formData } = paymentData;
   
-  const { data, error } = await supabase.functions.invoke('create-checkout', {
+  const response = await supabase.functions.invoke('create-checkout', {
     body: {
       productId: 'prod_Rx5lv8pz727AjU', // The product ID from Stripe
       successUrl,
@@ -115,10 +116,12 @@ export const processStripeCheckout = async (paymentData: any) => {
     }
   });
   
-  if (error) {
-    console.error('Supabase function error (Stripe):', error);
-    throw new Error(error.message || 'Fehler bei der Verbindung mit dem Zahlungsdienstleister');
+  if (response.error) {
+    console.error('Supabase function error (Stripe):', response.error);
+    throw new Error(response.error.message || 'Fehler bei der Verbindung mit dem Zahlungsdienstleister');
   }
+  
+  const data = response.data;
   
   if (!data) {
     console.error('No data returned from Stripe checkout function');
@@ -141,7 +144,14 @@ export const processStripeCheckout = async (paymentData: any) => {
 export const processPayPalCheckout = async (paymentData: any) => {
   const { successUrl, cancelUrl, poemTitle, formData } = paymentData;
   
-  const { data, error } = await supabase.functions.invoke('create-paypal-checkout', {
+  console.log('Starting PayPal checkout process with data:', {
+    successUrl,
+    cancelUrl,
+    poemTitle,
+    hasFormData: !!formData
+  });
+  
+  const response = await supabase.functions.invoke('create-paypal-checkout', {
     body: {
       successUrl,
       cancelUrl,
@@ -150,10 +160,14 @@ export const processPayPalCheckout = async (paymentData: any) => {
     }
   });
   
-  if (error) {
-    console.error('Supabase function error (PayPal):', error);
-    throw new Error(error.message || 'Fehler bei der Verbindung mit PayPal');
+  console.log('Response from create-paypal-checkout:', response);
+  
+  if (response.error) {
+    console.error('Supabase function error (PayPal):', response.error);
+    throw new Error(response.error.message || 'Fehler bei der Verbindung mit PayPal');
   }
+  
+  const data = response.data;
   
   if (!data) {
     console.error('No data returned from PayPal checkout function');
