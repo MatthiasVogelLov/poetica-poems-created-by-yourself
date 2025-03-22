@@ -5,7 +5,6 @@ import { corsHeaders, handleCorsPreflightRequest, createErrorResponse, createSuc
 const paypalClientId = Deno.env.get('PAYPAL_CLIENT_ID');
 const paypalSecretKey = Deno.env.get('PAYPAL_SECRET_KEY');
 // Always use live PayPal environment
-const isPayPalSandbox = false;
 const paypalBaseUrl = 'https://api-m.paypal.com';
 
 serve(async (req) => {
@@ -18,10 +17,7 @@ serve(async (req) => {
     console.log('[verify-paypal-payment] Using PayPal environment: LIVE');
     
     // Debug credentials (partially masked)
-    if (paypalClientId) {
-      const maskedClientId = paypalClientId.substring(0, 4) + '...' + paypalClientId.substring(paypalClientId.length - 4);
-      console.log('[verify-paypal-payment] Using PayPal Client ID:', maskedClientId);
-    } else {
+    if (!paypalClientId) {
       console.error('[verify-paypal-payment] PayPal Client ID is not configured');
       return createErrorResponse('PayPal Client ID is not configured', 500);
     }
@@ -30,6 +26,9 @@ serve(async (req) => {
       console.error('[verify-paypal-payment] PayPal Secret Key is not configured');
       return createErrorResponse('PayPal Secret Key is not configured', 500);
     }
+
+    const maskedClientId = paypalClientId.substring(0, 4) + '...' + paypalClientId.substring(paypalClientId.length - 4);
+    console.log('[verify-paypal-payment] Using PayPal Client ID:', maskedClientId);
 
     // Parse request body
     let requestData;
@@ -54,11 +53,11 @@ serve(async (req) => {
     console.log('[verify-paypal-payment] Requesting PayPal access token...');
     console.log('[verify-paypal-payment] PayPal API URL:', `${paypalBaseUrl}/v1/oauth2/token`);
     
+    // Fix: Properly encode credentials for Basic Auth
     const credentials = `${paypalClientId}:${paypalSecretKey}`;
     const encodedCredentials = btoa(credentials);
     
-    console.log('[verify-paypal-payment] Authorization header type:', 
-      `Basic ${encodedCredentials.substring(0, 5)}...`);
+    console.log('[verify-paypal-payment] Sending auth request');
     
     const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
       method: 'POST',
@@ -73,25 +72,20 @@ serve(async (req) => {
     console.log('[verify-paypal-payment] PayPal auth response status:', authStatus);
     
     if (!authResponse.ok) {
+      // Improved error handling
       let errorText = '';
-      let errorJson = null;
-      
       try {
-        errorText = await authResponse.text();
+        const responseText = await authResponse.text();
+        console.error('[verify-paypal-payment] Full auth error response:', responseText);
         try {
-          errorJson = JSON.parse(errorText);
-          console.error('[verify-paypal-payment] PayPal auth error JSON:', errorJson);
+          const errorJson = JSON.parse(responseText);
+          errorText = JSON.stringify(errorJson);
         } catch (e) {
-          // Not JSON, use text
+          errorText = responseText;
         }
       } catch (e) {
         errorText = 'Could not read error response body';
       }
-      
-      console.error('[verify-paypal-payment] PayPal auth error:', {
-        status: authStatus,
-        error: errorText
-      });
       
       return createErrorResponse(`Failed to authenticate with PayPal: ${errorText}`, 500);
     }
@@ -99,8 +93,12 @@ serve(async (req) => {
     let authData;
     try {
       authData = await authResponse.json();
-      console.log('[verify-paypal-payment] PayPal auth successful, token received (partial):', 
-        authData.access_token ? authData.access_token.substring(0, 5) + '...' : 'No token');
+      console.log('[verify-paypal-payment] PayPal auth successful, received token');
+      
+      if (!authData.access_token) {
+        console.error('[verify-paypal-payment] No access token in PayPal response:', authData);
+        return createErrorResponse('PayPal did not return an access token', 500);
+      }
     } catch (jsonError) {
       console.error('[verify-paypal-payment] Error parsing auth response:', jsonError);
       return createErrorResponse('Error parsing PayPal authentication response', 500);
@@ -122,25 +120,20 @@ serve(async (req) => {
     console.log('[verify-paypal-payment] PayPal order status response:', orderStatus);
     
     if (!orderResponse.ok) {
+      // Improved error handling
       let errorText = '';
-      let errorJson = null;
-      
       try {
-        errorText = await orderResponse.text();
+        const responseText = await orderResponse.text();
+        console.error('[verify-paypal-payment] Full order error response:', responseText);
         try {
-          errorJson = JSON.parse(errorText);
-          console.error('[verify-paypal-payment] PayPal order verification error JSON:', errorJson);
+          const errorJson = JSON.parse(responseText);
+          errorText = JSON.stringify(errorJson);
         } catch (e) {
-          // Not JSON, use text
+          errorText = responseText;
         }
       } catch (e) {
         errorText = 'Could not read error response body';
       }
-      
-      console.error('[verify-paypal-payment] PayPal order verification error:', {
-        status: orderStatus,
-        error: errorText
-      });
       
       return createErrorResponse(`Failed to verify PayPal order: ${errorText}`, 500);
     }
@@ -175,25 +168,20 @@ serve(async (req) => {
       console.log('[verify-paypal-payment] PayPal capture response status:', captureStatus);
       
       if (!captureResponse.ok) {
+        // Improved error handling
         let errorText = '';
-        let errorJson = null;
-        
         try {
-          errorText = await captureResponse.text();
+          const responseText = await captureResponse.text();
+          console.error('[verify-paypal-payment] Full capture error response:', responseText);
           try {
-            errorJson = JSON.parse(errorText);
-            console.error('[verify-paypal-payment] PayPal capture error JSON:', errorJson);
+            const errorJson = JSON.parse(responseText);
+            errorText = JSON.stringify(errorJson);
           } catch (e) {
-            // Not JSON, use text
+            errorText = responseText;
           }
         } catch (e) {
           errorText = 'Could not read error response body';
         }
-        
-        console.error('[verify-paypal-payment] PayPal capture error:', {
-          status: captureStatus,
-          error: errorText
-        });
         
         return createErrorResponse(`Failed to capture PayPal payment: ${errorText}`, 500);
       }

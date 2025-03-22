@@ -18,14 +18,33 @@ export const usePayPalPayment = () => {
       console.log('Verifying PayPal payment for order:', orderId);
       setIsVerifying(true);
       
+      // Add request ID for tracking
+      const requestId = `verify-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      console.log('Generated request ID:', requestId);
+      
       const response = await supabase.functions.invoke('verify-paypal-payment', {
-        body: { orderId }
+        body: { 
+          orderId,
+          requestId
+        }
       });
       
       // Check for errors in the response
       if (response.error) {
         console.error('Error response from verify-paypal-payment function:', response.error);
-        throw new Error(response.error.message || 'Fehler bei der Verifizierung der PayPal-Zahlung');
+        
+        // Try to extract more detailed error information if available
+        let errorMessage = 'Fehler bei der Verifizierung der PayPal-Zahlung';
+        
+        if (typeof response.error === 'object' && response.error !== null) {
+          if ('message' in response.error && typeof response.error.message === 'string') {
+            errorMessage = response.error.message;
+          } else if ('error' in response.error && typeof response.error.error === 'string') {
+            errorMessage = response.error.error;
+          }
+        }
+        
+        throw new Error(errorMessage);
       }
 
       // Check if data exists and is correctly formatted
@@ -42,6 +61,11 @@ export const usePayPalPayment = () => {
       }
       
       console.log('PayPal payment verified successfully:', response.data);
+      toast({
+        title: "Zahlung erfolgreich",
+        description: "Ihre PayPal-Zahlung wurde erfolgreich verarbeitet.",
+        variant: "default",
+      });
       return true;
     } catch (error) {
       console.error('PayPal verification error:', error);

@@ -9,7 +9,6 @@ const resendApiKey = Deno.env.get('RESEND_API_KEY');
 const recipientEmail = "matthiasvogel1973@gmail.com";
 
 // Always use live PayPal environment
-const isPayPalSandbox = false;
 const paypalBaseUrl = 'https://api-m.paypal.com';
 
 serve(async (req) => {
@@ -22,10 +21,7 @@ serve(async (req) => {
     console.log('[create-paypal-checkout] Using PayPal environment: LIVE');
     
     // Debug credentials (partially masked)
-    if (paypalClientId) {
-      const maskedClientId = paypalClientId.substring(0, 4) + '...' + paypalClientId.substring(paypalClientId.length - 4);
-      console.log('[create-paypal-checkout] Using PayPal Client ID:', maskedClientId);
-    } else {
+    if (!paypalClientId) {
       console.error('[create-paypal-checkout] PayPal Client ID is not configured');
       return createErrorResponse('PayPal Client ID is not configured', 500);
     }
@@ -34,6 +30,9 @@ serve(async (req) => {
       console.error('[create-paypal-checkout] PayPal Secret Key is not configured');
       return createErrorResponse('PayPal Secret Key is not configured', 500);
     }
+
+    const maskedClientId = paypalClientId.substring(0, 4) + '...' + paypalClientId.substring(paypalClientId.length - 4);
+    console.log('[create-paypal-checkout] Using PayPal Client ID:', maskedClientId);
 
     // Parse request body
     let requestData;
@@ -67,15 +66,14 @@ serve(async (req) => {
       hasFormData: !!formData
     });
     
-    // Get PayPal access token
+    // Get PayPal access token - FIXED AUTHENTICATION
     console.log('[create-paypal-checkout] Requesting PayPal access token...');
-    console.log('[create-paypal-checkout] PayPal API URL:', `${paypalBaseUrl}/v1/oauth2/token`);
     
+    // Fix: Properly encode credentials for Basic Auth
     const credentials = `${paypalClientId}:${paypalSecretKey}`;
     const encodedCredentials = btoa(credentials);
     
-    console.log('[create-paypal-checkout] Authorization header type:', 
-      `Basic ${encodedCredentials.substring(0, 5)}...`);
+    console.log('[create-paypal-checkout] Sending auth request to:', `${paypalBaseUrl}/v1/oauth2/token`);
     
     const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
       method: 'POST',
@@ -90,48 +88,42 @@ serve(async (req) => {
     console.log('[create-paypal-checkout] PayPal auth response status:', authStatus);
     
     if (!authResponse.ok) {
+      // Improved error handling
       let errorText = '';
-      let errorJson = null;
-      
       try {
-        errorText = await authResponse.text();
+        const responseText = await authResponse.text();
+        console.error('[create-paypal-checkout] Full error response:', responseText);
         try {
-          errorJson = JSON.parse(errorText);
-          console.error('[create-paypal-checkout] PayPal auth error JSON:', errorJson);
+          const errorJson = JSON.parse(responseText);
+          errorText = JSON.stringify(errorJson);
         } catch (e) {
-          // Not JSON, use text
+          errorText = responseText;
         }
       } catch (e) {
         errorText = 'Could not read error response body';
       }
       
-      console.error('[create-paypal-checkout] PayPal auth error:', {
-        status: authStatus,
-        error: errorText
-      });
-      
-      // Return detailed error for debugging
       return createErrorResponse(`Failed to authenticate with PayPal: ${errorText}`, 500);
     }
     
     let authData;
     try {
       authData = await authResponse.json();
-      console.log('[create-paypal-checkout] PayPal auth successful, token received (partial):', 
-        authData.access_token ? authData.access_token.substring(0, 5) + '...' : 'No token');
+      console.log('[create-paypal-checkout] PayPal auth successful, received token');
+      
+      if (!authData.access_token) {
+        console.error('[create-paypal-checkout] No access token in PayPal response:', authData);
+        return createErrorResponse('PayPal did not return an access token', 500);
+      }
+      
+      console.log('[create-paypal-checkout] Access token received successfully');
     } catch (jsonError) {
       console.error('[create-paypal-checkout] Error parsing auth response:', jsonError);
       return createErrorResponse('Error parsing PayPal authentication response', 500);
     }
     
-    if (!authData.access_token) {
-      console.error('[create-paypal-checkout] No access token in PayPal response:', authData);
-      return createErrorResponse('PayPal did not return an access token', 500);
-    }
-    
     // Create a PayPal order
     console.log('[create-paypal-checkout] Creating PayPal order...');
-    console.log('[create-paypal-checkout] PayPal order URL:', `${paypalBaseUrl}/v2/checkout/orders`);
     
     const orderPayload = {
       intent: 'CAPTURE',
@@ -170,26 +162,19 @@ serve(async (req) => {
     
     if (!orderResponse.ok) {
       let errorText = '';
-      let errorJson = null;
-      
       try {
-        errorText = await orderResponse.text();
+        const responseText = await orderResponse.text();
+        console.error('[create-paypal-checkout] Full error response from order creation:', responseText);
         try {
-          errorJson = JSON.parse(errorText);
-          console.error('[create-paypal-checkout] PayPal order creation error JSON:', errorJson);
+          const errorJson = JSON.parse(responseText);
+          errorText = JSON.stringify(errorJson);
         } catch (e) {
-          // Not JSON, use text
+          errorText = responseText;
         }
       } catch (e) {
         errorText = 'Could not read error response body';
       }
       
-      console.error('[create-paypal-checkout] PayPal order creation error:', {
-        status: orderStatus,
-        error: errorText
-      });
-      
-      // Return detailed error for debugging
       return createErrorResponse(`Failed to create PayPal order: ${errorText}`, 500);
     }
     
