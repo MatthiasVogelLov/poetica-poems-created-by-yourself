@@ -18,18 +18,35 @@ serve(async (req) => {
     
     if (!paypalClientId || !paypalSecretKey) {
       console.error('[create-paypal-checkout] PayPal credentials are not configured');
-      throw new Error('PayPal credentials are not configured');
+      return createErrorResponse('PayPal credentials are not configured', 500);
     }
 
     // Parse request body
-    const { successUrl, cancelUrl, poemTitle, formData } = await req.json();
+    let requestData;
+    try {
+      requestData = await req.json();
+      console.log('[create-paypal-checkout] Request data received:', JSON.stringify({
+        hasSuccessUrl: !!requestData.successUrl,
+        hasCancelUrl: !!requestData.cancelUrl,
+        poemTitle: requestData.poemTitle,
+        hasFormData: !!requestData.formData
+      }));
+    } catch (parseError) {
+      console.error('[create-paypal-checkout] Error parsing request body:', parseError);
+      return createErrorResponse('Invalid request format', 400);
+    }
+    
+    const { successUrl, cancelUrl, poemTitle, formData } = requestData;
     
     if (!successUrl || !cancelUrl) {
-      console.error('[create-paypal-checkout] Missing required parameters', { successUrl, cancelUrl });
-      throw new Error('Missing required parameters');
+      console.error('[create-paypal-checkout] Missing required parameters', { 
+        hasSuccessUrl: !!successUrl, 
+        hasCancelUrl: !!cancelUrl
+      });
+      return createErrorResponse('Missing required parameters: successUrl and cancelUrl', 400);
     }
 
-    console.log('[create-paypal-checkout] Creating PayPal order:', { 
+    console.log('[create-paypal-checkout] Creating PayPal order with params:', { 
       successUrl, 
       cancelUrl, 
       poemTitle,
@@ -37,6 +54,7 @@ serve(async (req) => {
     });
     
     // Get PayPal access token
+    console.log('[create-paypal-checkout] Requesting PayPal access token...');
     const authResponse = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
       method: 'POST',
       headers: {
@@ -46,54 +64,100 @@ serve(async (req) => {
       body: 'grant_type=client_credentials'
     });
     
+    const authStatus = authResponse.status;
+    console.log('[create-paypal-checkout] PayPal auth response status:', authStatus);
+    
     if (!authResponse.ok) {
-      const errorData = await authResponse.text();
-      console.error('[create-paypal-checkout] PayPal auth error:', errorData);
-      throw new Error('Failed to authenticate with PayPal');
+      let errorText = '';
+      try {
+        errorText = await authResponse.text();
+      } catch (e) {
+        errorText = 'Could not read error response body';
+      }
+      
+      console.error('[create-paypal-checkout] PayPal auth error:', {
+        status: authStatus,
+        error: errorText
+      });
+      return createErrorResponse(`Failed to authenticate with PayPal: ${errorText}`, 500);
     }
     
-    const authData = await authResponse.json();
+    let authData;
+    try {
+      authData = await authResponse.json();
+      console.log('[create-paypal-checkout] PayPal auth successful, token received');
+    } catch (jsonError) {
+      console.error('[create-paypal-checkout] Error parsing auth response:', jsonError);
+      return createErrorResponse('Error parsing PayPal authentication response', 500);
+    }
+    
+    if (!authData.access_token) {
+      console.error('[create-paypal-checkout] No access token in PayPal response:', authData);
+      return createErrorResponse('PayPal did not return an access token', 500);
+    }
     
     // Create a PayPal order
+    console.log('[create-paypal-checkout] Creating PayPal order...');
+    const orderPayload = {
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          amount: {
+            currency_code: 'EUR',
+            value: '0.99' // €0.99 for the poem
+          },
+          description: `Freischaltung: ${poemTitle || 'Personalisiertes Gedicht'}`
+        }
+      ],
+      application_context: {
+        return_url: `${successUrl}&payment_provider=paypal`,
+        cancel_url: cancelUrl,
+        brand_name: 'Poetica',
+        user_action: 'PAY_NOW',
+        shipping_preference: 'NO_SHIPPING'
+      }
+    };
+    
+    console.log('[create-paypal-checkout] Order payload:', JSON.stringify(orderPayload));
+    
     const orderResponse = await fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${authData.access_token}`
       },
-      body: JSON.stringify({
-        intent: 'CAPTURE',
-        purchase_units: [
-          {
-            amount: {
-              currency_code: 'EUR',
-              value: '0.99' // €0.99 for the poem
-            },
-            description: `Freischaltung: ${poemTitle || 'Personalisiertes Gedicht'}`
-          }
-        ],
-        application_context: {
-          return_url: `${successUrl}&payment_provider=paypal`,
-          cancel_url: cancelUrl,
-          brand_name: 'Poetica',
-          user_action: 'PAY_NOW',
-          shipping_preference: 'NO_SHIPPING'
-        }
-      })
+      body: JSON.stringify(orderPayload)
     });
+    
+    const orderStatus = orderResponse.status;
+    console.log('[create-paypal-checkout] PayPal order creation status:', orderStatus);
     
     if (!orderResponse.ok) {
-      const errorData = await orderResponse.text();
-      console.error('[create-paypal-checkout] PayPal order creation error:', errorData);
-      throw new Error('Failed to create PayPal order');
+      let errorText = '';
+      try {
+        errorText = await orderResponse.text();
+      } catch (e) {
+        errorText = 'Could not read error response body';
+      }
+      
+      console.error('[create-paypal-checkout] PayPal order creation error:', {
+        status: orderStatus,
+        error: errorText
+      });
+      return createErrorResponse(`Failed to create PayPal order: ${errorText}`, 500);
     }
     
-    const orderData = await orderResponse.json();
-    
-    console.log('[create-paypal-checkout] PayPal order created:', { 
-      id: orderData.id, 
-      status: orderData.status
-    });
+    let orderData;
+    try {
+      orderData = await orderResponse.json();
+      console.log('[create-paypal-checkout] PayPal order created successfully:', { 
+        id: orderData.id, 
+        status: orderData.status
+      });
+    } catch (jsonError) {
+      console.error('[create-paypal-checkout] Error parsing order response:', jsonError);
+      return createErrorResponse('Error parsing PayPal order response', 500);
+    }
     
     // Send notification email if formData is provided
     if (formData && resendApiKey) {
@@ -166,20 +230,26 @@ serve(async (req) => {
     const approvalLink = orderData.links.find(link => link.rel === 'approve');
     
     if (!approvalLink) {
-      throw new Error('PayPal approval URL not found');
+      console.error('[create-paypal-checkout] PayPal approval URL not found in response:', orderData);
+      return createErrorResponse('PayPal approval URL not found in response', 500);
     }
+    
+    console.log('[create-paypal-checkout] Returning success response with approval URL:', approvalLink.href);
+    
+    // Generate a unique poem ID for tracking
+    const poemId = poemTitle ? Buffer.from(poemTitle).toString('base64').substring(0, 36) : null;
     
     return createSuccessResponse({
       id: orderData.id,
       url: approvalLink.href,
-      poemId: poemTitle ? Buffer.from(poemTitle).toString('base64').substring(0, 36) : null
+      poemId: poemId
     });
   } catch (error) {
-    console.error('[create-paypal-checkout] Error creating PayPal checkout:', error);
+    console.error('[create-paypal-checkout] Unhandled error:', error);
     
     return createErrorResponse(
-      error.message || 'Error creating PayPal checkout',
-      400
+      error.message || 'Unexpected error creating PayPal checkout',
+      500
     );
   }
 });
