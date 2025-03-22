@@ -69,7 +69,7 @@ export async function createPayPalOrder(accessToken: string, poemTitle: string, 
       }
     ],
     application_context: {
-      return_url: `${successUrl}&payment_provider=paypal`,
+      return_url: successUrl,
       cancel_url: cancelUrl,
       brand_name: 'Poetica',
       user_action: 'PAY_NOW',
@@ -100,7 +100,8 @@ export async function createPayPalOrder(accessToken: string, poemTitle: string, 
   const orderData = await orderResponse.json();
   console.log('[create-paypal-checkout] PayPal order created successfully:', { 
     id: orderData.id, 
-    status: orderData.status
+    status: orderData.status,
+    links: orderData.links.map((link: any) => ({ rel: link.rel, href: link.href }))
   });
   
   return orderData;

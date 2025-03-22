@@ -41,20 +41,29 @@ serve(async (req) => {
     const orderData = await createPayPalOrder(accessToken, poemTitle, successUrl, cancelUrl);
     
     // Send email notification if form data is provided
-    await sendEmailNotification(formData, poemTitle, resendApiKey, recipientEmail);
+    if (formData && resendApiKey) {
+      try {
+        await sendEmailNotification(formData, poemTitle, resendApiKey, recipientEmail);
+      } catch (emailError) {
+        console.error('[create-paypal-checkout] Email notification error (non-fatal):', emailError);
+      }
+    }
     
     // Find the approval URL in the links array
     const approvalUrl = findApprovalUrl(orderData);
     
-    console.log('[create-paypal-checkout] Returning success response with approval URL:', approvalUrl);
+    console.log('[create-paypal-checkout] Found approval URL:', approvalUrl);
+    console.log('[create-paypal-checkout] Order ID:', orderData.id);
     
     // Generate a unique poem ID for tracking
     const poemId = generatePoemId(poemTitle);
     
     return createSuccessResponse({
-      id: orderData.id,
-      url: approvalUrl,
-      poemId: poemId
+      data: {
+        id: orderData.id,
+        url: approvalUrl,
+        poemId: poemId
+      }
     });
   } catch (error) {
     console.error('[create-paypal-checkout] Unhandled error:', error);

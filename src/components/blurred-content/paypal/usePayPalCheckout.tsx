@@ -36,7 +36,7 @@ export const usePayPalCheckout = () => {
       const poemTitle = location.state?.generatedPoem?.title || 'Personalisiertes Gedicht';
       
       // Call the create-paypal-checkout function via Supabase
-      const { data, error: functionError } = await supabase.functions.invoke('create-paypal-checkout', {
+      const { data: responseData, error: functionError } = await supabase.functions.invoke('create-paypal-checkout', {
         body: {
           successUrl: successUrl,
           cancelUrl: currentUrl,
@@ -54,7 +54,10 @@ export const usePayPalCheckout = () => {
         return false;
       }
       
-      console.log('PayPal checkout function response:', data);
+      console.log('PayPal checkout function response:', responseData);
+      
+      // Access the actual data from the response
+      const data = responseData?.data || responseData;
       
       if (data && data.url) {
         // Store order ID in localStorage for verification on return
@@ -62,7 +65,7 @@ export const usePayPalCheckout = () => {
           localStorage.setItem('paypal_order_id', data.id);
         }
         
-        // Open PayPal in a new tab
+        // Open PayPal checkout page
         window.location.href = data.url;
         
         toast.info('PayPal Checkout', {
@@ -71,7 +74,7 @@ export const usePayPalCheckout = () => {
         
         return true;
       } else {
-        console.error('No redirect URL returned from create-paypal-checkout function');
+        console.error('No redirect URL returned from create-paypal-checkout function', data);
         setError('PayPal Checkout konnte nicht gestartet werden');
         toast.error('PayPal Checkout konnte nicht gestartet werden');
         return false;
