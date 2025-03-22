@@ -7,10 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Generator from "./pages/Generator";
 import Preview from "./pages/Preview";
-import Impressum from "./pages/Impressum";
-import Datenschutz from "./pages/Datenschutz";
-import AGB from "./pages/AGB";
 import Kontakt from "./pages/Kontakt";
+import Hilfe from "./pages/Hilfe";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
@@ -34,10 +32,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/generator" element={<Generator />} />
           <Route path="/preview" element={<Preview />} />
-          <Route path="/impressum" element={<Impressum />} />
-          <Route path="/datenschutz" element={<Datenschutz />} />
-          <Route path="/agb" element={<AGB />} />
           <Route path="/kontakt" element={<Kontakt />} />
+          <Route path="/hilfe" element={<Hilfe />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

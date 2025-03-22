@@ -38,14 +38,8 @@ const Header = () => {
       {isMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-md animate-fade-in">
           <div className="py-5 px-8 flex flex-col space-y-4">
-            <NavLink to="/impressum" onClick={() => setIsMenuOpen(false)} className="text-base py-2 transition-all duration-200">
-              Impressum
-            </NavLink>
-            <NavLink to="/datenschutz" onClick={() => setIsMenuOpen(false)} className="text-base py-2 transition-all duration-200">
-              Datenschutz
-            </NavLink>
-            <NavLink to="/agb" onClick={() => setIsMenuOpen(false)} className="text-base py-2 transition-all duration-200">
-              AGB
+            <NavLink to="/hilfe" onClick={() => setIsMenuOpen(false)} className="text-base py-2 transition-all duration-200">
+              Hilfe
             </NavLink>
             <NavLink to="/kontakt" onClick={() => setIsMenuOpen(false)} className="text-base py-2 transition-all duration-200">
               Kontakt

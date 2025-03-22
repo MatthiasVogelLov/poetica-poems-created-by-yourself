@@ -19,11 +19,11 @@ const ContentManagementTabs: React.FC<ContentManagementTabsProps> = ({
   };
 
   // Content sections
-  const contentSections = ["impressum", "datenschutz", "agb", "kontakt"];
+  const contentSections = ["hilfe", "kontakt"];
 
   return (
     <Tabs defaultValue="stats" className="w-full" value={activeTab} onValueChange={onTabChange}>
-      <TabsList className="grid grid-cols-5 mb-8">
+      <TabsList className="grid grid-cols-3 mb-8">
         <TabsTrigger value="stats">Statistiken</TabsTrigger>
         {contentSections.map(section => (
           <TabsTrigger key={section} value={section} className="capitalize">
