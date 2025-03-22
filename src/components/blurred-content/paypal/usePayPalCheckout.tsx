@@ -31,6 +31,7 @@ export const usePayPalCheckout = () => {
       const currentUrl = window.location.href;
       const baseUrl = window.location.origin + location.pathname;
       const successUrl = `${baseUrl}?paid=true&payment_provider=paypal`;
+      const cancelUrl = `${currentUrl}`;
       
       // Get poem title if available
       const poemTitle = location.state?.generatedPoem?.title || 'Personalisiertes Gedicht';
@@ -39,7 +40,7 @@ export const usePayPalCheckout = () => {
       const response = await supabase.functions.invoke('create-paypal-checkout', {
         body: {
           successUrl: successUrl,
-          cancelUrl: currentUrl,
+          cancelUrl: cancelUrl,
           poemTitle: poemTitle,
           formData: null
         }

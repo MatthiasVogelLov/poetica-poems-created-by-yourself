@@ -73,7 +73,8 @@ export async function createPayPalOrder(accessToken: string, poemTitle: string, 
       cancel_url: cancelUrl,
       brand_name: 'Poetica',
       user_action: 'PAY_NOW',
-      shipping_preference: 'NO_SHIPPING'
+      shipping_preference: 'NO_SHIPPING',
+      landing_page: 'LOGIN' // Force user to select account or login
     }
   };
   
