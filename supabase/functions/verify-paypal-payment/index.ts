@@ -49,15 +49,19 @@ serve(async (req) => {
 
     console.log('[verify-paypal-payment] Verifying PayPal order:', { orderId });
     
-    // Get PayPal access token
+    // Get PayPal access token with improved encoding
     console.log('[verify-paypal-payment] Requesting PayPal access token...');
     console.log('[verify-paypal-payment] PayPal API URL:', `${paypalBaseUrl}/v1/oauth2/token`);
     
-    // Fix: Properly encode credentials for Basic Auth
-    const credentials = `${paypalClientId}:${paypalSecretKey}`;
-    const encodedCredentials = btoa(credentials);
+    // Create auth string and encode it properly
+    // Using TextEncoder/TextDecoder for more reliable encoding
+    const authString = `${paypalClientId}:${paypalSecretKey}`;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(authString);
+    const encodedCredentials = btoa(String.fromCharCode(...new Uint8Array(data)));
     
     console.log('[verify-paypal-payment] Sending auth request');
+    console.log('[verify-paypal-payment] Using auth header: Basic ' + encodedCredentials.substring(0, 10) + '...');
     
     const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
       method: 'POST',

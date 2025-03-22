@@ -66,7 +66,7 @@ serve(async (req) => {
           price_data: {
             currency: 'eur',
             product: productId,
-            unit_amount: 99, // €0.99
+            unit_amount: 129, // Updated to €1.29 to match PayPal's minimum requirement
           },
           quantity: 1,
         },
