@@ -5,6 +5,7 @@ import PaymentButton from './PaymentButton';
 import PaymentError from './PaymentError';
 import { PaymentProvider } from './types';
 import { useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface BlurredContentCardProps {
   isLoading: boolean;
@@ -24,10 +25,26 @@ const BlurredContentCard: React.FC<BlurredContentCardProps> = ({
     // Check for various PayPal return parameters
     const paymentStatus = searchParams.get('status');
     const transactionId = searchParams.get('tx');
+    const paid = searchParams.get('paid') === 'true';
     
-    if (transactionId || paymentStatus === 'COMPLETED' || paymentStatus === 'success') {
+    if (transactionId && !paid) {
+      console.log('Detected PayPal transaction ID without paid flag', transactionId);
+      
       // Handle successful payment return
-      window.location.href = `${window.location.pathname}?paid=true&payment_provider=paypal&tx=${transactionId || ''}`;
+      window.location.href = `${window.location.pathname}?paid=true&payment_provider=paypal&tx=${transactionId}`;
+      
+      // Show toast
+      toast.success('Zahlung erfolgreich (PayPal)', {
+        description: 'Ihr Gedicht wurde erfolgreich freigeschaltet.'
+      });
+    } else if (paymentStatus === 'COMPLETED' || paymentStatus === 'success') {
+      // Handle successful payment return from other PayPal flows
+      window.location.href = `${window.location.pathname}?paid=true&payment_provider=paypal`;
+      
+      // Show toast
+      toast.success('Zahlung erfolgreich (PayPal)', {
+        description: 'Ihr Gedicht wurde erfolgreich freigeschaltet.'
+      });
     }
   }, [searchParams]);
 
