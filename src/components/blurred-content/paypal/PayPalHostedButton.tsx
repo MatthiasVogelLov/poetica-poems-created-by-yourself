@@ -1,15 +1,16 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import PayPalButton from './PayPalButton';
 import PayPalFooter from './PayPalFooter';
 import { usePayPalCheckout } from './usePayPalCheckout';
+import PaymentError from '../PaymentError';
 
 interface PayPalHostedButtonProps {
   isLoading: boolean;
 }
 
 const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading: externalLoading }) => {
-  const { isLoading: checkoutLoading, initiatePayPalCheckout } = usePayPalCheckout();
+  const { isLoading: checkoutLoading, error, initiatePayPalCheckout } = usePayPalCheckout();
   
   // Combined loading state
   const combinedLoading = externalLoading || checkoutLoading;
@@ -20,9 +21,11 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading: exte
 
   return (
     <div className="w-full">
+      {error && <PaymentError error={error} />}
       <PayPalButton 
         isLoading={combinedLoading} 
-        onClick={handlePayPalClick} 
+        onClick={handlePayPalClick}
+        hasError={!!error}
       />
       <PayPalFooter />
     </div>

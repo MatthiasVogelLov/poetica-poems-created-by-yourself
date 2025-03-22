@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 export const usePayPalCheckout = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const location = useLocation();
   
   const saveCurrentPoemData = () => {
@@ -21,15 +22,17 @@ export const usePayPalCheckout = () => {
     try {
       console.log('Starting PayPal payment process (sandbox)...');
       setIsLoading(true);
+      setError(null);
       
       // Save poem data before redirecting
       saveCurrentPoemData();
       
       // Call the create-paypal-payment function via Supabase
-      const { data, error } = await supabase.functions.invoke('create-paypal-payment');
+      const { data, error: functionError } = await supabase.functions.invoke('create-paypal-payment');
       
-      if (error) {
-        console.error('Error calling create-paypal-payment function:', error);
+      if (functionError) {
+        console.error('Error calling create-paypal-payment function:', functionError);
+        setError('PayPal-Verbindung fehlgeschlagen');
         toast.error('Fehler bei der PayPal-Verbindung', {
           description: 'Bitte versuchen Sie es später erneut.'
         });
@@ -55,11 +58,13 @@ export const usePayPalCheckout = () => {
         return true;
       } else {
         console.error('No redirect URL returned from create-paypal-payment function');
+        setError('PayPal Checkout konnte nicht gestartet werden');
         toast.error('PayPal Checkout konnte nicht gestartet werden');
         return false;
       }
     } catch (err) {
       console.error('Failed to process PayPal payment:', err);
+      setError('Ein unerwarteter Fehler ist aufgetreten');
       toast.error('Fehler bei der Zahlung', {
         description: 'Ein unerwarteter Fehler ist aufgetreten.'
       });
@@ -71,6 +76,7 @@ export const usePayPalCheckout = () => {
   
   return {
     isLoading,
+    error,
     initiatePayPalCheckout
   };
 };

@@ -12,6 +12,10 @@ const PAYPAL_CLIENT_SECRET = Deno.env.get('PAYPAL_SECRET_KEY');
 async function createPayPalOrder() {
   // Check for required environment variables
   if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+    console.error('[create-paypal-payment] Missing PayPal credentials:', {
+      hasClientId: !!PAYPAL_CLIENT_ID,
+      hasClientSecret: !!PAYPAL_CLIENT_SECRET
+    });
     throw new Error('PayPal credentials not configured');
   }
 
@@ -21,6 +25,7 @@ async function createPayPalOrder() {
     
     console.log('[create-paypal-payment] Requesting PayPal access token...');
     console.log('[create-paypal-payment] Using PayPal environment: SANDBOX');
+    console.log('[create-paypal-payment] Token request URL:', `${PAYPAL_API}/v1/oauth2/token`);
     
     const tokenResponse = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
       method: 'POST',
@@ -31,14 +36,23 @@ async function createPayPalOrder() {
       body: 'grant_type=client_credentials'
     });
 
+    const tokenStatus = tokenResponse.status;
+    console.log('[create-paypal-payment] Token response status:', tokenStatus);
+
     if (!tokenResponse.ok) {
       const tokenError = await tokenResponse.text();
       console.error('[create-paypal-payment] Token error:', tokenError);
-      throw new Error('Failed to get PayPal access token');
+      throw new Error(`Failed to get PayPal access token: Status ${tokenStatus}`);
     }
 
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
+    
+    if (!accessToken) {
+      console.error('[create-paypal-payment] No access token in response:', tokenData);
+      throw new Error('No access token in PayPal response');
+    }
+    
     console.log('[create-paypal-payment] Successfully got PayPal access token');
 
     // Create order with sandbox URLs
@@ -71,7 +85,7 @@ async function createPayPalOrder() {
     if (!orderResponse.ok) {
       const orderError = await orderResponse.text();
       console.error('[create-paypal-payment] Order error:', orderError);
-      throw new Error('Failed to create PayPal order');
+      throw new Error(`Failed to create PayPal order: Status ${orderResponse.status}`);
     }
 
     const orderData = await orderResponse.json();
@@ -103,6 +117,10 @@ serve(async (req) => {
 
   try {
     console.log('[create-paypal-payment] Processing request');
+    console.log('[create-paypal-payment] PayPal credentials check:', {
+      hasClientId: !!PAYPAL_CLIENT_ID,
+      hasClientSecret: !!PAYPAL_CLIENT_SECRET
+    });
     
     // Create PayPal order and get redirect URL
     const paypalOrderData = await createPayPalOrder();
