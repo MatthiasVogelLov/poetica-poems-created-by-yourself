@@ -3,7 +3,7 @@ import React from 'react';
 import { CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { PaymentProvider } from './usePaymentProcess';
+import { PaymentProvider } from './types';
 
 interface PaymentButtonProps {
   provider: PaymentProvider;

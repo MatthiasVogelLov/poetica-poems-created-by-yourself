@@ -3,7 +3,7 @@ import React from 'react';
 import { LockIcon } from 'lucide-react';
 import PaymentButton from './PaymentButton';
 import PaymentError from './PaymentError';
-import { PaymentProvider } from './usePaymentProcess';
+import { PaymentProvider } from './types';
 
 interface BlurredContentCardProps {
   isLoading: boolean;
