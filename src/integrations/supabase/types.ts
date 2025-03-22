@@ -102,6 +102,12 @@ export type Database = {
         }
         Relationships: []
       }
+      content_sections: {
+        Row: {
+          section: string | null
+        }
+        Relationships: []
+      }
       daily_stats: {
         Row: {
           day: string | null
@@ -152,7 +158,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      create_daily_stats_cron: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
