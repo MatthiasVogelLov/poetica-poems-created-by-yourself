@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { savePoemToLocalStorage } from '../paymentUtils';
 import { PayPalButtons } from './PayPalButtons';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PayPalHostedButtonProps {
   isLoading: boolean;
@@ -12,7 +13,6 @@ interface PayPalHostedButtonProps {
 const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) => {
   const isMobile = useIsMobile();
   const location = useLocation();
-  const navigate = useNavigate();
   
   // Save poem data when component mounts to ensure it's available after payment
   useEffect(() => {
@@ -35,10 +35,30 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
     );
   }
 
+  const handlePayPalClick = async () => {
+    try {
+      // Call the create-paypal-payment function via Supabase
+      const { data, error } = await supabase.functions.invoke('create-paypal-payment');
+      
+      if (error) {
+        console.error('Error calling create-paypal-payment function:', error);
+        return;
+      }
+      
+      if (data && data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else {
+        console.error('No redirect URL returned from create-paypal-payment function');
+      }
+    } catch (err) {
+      console.error('Failed to process PayPal payment:', err);
+    }
+  };
+
   return (
     <div className="w-full">
       <button 
-        onClick={() => window.location.href = '/api/create-paypal-payment'}
+        onClick={handlePayPalClick}
         className={`w-full bg-[#FFD140] text-black font-bold px-4 rounded hover:bg-[#f5c638] transition-colors ${isMobile ? 'text-sm py-1.5' : 'py-2'}`}
       >
         Mit PayPal bezahlen
