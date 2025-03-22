@@ -27,7 +27,7 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({ isLoading, onClick, hasErro
   return (
     <button 
       onClick={onClick}
-      className={`w-full ${hasError ? 'bg-amber-100 border border-amber-300' : 'bg-[#FFD140] hover:bg-[#f5c638]'} text-black font-bold px-4 rounded transition-colors ${isMobile ? 'text-sm py-1.5' : 'py-2'}`}
+      className={`w-full ${hasError ? 'bg-amber-100 border border-amber-300' : 'bg-[#FFC439] hover:bg-[#f5c638]'} text-black font-bold px-4 rounded transition-colors ${isMobile ? 'text-sm py-1.5' : 'py-2'}`}
     >
       {hasError ? (
         <div className="flex items-center justify-center">

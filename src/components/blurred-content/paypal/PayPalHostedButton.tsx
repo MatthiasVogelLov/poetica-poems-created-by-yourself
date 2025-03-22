@@ -16,6 +16,7 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading: exte
   const combinedLoading = externalLoading || checkoutLoading;
   
   const handlePayPalClick = async () => {
+    console.log('PayPal button clicked, initiating checkout...');
     await initiatePayPalCheckout();
   };
 

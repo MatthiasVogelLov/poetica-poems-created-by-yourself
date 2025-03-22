@@ -58,13 +58,22 @@ serve(async (req) => {
     // Generate a unique poem ID for tracking
     const poemId = generatePoemId(poemTitle);
     
-    return createSuccessResponse({
-      data: {
+    // Important: Return a consistent response format that's easy to parse
+    return new Response(
+      JSON.stringify({
+        success: true,
         id: orderData.id,
         url: approvalUrl,
         poemId: poemId
+      }),
+      {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
+        status: 200,
       }
-    });
+    );
   } catch (error) {
     console.error('[create-paypal-checkout] Unhandled error:', error);
     

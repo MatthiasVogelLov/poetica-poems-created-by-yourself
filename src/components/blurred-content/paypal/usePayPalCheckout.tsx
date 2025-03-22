@@ -36,7 +36,7 @@ export const usePayPalCheckout = () => {
       const poemTitle = location.state?.generatedPoem?.title || 'Personalisiertes Gedicht';
       
       // Call the create-paypal-checkout function via Supabase
-      const { data: responseData, error: functionError } = await supabase.functions.invoke('create-paypal-checkout', {
+      const response = await supabase.functions.invoke('create-paypal-checkout', {
         body: {
           successUrl: successUrl,
           cancelUrl: currentUrl,
@@ -45,8 +45,11 @@ export const usePayPalCheckout = () => {
         }
       });
       
-      if (functionError) {
-        console.error('Error calling create-paypal-checkout function:', functionError);
+      // Log the full response for debugging
+      console.log('PayPal checkout function full response:', response);
+      
+      if (response.error) {
+        console.error('Error calling create-paypal-checkout function:', response.error);
         setError('PayPal-Verbindung fehlgeschlagen. Bitte versuchen Sie es später erneut.');
         toast.error('Fehler bei der PayPal-Verbindung', {
           description: 'Bitte versuchen Sie es später erneut.'
@@ -54,18 +57,26 @@ export const usePayPalCheckout = () => {
         return false;
       }
       
-      console.log('PayPal checkout function response:', responseData);
+      // Access the response data
+      const data = response.data;
+      console.log('PayPal checkout function processed data:', data);
       
-      // Access the actual data from the response
-      const data = responseData?.data || responseData;
+      if (!data) {
+        console.error('No data returned from create-paypal-checkout function');
+        setError('PayPal Checkout konnte nicht gestartet werden');
+        toast.error('PayPal Checkout konnte nicht gestartet werden');
+        return false;
+      }
       
-      if (data && data.url) {
+      if (data.url) {
         // Store order ID in localStorage for verification on return
         if (data.id) {
           localStorage.setItem('paypal_order_id', data.id);
+          console.log('Saved PayPal order ID to localStorage:', data.id);
         }
         
-        // Open PayPal checkout page
+        // Redirect to PayPal
+        console.log('Redirecting to PayPal URL:', data.url);
         window.location.href = data.url;
         
         toast.info('PayPal Checkout', {
@@ -74,7 +85,7 @@ export const usePayPalCheckout = () => {
         
         return true;
       } else {
-        console.error('No redirect URL returned from create-paypal-checkout function', data);
+        console.error('No redirect URL in response:', data);
         setError('PayPal Checkout konnte nicht gestartet werden');
         toast.error('PayPal Checkout konnte nicht gestartet werden');
         return false;
