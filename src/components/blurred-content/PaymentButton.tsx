@@ -15,7 +15,7 @@ interface PaymentButtonProps {
 const PaymentButton: React.FC<PaymentButtonProps> = ({ provider, isLoading, onClick }) => {
   const isMobile = useIsMobile();
   
-  // If this is the PayPal button, use the hosted button component
+  // If this is the PayPal button, use the PayPal button component
   if (provider === 'paypal') {
     return <PayPalHostedButton isLoading={isLoading} />;
   }

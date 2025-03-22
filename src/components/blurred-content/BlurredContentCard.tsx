@@ -4,7 +4,7 @@ import { LockIcon } from 'lucide-react';
 import PaymentButton from './PaymentButton';
 import PaymentError from './PaymentError';
 import { PaymentProvider } from './types';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface BlurredContentCardProps {
@@ -19,34 +19,45 @@ const BlurredContentCard: React.FC<BlurredContentCardProps> = ({
   onPaymentClick 
 }) => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   
   // Check for returning PayPal parameters
   useEffect(() => {
     // Check for various PayPal return parameters
     const paymentStatus = searchParams.get('status');
     const transactionId = searchParams.get('tx');
+    const token = searchParams.get('token');
     const paid = searchParams.get('paid') === 'true';
     
-    if (transactionId && !paid) {
-      console.log('Detected PayPal transaction ID without paid flag', transactionId);
+    // If we have a transaction ID but not marked as paid yet
+    if ((transactionId || token) && !paid) {
+      console.log('Detected PayPal return with transaction ID or token', { transactionId, token });
       
-      // Handle successful payment return
-      window.location.href = `${window.location.pathname}?paid=true&payment_provider=paypal&tx=${transactionId}`;
+      // Redirect to mark as paid
+      const currentPath = window.location.pathname;
+      navigate(`${currentPath}?paid=true&payment_provider=paypal${transactionId ? `&tx=${transactionId}` : ''}`, {
+        replace: true
+      });
       
-      // Show toast
+      // Show success toast
       toast.success('Zahlung erfolgreich (PayPal)', {
         description: 'Ihr Gedicht wurde erfolgreich freigeschaltet.'
       });
     } else if (paymentStatus === 'COMPLETED' || paymentStatus === 'success') {
       // Handle successful payment return from other PayPal flows
-      window.location.href = `${window.location.pathname}?paid=true&payment_provider=paypal`;
-      
-      // Show toast
-      toast.success('Zahlung erfolgreich (PayPal)', {
-        description: 'Ihr Gedicht wurde erfolgreich freigeschaltet.'
-      });
+      if (!paid) {
+        const currentPath = window.location.pathname;
+        navigate(`${currentPath}?paid=true&payment_provider=paypal`, {
+          replace: true
+        });
+        
+        // Show success toast
+        toast.success('Zahlung erfolgreich (PayPal)', {
+          description: 'Ihr Gedicht wurde erfolgreich freigeschaltet.'
+        });
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
   return (
     <div className="text-center max-w-md mx-auto px-4 sm:px-6 py-4 sm:py-6 glass-card rounded-xl animate-fade-in mt-2">

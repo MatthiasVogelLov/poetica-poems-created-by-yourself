@@ -20,35 +20,50 @@ export const usePayPalCheckout = () => {
   
   const initiatePayPalCheckout = async () => {
     try {
-      console.log('Starting PayPal payment process (sandbox)...');
+      console.log('Starting PayPal payment process...');
       setIsLoading(true);
       setError(null);
       
       // Save poem data before redirecting
       saveCurrentPoemData();
       
-      // Call the create-paypal-payment function via Supabase
-      const { data, error: functionError } = await supabase.functions.invoke('create-paypal-payment');
+      // Get current URL for return URLs
+      const currentUrl = window.location.href;
+      const baseUrl = window.location.origin + location.pathname;
+      const successUrl = `${baseUrl}?paid=true&payment_provider=paypal`;
+      
+      // Get poem title if available
+      const poemTitle = location.state?.generatedPoem?.title || 'Personalisiertes Gedicht';
+      
+      // Call the create-paypal-checkout function via Supabase
+      const { data, error: functionError } = await supabase.functions.invoke('create-paypal-checkout', {
+        body: {
+          successUrl: successUrl,
+          cancelUrl: currentUrl,
+          poemTitle: poemTitle,
+          formData: null
+        }
+      });
       
       if (functionError) {
-        console.error('Error calling create-paypal-payment function:', functionError);
-        setError('PayPal-Verbindung fehlgeschlagen');
+        console.error('Error calling create-paypal-checkout function:', functionError);
+        setError('PayPal-Verbindung fehlgeschlagen. Bitte versuchen Sie es später erneut.');
         toast.error('Fehler bei der PayPal-Verbindung', {
           description: 'Bitte versuchen Sie es später erneut.'
         });
         return false;
       }
       
-      console.log('PayPal payment function response:', data);
+      console.log('PayPal checkout function response:', data);
       
-      if (data && data.redirectUrl) {
+      if (data && data.url) {
         // Store order ID in localStorage for verification on return
-        if (data.orderId) {
-          localStorage.setItem('paypal_order_id', data.orderId);
+        if (data.id) {
+          localStorage.setItem('paypal_order_id', data.id);
         }
         
         // Open PayPal in a new window to handle the return flow better
-        window.open(data.redirectUrl, '_blank');
+        window.open(data.url, '_blank');
         
         // Show a message to the user about the new window
         toast.info('PayPal Checkout', {
@@ -57,7 +72,7 @@ export const usePayPalCheckout = () => {
         
         return true;
       } else {
-        console.error('No redirect URL returned from create-paypal-payment function');
+        console.error('No redirect URL returned from create-paypal-checkout function');
         setError('PayPal Checkout konnte nicht gestartet werden');
         toast.error('PayPal Checkout konnte nicht gestartet werden');
         return false;
