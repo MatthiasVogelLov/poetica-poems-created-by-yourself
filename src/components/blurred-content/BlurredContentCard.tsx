@@ -3,11 +3,12 @@ import React from 'react';
 import { LockIcon } from 'lucide-react';
 import PaymentButton from './PaymentButton';
 import PaymentError from './PaymentError';
+import { PaymentProvider } from './usePaymentProcess';
 
 interface BlurredContentCardProps {
   isLoading: boolean;
   error: string | null;
-  onPaymentClick: () => void;
+  onPaymentClick: (provider: PaymentProvider) => void;
 }
 
 const BlurredContentCard: React.FC<BlurredContentCardProps> = ({ 
@@ -26,7 +27,31 @@ const BlurredContentCard: React.FC<BlurredContentCardProps> = ({
       </p>
       
       <PaymentError error={error} />
-      <PaymentButton isLoading={isLoading} onClick={onPaymentClick} />
+      
+      <div className="space-y-3">
+        <PaymentButton 
+          provider="stripe"
+          isLoading={isLoading} 
+          onClick={() => onPaymentClick('stripe')} 
+        />
+        
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Oder
+            </span>
+          </div>
+        </div>
+        
+        <PaymentButton 
+          provider="paypal"
+          isLoading={isLoading} 
+          onClick={() => onPaymentClick('paypal')} 
+        />
+      </div>
     </div>
   );
 };

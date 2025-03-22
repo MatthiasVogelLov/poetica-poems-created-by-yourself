@@ -99,3 +99,21 @@ export function formatPoemForEmail(poemContent: string): string {
     .map(stanza => `<div style="margin-bottom: 2em; padding: 0;">${stanza}</div>`) // Wrap each stanza in a div with bottom margin
     .join('');
 }
+
+/**
+ * Format poem content for WhatsApp sharing
+ * Preserves line breaks and stanza structure
+ */
+export function formatPoemForWhatsApp(title: string, poem: string): string {
+  // Add title first
+  let formattedText = `*${title}*\n\n`;
+  
+  // Process the poem text
+  formattedText += poem
+    // Make sure stanzas have consistent spacing
+    .replace(/\n{3,}/g, '\n\n')
+    // Add a small decoration at the end
+    + '\n\n~ Gedicht erstellt mit Poetica ~';
+  
+  return formattedText;
+}

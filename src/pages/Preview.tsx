@@ -14,10 +14,12 @@ const Preview = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isPaid = searchParams.get('paid') === 'true';
+  const paymentProvider = searchParams.get('payment_provider');
   
   // Add debugging to check payment status and localStorage on page load
   useEffect(() => {
     console.log('Preview page loaded with payment status:', isPaid ? 'PAID' : 'NOT PAID');
+    console.log('Payment provider:', paymentProvider || 'none');
     
     // Check localStorage for poem data
     try {
@@ -32,11 +34,12 @@ const Preview = () => {
     
     // Show toast message if coming back from payment
     if (isPaid) {
-      toast.success("Zahlung erfolgreich", {
+      const provider = paymentProvider === 'paypal' ? 'PayPal' : 'Kreditkarte';
+      toast.success(`Zahlung erfolgreich (${provider})`, {
         description: "Wenn Ihr Gedicht nicht angezeigt wird, laden Sie bitte die Seite neu."
       });
     }
-  }, [isPaid]);
+  }, [isPaid, paymentProvider]);
   
   // Use our custom hook to handle poem loading
   const { poemTitle, poemContent, isGenerating } = usePoemLoader(
