@@ -1,13 +1,12 @@
 
 import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 /**
  * Hook for handling PayPal-specific payment functionality
  */
 export const usePayPalPayment = () => {
-  const { toast } = useToast();
   const [isVerifying, setIsVerifying] = useState(false);
   
   /**
@@ -61,18 +60,18 @@ export const usePayPalPayment = () => {
       }
       
       console.log('PayPal payment verified successfully:', response.data);
-      toast({
-        title: "Zahlung erfolgreich",
-        description: "Ihre PayPal-Zahlung wurde erfolgreich verarbeitet.",
-        variant: "default",
+      toast.success('Zahlung erfolgreich', {
+        description: 'Ihre PayPal-Zahlung wurde erfolgreich verarbeitet.',
       });
+      
+      // Clear the stored order ID
+      localStorage.removeItem('paypal_order_id');
+      
       return true;
     } catch (error) {
       console.error('PayPal verification error:', error);
-      toast({
-        title: "Fehler bei der Zahlung",
-        description: error.message || "Die PayPal-Zahlung konnte nicht verifiziert werden. Bitte versuchen Sie es erneut.",
-        variant: "destructive",
+      toast.error('Fehler bei der Zahlung', {
+        description: error.message || 'Die PayPal-Zahlung konnte nicht verifiziert werden.',
       });
       return false;
     } finally {

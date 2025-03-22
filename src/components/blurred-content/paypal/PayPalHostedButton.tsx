@@ -1,10 +1,11 @@
 
-import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { savePoemToLocalStorage } from '../paymentUtils';
 import { PayPalButtons } from './PayPalButtons';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from "sonner";
 
 interface PayPalHostedButtonProps {
   isLoading: boolean;
@@ -13,6 +14,7 @@ interface PayPalHostedButtonProps {
 const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) => {
   const isMobile = useIsMobile();
   const location = useLocation();
+  const [buttonLoading, setButtonLoading] = useState(false);
   
   // Save poem data when component mounts to ensure it's available after payment
   useEffect(() => {
@@ -23,7 +25,10 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
     }
   }, [location.state]);
   
-  if (isLoading) {
+  // Combined loading state
+  const showLoading = isLoading || buttonLoading;
+  
+  if (showLoading) {
     return (
       <button 
         disabled={true}
@@ -38,25 +43,40 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
   const handlePayPalClick = async () => {
     try {
       console.log('Starting PayPal payment process...');
+      setButtonLoading(true);
       
       // Call the create-paypal-payment function via Supabase
       const { data, error } = await supabase.functions.invoke('create-paypal-payment');
       
       if (error) {
         console.error('Error calling create-paypal-payment function:', error);
+        toast.error('Fehler bei der PayPal-Verbindung', {
+          description: 'Bitte versuchen Sie es später erneut.'
+        });
         return;
       }
       
       console.log('PayPal payment function response:', data);
       
       if (data && data.redirectUrl) {
-        // Open PayPal in a new window for better return handling
-        window.open(data.redirectUrl, '_blank');
+        // Store order ID in localStorage for verification on return
+        if (data.orderId) {
+          localStorage.setItem('paypal_order_id', data.orderId);
+        }
+        
+        // Open PayPal in the same window
+        window.location.href = data.redirectUrl;
       } else {
         console.error('No redirect URL returned from create-paypal-payment function');
+        toast.error('PayPal Checkout konnte nicht gestartet werden');
       }
     } catch (err) {
       console.error('Failed to process PayPal payment:', err);
+      toast.error('Fehler bei der Zahlung', {
+        description: 'Ein unerwarteter Fehler ist aufgetreten.'
+      });
+    } finally {
+      setButtonLoading(false);
     }
   };
 

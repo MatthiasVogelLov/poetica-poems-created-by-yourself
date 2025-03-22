@@ -1,30 +1,45 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders, handleCorsPreflightRequest, createErrorResponse, createSuccessResponse } from "../_shared/email-utils.ts";
-import { getEnvironmentVariables } from "./config.ts";
-import { parseRequestData } from "./utils.ts";
-import { getPayPalAccessToken, checkOrderStatus, processOrderBasedOnStatus } from "./paypal-api.ts";
+import { corsHeaders } from "../_shared/email-utils.ts";
+import { getPayPalAccessToken, checkOrderStatus, processOrderBasedOnStatus, extractErrorText } from "./paypal-api.ts";
 
-/**
- * Main handler function for verifying PayPal payments
- */
+// PayPal API configuration
+const PAYPAL_API = 'https://api-m.paypal.com';
+const PAYPAL_CLIENT_ID = Deno.env.get('PAYPAL_CLIENT_ID');
+const PAYPAL_CLIENT_SECRET = Deno.env.get('PAYPAL_SECRET_KEY');
+
+// Handle CORS preflight requests
 serve(async (req) => {
-  // Handle CORS preflight requests
-  const corsResponse = handleCorsPreflightRequest(req);
-  if (corsResponse) return corsResponse;
+  // Handle CORS
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
 
-  console.log('[verify-paypal-payment] Starting execution with timestamp:', new Date().toISOString());
-  
   try {
-    // Get environment variables
-    const { paypalClientId, paypalSecretKey } = getEnvironmentVariables();
+    console.log('[verify-paypal-payment] Starting verification process');
     
-    // Parse request body
-    const requestData = await parseRequestData(req);
+    // Check for required environment variables
+    if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+      throw new Error('PayPal credentials not configured');
+    }
+    
+    // Parse the request body
+    let requestData;
+    try {
+      requestData = await req.json();
+    } catch (error) {
+      throw new Error('Invalid request format');
+    }
+    
     const { orderId } = requestData;
+    if (!orderId) {
+      throw new Error('Missing PayPal order ID');
+    }
+    
+    console.log('[verify-paypal-payment] Verifying order:', orderId);
     
     // Get PayPal access token
-    const accessToken = await getPayPalAccessToken(paypalClientId, paypalSecretKey);
+    const accessToken = await getPayPalAccessToken(PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET);
     
     // Check order status
     const orderData = await checkOrderStatus(accessToken, orderId);
@@ -32,13 +47,29 @@ serve(async (req) => {
     // Process the order based on its status
     const result = await processOrderBasedOnStatus(orderData, accessToken);
     
-    return createSuccessResponse(result);
+    // Return the verification result
+    return new Response(
+      JSON.stringify(result), 
+      {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json"
+        }
+      }
+    );
   } catch (error) {
-    console.error('[verify-paypal-payment] Unhandled error:', error);
+    console.error('[verify-paypal-payment] Error:', error);
     
-    return createErrorResponse(
-      error.message || 'Unexpected error verifying PayPal payment',
-      500
+    return new Response(
+      JSON.stringify({ error: error.message }), 
+      {
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json"
+        }
+      }
     );
   }
 });
