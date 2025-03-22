@@ -131,7 +131,7 @@ serve(async (req) => {
         {
           amount: {
             currency_code: 'EUR',
-            value: '0.99' // €0.99 for the poem
+            value: '1.29' // Updated to €1.29 to match PayPal's minimum requirement
           },
           description: `Freischaltung: ${poemTitle || 'Personalisiertes Gedicht'}`
         }

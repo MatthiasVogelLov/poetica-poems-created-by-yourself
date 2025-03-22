@@ -23,7 +23,7 @@ const BlurredContentCard: React.FC<BlurredContentCardProps> = ({
       </div>
       <h3 className="text-xl font-medium mb-2">Vollständiges Gedicht freischalten</h3>
       <p className="text-muted-foreground mb-6">
-        Für nur 0,99 € können Sie das vollständige Gedicht freischalten und herunterladen.
+        Für nur 1,29 € können Sie das vollständige Gedicht freischalten und herunterladen.
       </p>
       
       <PaymentError error={error} />
