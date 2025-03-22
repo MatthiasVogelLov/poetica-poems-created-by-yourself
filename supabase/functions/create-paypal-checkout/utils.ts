@@ -36,5 +36,7 @@ export function validateRequestParams(successUrl: string, cancelUrl: string) {
  * Generate a unique poem ID for tracking
  */
 export function generatePoemId(poemTitle: string): string | null {
-  return poemTitle ? Buffer.from(poemTitle).toString('base64').substring(0, 36) : null;
+  if (!poemTitle) return null;
+  // Use a simple encoding instead of Buffer (which isn't available in Deno)
+  return btoa(poemTitle).substring(0, 36);
 }

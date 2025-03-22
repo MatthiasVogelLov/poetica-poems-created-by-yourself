@@ -69,7 +69,7 @@ const BlurredContentCard: React.FC<BlurredContentCardProps> = ({
         Für nur 1,29 € können Sie das vollständige Gedicht freischalten und herunterladen.
       </p>
       
-      <PaymentError error={error} />
+      {error && <PaymentError error={error} />}
       
       <div className="space-y-3">
         <PaymentButton 

@@ -62,12 +62,11 @@ export const usePayPalCheckout = () => {
           localStorage.setItem('paypal_order_id', data.id);
         }
         
-        // Open PayPal in a new window to handle the return flow better
-        window.open(data.url, '_blank');
+        // Open PayPal in a new tab
+        window.location.href = data.url;
         
-        // Show a message to the user about the new window
         toast.info('PayPal Checkout', {
-          description: 'Bitte schließen Sie den Bezahlvorgang im PayPal-Fenster ab.'
+          description: 'Sie werden zu PayPal weitergeleitet...'
         });
         
         return true;
