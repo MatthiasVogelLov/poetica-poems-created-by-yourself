@@ -88,9 +88,9 @@ export const usePaymentProcess = () => {
           description: "Als Administrator können Sie das vollständige Gedicht ohne Zahlung ansehen.",
         });
         
-        // Create URL with paid parameter
+        // Create URL with paid parameter and payment provider for consistency in analytics
         const currentPath = location.pathname;
-        const paidUrl = `${currentPath}?paid=true`;
+        const paidUrl = `${currentPath}?paid=true&payment_provider=${provider}`;
         
         // Redirect to the same page with paid=true
         navigate(paidUrl, { 
