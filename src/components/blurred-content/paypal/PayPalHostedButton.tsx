@@ -4,6 +4,7 @@ import PayPalButton from './PayPalButton';
 import PayPalFooter from './PayPalFooter';
 import { usePayPalCheckout } from './usePayPalCheckout';
 import PaymentError from '../PaymentError';
+import { PayPalButtons } from './PayPalButtons';
 
 interface PayPalHostedButtonProps {
   isLoading: boolean;
@@ -19,14 +20,33 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading: exte
     await initiatePayPalCheckout();
   };
 
+  // If there is an error, use the standard PayPal button with error styling
+  if (error) {
+    return (
+      <div className="w-full">
+        <PaymentError error={error} />
+        <PayPalButton 
+          isLoading={combinedLoading} 
+          onClick={handlePayPalClick}
+          hasError={true}
+        />
+        <PayPalFooter />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
-      {error && <PaymentError error={error} />}
-      <PayPalButton 
-        isLoading={combinedLoading} 
-        onClick={handlePayPalClick}
-        hasError={!!error}
-      />
+      {/* Use hosted PayPal buttons when there's no error */}
+      {!error && !combinedLoading ? (
+        <PayPalButtons />
+      ) : (
+        <PayPalButton 
+          isLoading={combinedLoading} 
+          onClick={handlePayPalClick}
+          hasError={false}
+        />
+      )}
       <PayPalFooter />
     </div>
   );

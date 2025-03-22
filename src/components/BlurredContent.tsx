@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { usePaymentProcess } from './blurred-content/usePaymentProcess';
@@ -22,15 +23,12 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
   } = usePaymentProcess();
 
   useEffect(() => {
-    if (paypalOrderId) {
-      checkPayPalReturn();
-      return;
-    }
-    
+    // Check for transaction ID from PayPal hosted buttons
     const isPaid = searchParams.get('paid') === 'true';
     const paymentProvider = searchParams.get('payment_provider');
     const transactionId = searchParams.get('tx');
     
+    // Handle transaction ID from hosted PayPal buttons
     if (transactionId) {
       console.log('User returned from PayPal payment with transaction ID:', transactionId);
       
@@ -51,6 +49,13 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       return;
     }
     
+    // Check if returning from PayPal API flow
+    if (paypalOrderId) {
+      checkPayPalReturn();
+      return;
+    }
+    
+    // Handle standard PayPal return flow
     if (isPaid && paymentProvider === 'paypal') {
       console.log('User returned from PayPal payment', {
         isPaid,
