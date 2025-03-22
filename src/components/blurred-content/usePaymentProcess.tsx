@@ -159,4 +159,5 @@ export const usePaymentProcess = (): UsePaymentProcessProps => {
 };
 
 // Re-export the PaymentProvider type for convenience
-export { PaymentProvider } from './types';
+// FIX: Use "export type" when re-exporting a type with isolatedModules enabled
+export type { PaymentProvider } from './types';
