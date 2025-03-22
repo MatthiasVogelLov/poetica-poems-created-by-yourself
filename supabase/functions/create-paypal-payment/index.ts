@@ -12,8 +12,9 @@ serve(async (req) => {
   try {
     console.log('[create-paypal-payment] Processing request');
     
-    // Get the PayPal checkout URL - this will redirect to PayPal's standard checkout
-    const redirectUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MQBQFKYJP8NJW&currency_code=EUR";
+    // Use the PayPal checkout URL with just the basic parameters
+    // This is a simpler and more reliable approach than the hosted button
+    const redirectUrl = "https://www.paypal.com/checkoutnow?token=EC-MQBQFKYJP8NJW";
     
     // Return the URL in the expected format
     return new Response(

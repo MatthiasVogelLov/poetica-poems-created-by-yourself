@@ -37,6 +37,8 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
 
   const handlePayPalClick = async () => {
     try {
+      console.log('Starting PayPal payment process...');
+      
       // Call the create-paypal-payment function via Supabase
       const { data, error } = await supabase.functions.invoke('create-paypal-payment');
       
@@ -45,8 +47,11 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
         return;
       }
       
+      console.log('PayPal payment function response:', data);
+      
       if (data && data.redirectUrl) {
-        window.location.href = data.redirectUrl;
+        // Open PayPal in a new window for better return handling
+        window.open(data.redirectUrl, '_blank');
       } else {
         console.error('No redirect URL returned from create-paypal-payment function');
       }
