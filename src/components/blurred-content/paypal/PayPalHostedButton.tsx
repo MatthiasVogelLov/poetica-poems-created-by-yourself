@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { savePoemToLocalStorage } from '../paymentUtils';
+import { PayPalButtons } from './PayPalButtons';
 
 interface PayPalHostedButtonProps {
   isLoading: boolean;
@@ -22,11 +23,6 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
     }
   }, [location.state]);
   
-  // Create return URL to the current page with paid=true
-  const currentPath = location.pathname;
-  const returnUrl = `${window.location.origin}${currentPath}?paid=true&payment_provider=paypal`;
-  const cancelUrl = window.location.href;
-  
   if (isLoading) {
     return (
       <button 
@@ -38,45 +34,22 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
       </button>
     );
   }
-  
-  // Using direct checkout link with auto-return parameters
+
   return (
     <div className="w-full">
-      <form 
-        action="https://www.paypal.com/cgi-bin/webscr" 
-        method="post" 
-        target="_top"
-        className="w-full flex flex-col items-center gap-2"
+      <button 
+        onClick={() => window.location.href = '/api/create-paypal-payment'}
+        className={`w-full bg-[#FFD140] text-black font-bold px-4 rounded hover:bg-[#f5c638] transition-colors ${isMobile ? 'text-sm py-1.5' : 'py-2'}`}
       >
-        {/* PayPal Standard Checkout parameters */}
-        <input type="hidden" name="cmd" value="_xclick" />
-        <input type="hidden" name="business" value="matthiasvogel1973@gmail.com" />
-        <input type="hidden" name="lc" value="DE" />
-        <input type="hidden" name="item_name" value="Personalisiertes Gedicht" />
-        <input type="hidden" name="amount" value="1.29" />
-        <input type="hidden" name="currency_code" value="EUR" />
-        <input type="hidden" name="button_subtype" value="services" />
-        <input type="hidden" name="no_note" value="1" />
-        <input type="hidden" name="no_shipping" value="1" />
-        <input type="hidden" name="rm" value="1" /> {/* Return method: GET */}
-        <input type="hidden" name="return" value={returnUrl} />
-        <input type="hidden" name="cancel_return" value={cancelUrl} />
-        <input type="hidden" name="bn" value="PP-BuyNowBF:btn_buynowCC_LG.gif:NonHosted" />
-        
-        <button 
-          type="submit"
-          className={`w-full bg-[#FFD140] text-black font-bold px-4 rounded hover:bg-[#f5c638] transition-colors ${isMobile ? 'text-sm py-1.5' : 'py-2'}`}
-        >
-          Mit PayPal bezahlen
-        </button>
-        <div className="flex flex-col items-center text-xs text-muted-foreground">
-          <img src="https://www.paypalobjects.com/images/Debit_Credit_APM.svg" alt="Payment methods" className="h-6 mb-1" />
-          <div className="flex items-center gap-1">
-            Abgewickelt durch 
-            <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="PayPal" className="h-3" />
-          </div>
+        Mit PayPal bezahlen
+      </button>
+      <div className="flex flex-col items-center text-xs text-muted-foreground mt-2">
+        <img src="https://www.paypalobjects.com/images/Debit_Credit_APM.svg" alt="Payment methods" className="h-6 mb-1" />
+        <div className="flex items-center gap-1">
+          Abgewickelt durch 
+          <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="PayPal" className="h-3" />
         </div>
-      </form>
+      </div>
     </div>
   );
 };

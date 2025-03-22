@@ -66,7 +66,6 @@ const Preview = () => {
     <div className="min-h-screen bg-white">
       <Header />
       
-      {/* Reduced top padding to make poem more visible */}
       <div className="pt-16 sm:pt-20 pb-10 sm:pb-20">
         <div className="container-narrow px-4 sm:px-8">
           <PreviewHeader isPaid={isPaid || !!transactionId} onBackClick={goBack} />
