@@ -42,7 +42,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
             required
           >
             <FormControl>
-              <SelectTrigger className="form-select">
+              <SelectTrigger className="form-select w-full">
                 <SelectValue placeholder={`${label || name} auswählen`} />
               </SelectTrigger>
             </FormControl>

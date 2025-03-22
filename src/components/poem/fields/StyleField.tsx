@@ -43,7 +43,7 @@ const styleOptions: SelectOption[] = [
 
 const StyleHelpContent = () => {
   return (
-    <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+    <div className="space-y-4 pr-2">
       <div className="space-y-2">
         <h3 className="font-bold">1. Sonett</h3>
         <p>Ein Sonett besteht aus 14 Versen, die meist in zwei Quartette (vierzeilige Strophen) und zwei Terzette (dreizeilige Strophen) unterteilt sind. Häufig folgt es dem Reimschema ABBA ABBA CCD EED oder Ähnlichem. Klassische Themen sind Liebe, Natur und Vergänglichkeit.</p>
@@ -144,7 +144,15 @@ const StyleField: React.FC<StyleFieldProps> = ({ form }) => {
         {isMobile ? (
           <Dialog>
             <DialogTrigger asChild>
-              <button className="inline-flex h-4 w-4 items-center justify-center rounded-full p-0 ml-1">
+              <button 
+                type="button" 
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full p-0 ml-1"
+                // Add type="button" to prevent form submission
+                onClick={(e) => {
+                  e.preventDefault(); // Prevent form submission
+                  e.stopPropagation(); // Stop event propagation
+                }}
+              >
                 <HelpCircle className="h-3 w-3" />
                 <span className="sr-only">Gedichtstile Informationen</span>
               </button>
@@ -156,14 +164,24 @@ const StyleField: React.FC<StyleFieldProps> = ({ form }) => {
                   Informationen zu verschiedenen Gedichtstilen.
                 </DialogDescription>
               </DialogHeader>
-              <StyleHelpContent />
+              <div className="max-h-[60vh] overflow-y-auto">
+                <StyleHelpContent />
+              </div>
             </DialogContent>
           </Dialog>
         ) : (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="inline-flex h-4 w-4 items-center justify-center rounded-full p-0 ml-1">
+                <button 
+                  type="button" 
+                  className="inline-flex h-4 w-4 items-center justify-center rounded-full p-0 ml-1"
+                  // Add type="button" to prevent form submission
+                  onClick={(e) => {
+                    e.preventDefault(); // Prevent form submission
+                    e.stopPropagation(); // Stop event propagation
+                  }}
+                >
                   <HelpCircle className="h-3 w-3" />
                   <span className="sr-only">Gedichtstile Informationen</span>
                 </button>
@@ -171,9 +189,11 @@ const StyleField: React.FC<StyleFieldProps> = ({ form }) => {
               <TooltipContent 
                 side="right" 
                 align="center" 
-                className="max-w-md w-80 max-h-[500px] overflow-y-auto"
+                className="w-80 p-4"
               >
-                <StyleHelpContent />
+                <div className="max-h-[60vh] overflow-y-auto">
+                  <StyleHelpContent />
+                </div>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -186,6 +206,7 @@ const StyleField: React.FC<StyleFieldProps> = ({ form }) => {
         label=""
         hideLabel={true}
         options={styleOptions}
+        className="w-full"
       />
     </div>
   );

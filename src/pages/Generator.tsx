@@ -3,10 +3,9 @@ import React from 'react';
 import Header from '../components/Header';
 import PoemForm from '../components/PoemForm';
 import HeaderContent from '../components/generator/HeaderContent';
-import GeneratorFooter from '../components/GeneratorFooter';
+import Footer from '../components/Footer';
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from 'react-router-dom';
-import { toast } from "sonner";
 
 const Generator = () => {
   const location = useLocation();
@@ -55,7 +54,7 @@ const Generator = () => {
         </div>
       </div>
       
-      <GeneratorFooter />
+      <Footer />
     </div>
   );
 };
