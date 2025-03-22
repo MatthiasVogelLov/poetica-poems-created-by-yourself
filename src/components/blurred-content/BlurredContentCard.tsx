@@ -20,10 +20,12 @@ const BlurredContentCard: React.FC<BlurredContentCardProps> = ({
   const [searchParams] = useSearchParams();
   
   // Check for returning PayPal parameters
-  // PayPal hosted checkout will add these parameters when returning
   useEffect(() => {
+    // Check for various PayPal return parameters
     const paymentStatus = searchParams.get('status');
-    if (paymentStatus === 'COMPLETED' || paymentStatus === 'success') {
+    const transactionId = searchParams.get('tx');
+    
+    if (transactionId || paymentStatus === 'COMPLETED' || paymentStatus === 'success') {
       // Handle successful payment return
       window.location.href = `${window.location.pathname}?paid=true&payment_provider=paypal`;
     }

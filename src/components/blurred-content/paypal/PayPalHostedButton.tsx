@@ -46,9 +46,12 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
         target="_top" 
         className="w-full flex flex-col items-center gap-2"
       >
-        {/* Add hidden input for return URL */}
+        {/* Add hidden inputs for return flow */}
         <input type="hidden" name="return" value={returnUrl} />
         <input type="hidden" name="cancel_return" value={window.location.href} />
+        <input type="hidden" name="rm" value="2" /> {/* Return method: POST with variables */}
+        <input type="hidden" name="cbt" value="Zurück zu Poetica" /> {/* Custom return button text */}
+        <input type="hidden" name="bn" value="Poetica_Gedicht_Bezahlung" /> {/* Button source */}
         
         <button 
           type="submit"
