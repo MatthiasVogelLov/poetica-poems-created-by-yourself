@@ -4,6 +4,11 @@ import { corsHeaders, handleCorsPreflightRequest, createErrorResponse, createSuc
 
 const paypalClientId = Deno.env.get('PAYPAL_CLIENT_ID');
 const paypalSecretKey = Deno.env.get('PAYPAL_SECRET_KEY');
+// Check if we're using sandbox or live environment
+const isPayPalSandbox = Deno.env.get('PAYPAL_USE_SANDBOX') !== 'false';
+const paypalBaseUrl = isPayPalSandbox 
+  ? 'https://api-m.sandbox.paypal.com' 
+  : 'https://api-m.paypal.com';
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -12,6 +17,7 @@ serve(async (req) => {
 
   try {
     console.log('[verify-paypal-payment] Starting execution with timestamp:', new Date().toISOString());
+    console.log('[verify-paypal-payment] Using PayPal environment:', isPayPalSandbox ? 'SANDBOX' : 'LIVE');
     
     if (!paypalClientId || !paypalSecretKey) {
       console.error('[verify-paypal-payment] PayPal credentials are not configured');
@@ -39,7 +45,9 @@ serve(async (req) => {
     
     // Get PayPal access token
     console.log('[verify-paypal-payment] Requesting PayPal access token...');
-    const authResponse = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+    console.log('[verify-paypal-payment] PayPal API URL:', `${paypalBaseUrl}/v1/oauth2/token`);
+    
+    const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -77,7 +85,9 @@ serve(async (req) => {
     
     // Verify the order status
     console.log('[verify-paypal-payment] Checking order status...');
-    const orderResponse = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}`, {
+    console.log('[verify-paypal-payment] PayPal order URL:', `${paypalBaseUrl}/v2/checkout/orders/${orderId}`);
+    
+    const orderResponse = await fetch(`${paypalBaseUrl}/v2/checkout/orders/${orderId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -118,8 +128,9 @@ serve(async (req) => {
     // If the order is approved but not captured yet, capture the payment
     if (orderData.status === 'APPROVED') {
       console.log('[verify-paypal-payment] Order is approved, capturing payment...');
+      console.log('[verify-paypal-payment] PayPal capture URL:', `${paypalBaseUrl}/v2/checkout/orders/${orderId}/capture`);
       
-      const captureResponse = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`, {
+      const captureResponse = await fetch(`${paypalBaseUrl}/v2/checkout/orders/${orderId}/capture`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

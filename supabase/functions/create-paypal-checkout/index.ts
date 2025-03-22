@@ -8,6 +8,12 @@ const paypalSecretKey = Deno.env.get('PAYPAL_SECRET_KEY');
 const resendApiKey = Deno.env.get('RESEND_API_KEY');
 const recipientEmail = "matthiasvogel1973@gmail.com";
 
+// Check if we're using sandbox or live environment
+const isPayPalSandbox = Deno.env.get('PAYPAL_USE_SANDBOX') !== 'false';
+const paypalBaseUrl = isPayPalSandbox 
+  ? 'https://api-m.sandbox.paypal.com' 
+  : 'https://api-m.paypal.com';
+
 serve(async (req) => {
   // Handle CORS preflight requests
   const corsResponse = handleCorsPreflightRequest(req);
@@ -15,6 +21,7 @@ serve(async (req) => {
 
   try {
     console.log('[create-paypal-checkout] Starting execution with timestamp:', new Date().toISOString());
+    console.log('[create-paypal-checkout] Using PayPal environment:', isPayPalSandbox ? 'SANDBOX' : 'LIVE');
     
     if (!paypalClientId || !paypalSecretKey) {
       console.error('[create-paypal-checkout] PayPal credentials are not configured');
@@ -55,7 +62,9 @@ serve(async (req) => {
     
     // Get PayPal access token
     console.log('[create-paypal-checkout] Requesting PayPal access token...');
-    const authResponse = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+    console.log('[create-paypal-checkout] PayPal API URL:', `${paypalBaseUrl}/v1/oauth2/token`);
+    
+    const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -98,6 +107,8 @@ serve(async (req) => {
     
     // Create a PayPal order
     console.log('[create-paypal-checkout] Creating PayPal order...');
+    console.log('[create-paypal-checkout] PayPal order URL:', `${paypalBaseUrl}/v2/checkout/orders`);
+    
     const orderPayload = {
       intent: 'CAPTURE',
       purchase_units: [
@@ -120,7 +131,7 @@ serve(async (req) => {
     
     console.log('[create-paypal-checkout] Order payload:', JSON.stringify(orderPayload));
     
-    const orderResponse = await fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
+    const orderResponse = await fetch(`${paypalBaseUrl}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
