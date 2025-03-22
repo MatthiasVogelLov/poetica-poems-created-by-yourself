@@ -4,6 +4,7 @@ import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { usePaymentProcess } from './blurred-content/usePaymentProcess';
 import BlurredPoemSection from './blurred-content/BlurredPoemSection';
 import BlurredContentCard from './blurred-content/BlurredContentCard';
+import { toast } from "sonner";
 
 interface BlurredContentProps {
   children: React.ReactNode;
@@ -21,7 +22,7 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
     paypalOrderId 
   } = usePaymentProcess();
 
-  // Check for PayPal return parameters from both API and hosted checkout
+  // Check if returning from payment
   useEffect(() => {
     // Check for API flow return
     if (paypalOrderId) {
@@ -29,17 +30,25 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       return;
     }
     
-    // Check for hosted checkout return
-    const paymentStatus = searchParams.get('status');
-    if (paymentStatus === 'COMPLETED' || paymentStatus === 'success') {
-      // Navigate to the paid state
-      const currentPath = location.pathname;
-      navigate(`${currentPath}?paid=true&payment_provider=paypal`, { 
-        state: location.state,
-        replace: true 
-      });
+    // Check for payment status
+    const isPaid = searchParams.get('paid') === 'true';
+    const paymentProvider = searchParams.get('payment_provider');
+    
+    if (isPaid && paymentProvider === 'paypal') {
+      console.log('User returned from PayPal payment with paid=true');
+      
+      // If we're on the preview page, just ensure state is properly set
+      if (location.pathname === '/preview') {
+        // We're already on the preview page with paid=true, show success message
+        toast.success(`Zahlung erfolgreich (PayPal)`, {
+          description: "Ihr Gedicht wurde erfolgreich freigeschaltet."
+        });
+      } else {
+        // If not on preview page, redirect to preview with paid=true
+        navigate('/preview?paid=true&payment_provider=paypal', { replace: true });
+      }
     }
-  }, [paypalOrderId, checkPayPalReturn, searchParams, navigate, location]);
+  }, [paypalOrderId, checkPayPalReturn, searchParams, navigate, location.pathname]);
 
   return (
     <div className="relative">

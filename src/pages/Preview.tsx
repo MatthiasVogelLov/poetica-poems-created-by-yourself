@@ -33,10 +33,10 @@ const Preview = () => {
     }
     
     // Show toast message if coming back from payment
-    if (isPaid) {
+    if (isPaid && paymentProvider) {
       const provider = paymentProvider === 'paypal' ? 'PayPal' : 'Kreditkarte';
       toast.success(`Zahlung erfolgreich (${provider})`, {
-        description: "Wenn Ihr Gedicht nicht angezeigt wird, laden Sie bitte die Seite neu."
+        description: "Vielen Dank für Ihren Kauf! Das vollständige Gedicht wurde freigeschaltet."
       });
     }
   }, [isPaid, paymentProvider]);

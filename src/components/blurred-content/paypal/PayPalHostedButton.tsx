@@ -1,6 +1,8 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { savePoemToLocalStorage } from '../paymentUtils';
 
 interface PayPalHostedButtonProps {
   isLoading: boolean;
@@ -8,6 +10,21 @@ interface PayPalHostedButtonProps {
 
 const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) => {
   const isMobile = useIsMobile();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Save poem data when component mounts to ensure it's available after payment
+  useEffect(() => {
+    if (location.state?.generatedPoem) {
+      const { title, poem } = location.state.generatedPoem;
+      savePoemToLocalStorage(title, poem);
+      console.log('Saved poem data before PayPal payment:', { title });
+    }
+  }, [location.state]);
+  
+  // Create return URL to the current page with paid=true
+  const currentPath = location.pathname;
+  const returnUrl = `${window.location.origin}${currentPath}?paid=true&payment_provider=paypal`;
   
   if (isLoading) {
     return (
@@ -26,9 +43,13 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
       <form 
         action="https://www.paypal.com/ncp/payment/W82598U7M5WML" 
         method="post" 
-        target="_blank" 
+        target="_top" 
         className="w-full flex flex-col items-center gap-2"
       >
+        {/* Add hidden input for return URL */}
+        <input type="hidden" name="return" value={returnUrl} />
+        <input type="hidden" name="cancel_return" value={window.location.href} />
+        
         <button 
           type="submit"
           className={`w-full bg-[#FFD140] text-black font-bold px-4 rounded hover:bg-[#f5c638] transition-colors ${isMobile ? 'text-sm py-1.5' : 'py-2'}`}
