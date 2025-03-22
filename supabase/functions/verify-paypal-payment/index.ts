@@ -1,14 +1,11 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders, handleCorsPreflightRequest, createErrorResponse, createSuccessResponse } from "../_shared/email-utils.ts";
 
 const paypalClientId = Deno.env.get('PAYPAL_CLIENT_ID');
 const paypalSecretKey = Deno.env.get('PAYPAL_SECRET_KEY');
-// Check if we're using sandbox or live environment
-const isPayPalSandbox = Deno.env.get('PAYPAL_USE_SANDBOX') !== 'false';
-const paypalBaseUrl = isPayPalSandbox 
-  ? 'https://api-m.sandbox.paypal.com' 
-  : 'https://api-m.paypal.com';
+// Always use live PayPal environment
+const isPayPalSandbox = false;
+const paypalBaseUrl = 'https://api-m.paypal.com';
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -17,7 +14,7 @@ serve(async (req) => {
 
   try {
     console.log('[verify-paypal-payment] Starting execution with timestamp:', new Date().toISOString());
-    console.log('[verify-paypal-payment] Using PayPal environment:', isPayPalSandbox ? 'SANDBOX' : 'LIVE');
+    console.log('[verify-paypal-payment] Using PayPal environment: LIVE');
     
     if (!paypalClientId || !paypalSecretKey) {
       console.error('[verify-paypal-payment] PayPal credentials are not configured');
