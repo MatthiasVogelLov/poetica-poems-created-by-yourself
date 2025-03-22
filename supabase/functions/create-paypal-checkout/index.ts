@@ -121,6 +121,9 @@ serve(async (req) => {
           })
           .join('');
 
+        // Format poem content for email
+        const formattedPoemContent = formData.poem ? formatPoemForEmail(formData.poem) : '<p>Kein Gedichttext verfügbar</p>';
+
         const emailPayload = {
           from: 'Poetica <notification@poetica.apvora.com>',
           to: recipientEmail,
@@ -131,7 +134,7 @@ serve(async (req) => {
               
               <h2 style="color: #457b9d; margin-top: 20px;">Gedicht</h2>
               <div style="white-space: pre-line; font-family: 'Playfair Display', serif; background-color: #f8f9fa; padding: 20px; border-radius: 5px; line-height: 1.6;">
-                ${formData.poem || 'Kein Gedichttext verfügbar'}
+                ${formattedPoemContent}
               </div>
               
               <h2 style="color: #457b9d; margin-top: 20px;">Gewählte Einstellungen</h2>
@@ -168,7 +171,8 @@ serve(async (req) => {
     
     return createSuccessResponse({
       id: orderData.id,
-      url: approvalLink.href
+      url: approvalLink.href,
+      poemId: poemTitle ? Buffer.from(poemTitle).toString('base64').substring(0, 36) : null
     });
   } catch (error) {
     console.error('[create-paypal-checkout] Error creating PayPal checkout:', error);

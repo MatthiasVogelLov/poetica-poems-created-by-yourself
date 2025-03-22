@@ -80,12 +80,16 @@ export function formatTextWithLineBreaks(text: string): string {
  * with enhanced styling
  */
 export function formatPoemForEmail(poemContent: string): string {
+  if (!poemContent) return '<p class="poem-line">Kein Gedichttext verfügbar</p>';
+  
   // First split by double line breaks (stanzas)
   const stanzas = poemContent.split(/\n\s*\n/);
   
   // Clean up stanzas and process them
   return stanzas
     .map(stanza => {
+      if (!stanza.trim()) return ''; // Skip empty stanzas
+      
       // For each stanza, wrap each line in a paragraph tag with improved styling
       return stanza
         .split('\n')
@@ -96,6 +100,7 @@ export function formatPoemForEmail(poemContent: string): string {
         })
         .join('');
     })
+    .filter(Boolean) // Remove empty stanzas
     .map(stanza => `<div style="margin-bottom: 2em; padding: 0;">${stanza}</div>`) // Wrap each stanza in a div with bottom margin
     .join('');
 }
