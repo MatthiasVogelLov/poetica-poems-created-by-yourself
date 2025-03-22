@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { usePaymentProcess } from './blurred-content/usePaymentProcess';
@@ -22,31 +21,24 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
     paypalOrderId 
   } = usePaymentProcess();
 
-  // Check if returning from payment
   useEffect(() => {
-    // Check for API flow return
     if (paypalOrderId) {
       checkPayPalReturn();
       return;
     }
     
-    // Check for various PayPal return parameters
     const isPaid = searchParams.get('paid') === 'true';
     const paymentProvider = searchParams.get('payment_provider');
     const transactionId = searchParams.get('tx');
     
-    // If we have a transaction ID from PayPal, mark as paid
     if (transactionId) {
       console.log('User returned from PayPal payment with transaction ID:', transactionId);
       
-      // If we're on the preview page, just ensure state is properly set
       if (location.pathname === '/preview') {
-        // We're already on the preview page, show success message
         toast.success(`Zahlung erfolgreich (PayPal)`, {
           description: "Ihr Gedicht wurde erfolgreich freigeschaltet."
         });
         
-        // If we don't have paid=true in the URL, add it
         if (!isPaid) {
           navigate('/preview?paid=true&payment_provider=paypal&tx=' + transactionId, { 
             state: location.state,
@@ -54,13 +46,11 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
           });
         }
       } else {
-        // If not on preview page, redirect to preview with paid=true
         navigate('/preview?paid=true&payment_provider=paypal&tx=' + transactionId, { replace: true });
       }
       return;
     }
     
-    // Standard payment return check
     if (isPaid && paymentProvider === 'paypal') {
       console.log('User returned from PayPal payment', {
         isPaid,
@@ -68,14 +58,11 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         pathname: location.pathname
       });
       
-      // If we're on the preview page, just ensure state is properly set
       if (location.pathname === '/preview') {
-        // We're already on the preview page, show success message
         toast.success(`Zahlung erfolgreich (PayPal)`, {
           description: "Ihr Gedicht wurde erfolgreich freigeschaltet."
         });
       } else {
-        // If not on preview page, redirect to preview with paid=true
         navigate('/preview?paid=true&payment_provider=paypal', { replace: true });
       }
     }
@@ -87,7 +74,6 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         {children}
       </BlurredPoemSection>
       
-      {/* Payment card is now positioned with negative margin for closer placement */}
       <div className="mt-[-40px]">
         <BlurredContentCard 
           isLoading={isLoading} 
