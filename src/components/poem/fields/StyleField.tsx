@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface StyleFieldProps {
   form: UseFormReturn<PoemFormData>;
@@ -135,22 +135,19 @@ const StyleHelpContent = () => {
 };
 
 const StyleField: React.FC<StyleFieldProps> = ({ form }) => {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   return (
-    <div className="relative">
-      <div className="flex items-center gap-2">
-        <SelectField
-          form={form}
-          name="style"
-          label="Stil"
-          options={styleOptions}
-        />
+    <div>
+      <div className="flex items-center gap-1 mb-2">
+        <span className="text-sm font-medium">Stil</span>
         {isMobile ? (
           <Dialog>
-            <DialogTrigger className="inline-flex h-7 w-7 items-center justify-center rounded-full border bg-background p-0 absolute top-9 right-[-2rem]">
-              <HelpCircle className="h-4 w-4" />
-              <span className="sr-only">Gedichtstile Informationen</span>
+            <DialogTrigger asChild>
+              <button className="inline-flex h-4 w-4 items-center justify-center rounded-full p-0 ml-1">
+                <HelpCircle className="h-3 w-3" />
+                <span className="sr-only">Gedichtstile Informationen</span>
+              </button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
@@ -165,17 +162,31 @@ const StyleField: React.FC<StyleFieldProps> = ({ form }) => {
         ) : (
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger className="inline-flex h-6 w-6 items-center justify-center rounded-full border bg-background p-0 absolute top-9 right-[-2rem]">
-                <HelpCircle className="h-4 w-4" />
-                <span className="sr-only">Gedichtstile Informationen</span>
+              <TooltipTrigger asChild>
+                <button className="inline-flex h-4 w-4 items-center justify-center rounded-full p-0 ml-1">
+                  <HelpCircle className="h-3 w-3" />
+                  <span className="sr-only">Gedichtstile Informationen</span>
+                </button>
               </TooltipTrigger>
-              <TooltipContent side="right" align="start" className="max-w-md w-80 max-h-[500px] overflow-y-auto">
+              <TooltipContent 
+                side="right" 
+                align="center" 
+                className="max-w-md w-80 max-h-[500px] overflow-y-auto"
+              >
                 <StyleHelpContent />
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         )}
       </div>
+      
+      <SelectField
+        form={form}
+        name="style"
+        label=""
+        hideLabel={true}
+        options={styleOptions}
+      />
     </div>
   );
 };

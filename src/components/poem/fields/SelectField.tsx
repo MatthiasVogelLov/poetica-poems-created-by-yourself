@@ -16,6 +16,7 @@ interface SelectFieldProps {
   label: string;
   options: SelectOption[];
   className?: string;
+  hideLabel?: boolean;
 }
 
 const SelectField: React.FC<SelectFieldProps> = ({ 
@@ -23,7 +24,8 @@ const SelectField: React.FC<SelectFieldProps> = ({
   name, 
   label, 
   options,
-  className 
+  className,
+  hideLabel = false
 }) => {
   return (
     <FormField
@@ -31,7 +33,9 @@ const SelectField: React.FC<SelectFieldProps> = ({
       name={name}
       render={({ field }) => (
         <FormItem className={className}>
-          <FormLabel className="block text-sm font-medium mb-2">{label}</FormLabel>
+          {!hideLabel && (
+            <FormLabel className="block text-sm font-medium mb-2">{label}</FormLabel>
+          )}
           <Select 
             onValueChange={field.onChange} 
             defaultValue={field.value}
@@ -39,7 +43,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
           >
             <FormControl>
               <SelectTrigger className="form-select">
-                <SelectValue placeholder={`${label} auswählen`} />
+                <SelectValue placeholder={`${label || name} auswählen`} />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
