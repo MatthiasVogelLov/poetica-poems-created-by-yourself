@@ -83,12 +83,17 @@ export function formatPoemForEmail(poemContent: string): string {
   // First split by double line breaks (stanzas)
   const stanzas = poemContent.split(/\n\s*\n/);
   
+  // Clean up stanzas and process them
   return stanzas
     .map(stanza => {
       // For each stanza, wrap each line in a paragraph tag with improved styling
       return stanza
         .split('\n')
-        .map(line => `<p style="margin: 0; line-height: 1.8; font-size: 15px; text-align: center;">${line || '&nbsp;'}</p>`)
+        .map(line => {
+          // Convert ** emphasis ** to <em> tags for italics
+          const formattedLine = line.replace(/\*\*(.*?)\*\*/g, '<em>$1</em>');
+          return `<p style="margin: 0; line-height: 1.8; font-size: 15px; text-align: center;">${formattedLine || '&nbsp;'}</p>`;
+        })
         .join('');
     })
     .map(stanza => `<div style="margin-bottom: 2em; padding: 0;">${stanza}</div>`) // Wrap each stanza in a div with bottom margin
