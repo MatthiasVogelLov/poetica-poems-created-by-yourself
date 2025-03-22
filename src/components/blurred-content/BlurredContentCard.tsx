@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { LockIcon } from 'lucide-react';
 import PaymentButton from './PaymentButton';
 import PaymentError from './PaymentError';
 import { PaymentProvider } from './types';
+import { useSearchParams } from 'react-router-dom';
 
 interface BlurredContentCardProps {
   isLoading: boolean;
@@ -16,6 +17,18 @@ const BlurredContentCard: React.FC<BlurredContentCardProps> = ({
   error, 
   onPaymentClick 
 }) => {
+  const [searchParams] = useSearchParams();
+  
+  // Check for returning PayPal parameters
+  // PayPal hosted checkout will add these parameters when returning
+  useEffect(() => {
+    const paymentStatus = searchParams.get('status');
+    if (paymentStatus === 'COMPLETED' || paymentStatus === 'success') {
+      // Handle successful payment return
+      window.location.href = `${window.location.pathname}?paid=true&payment_provider=paypal`;
+    }
+  }, [searchParams]);
+
   return (
     <div className="text-center max-w-md mx-auto px-4 sm:px-6 py-4 sm:py-6 glass-card rounded-xl animate-fade-in mt-2">
       <div className="mb-4 mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
