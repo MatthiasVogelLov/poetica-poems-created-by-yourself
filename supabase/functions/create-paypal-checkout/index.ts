@@ -12,6 +12,67 @@ const recipientEmail = "matthiasvogel1973@gmail.com";
 const paypalBaseUrl = 'https://api-m.paypal.com';
 
 /**
+ * Main handler function for the create-paypal-checkout endpoint
+ */
+serve(async (req) => {
+  // Handle CORS preflight requests
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
+
+  try {
+    console.log('[create-paypal-checkout] Starting execution with timestamp:', new Date().toISOString());
+    console.log('[create-paypal-checkout] Using PayPal environment: LIVE');
+    
+    // Validate PayPal credentials
+    validateCredentials();
+    
+    // Parse request body
+    const requestData = await parseRequestData(req);
+    const { successUrl, cancelUrl, poemTitle, formData } = requestData;
+    
+    // Validate request parameters
+    validateRequestParams(successUrl, cancelUrl);
+
+    console.log('[create-paypal-checkout] Creating PayPal order with params:', { 
+      successUrl, 
+      cancelUrl, 
+      poemTitle,
+      hasFormData: !!formData
+    });
+    
+    // Get PayPal access token
+    const accessToken = await getPayPalAccessToken();
+    
+    // Create PayPal order
+    const orderData = await createPayPalOrder(accessToken, poemTitle, successUrl, cancelUrl);
+    
+    // Send email notification if form data is provided
+    await sendEmailNotification(formData, poemTitle);
+    
+    // Find the approval URL in the links array
+    const approvalUrl = findApprovalUrl(orderData);
+    
+    console.log('[create-paypal-checkout] Returning success response with approval URL:', approvalUrl);
+    
+    // Generate a unique poem ID for tracking
+    const poemId = generatePoemId(poemTitle);
+    
+    return createSuccessResponse({
+      id: orderData.id,
+      url: approvalUrl,
+      poemId: poemId
+    });
+  } catch (error) {
+    console.error('[create-paypal-checkout] Unhandled error:', error);
+    
+    return createErrorResponse(
+      error.message || 'Unexpected error creating PayPal checkout',
+      500
+    );
+  }
+});
+
+/**
  * Validate environment variables and credentials
  */
 function validateCredentials() {
@@ -30,6 +91,26 @@ function validateCredentials() {
 }
 
 /**
+ * Parse and validate request data
+ */
+async function parseRequestData(req: Request) {
+  try {
+    const requestData = await req.json();
+    console.log('[create-paypal-checkout] Request data received:', JSON.stringify({
+      hasSuccessUrl: !!requestData.successUrl,
+      hasCancelUrl: !!requestData.cancelUrl,
+      poemTitle: requestData.poemTitle,
+      hasFormData: !!requestData.formData
+    }));
+    
+    return requestData;
+  } catch (parseError) {
+    console.error('[create-paypal-checkout] Error parsing request body:', parseError);
+    throw new Error('Invalid request format');
+  }
+}
+
+/**
  * Validate required request parameters
  */
 function validateRequestParams(successUrl: string, cancelUrl: string) {
@@ -43,54 +124,53 @@ function validateRequestParams(successUrl: string, cancelUrl: string) {
 }
 
 /**
- * Create a Base64 encoded auth string for PayPal API
- */
-function createAuthCredentials() {
-  const authString = `${paypalClientId}:${paypalSecretKey}`;
-  const encoder = new TextEncoder();
-  const data = encoder.encode(authString);
-  const encodedCredentials = btoa(String.fromCharCode(...new Uint8Array(data)));
-  
-  console.log('[create-paypal-checkout] Using auth header: Basic ' + encodedCredentials.substring(0, 10) + '...');
-  return encodedCredentials;
-}
-
-/**
  * Get PayPal access token using client credentials
  */
 async function getPayPalAccessToken() {
   console.log('[create-paypal-checkout] Requesting PayPal access token...');
   console.log('[create-paypal-checkout] Sending auth request to:', `${paypalBaseUrl}/v1/oauth2/token`);
   
-  const encodedCredentials = createAuthCredentials();
+  // Create authorization header using base64 encoding of client_id:client_secret
+  const credentials = `${paypalClientId}:${paypalSecretKey}`;
+  // Using TextEncoder for UTF-8 encoding
+  const encodedCredentials = btoa(credentials);
   
-  const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${encodedCredentials}`
-    },
-    body: 'grant_type=client_credentials'
-  });
+  console.log('[create-paypal-checkout] Authorization header format: Basic [encoded credentials]');
   
-  const authStatus = authResponse.status;
-  console.log('[create-paypal-checkout] PayPal auth response status:', authStatus);
-  
-  if (!authResponse.ok) {
-    const errorText = await extractErrorText(authResponse);
-    throw new Error(`Failed to authenticate with PayPal: ${errorText}`);
+  try {
+    const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${encodedCredentials}`
+      },
+      body: 'grant_type=client_credentials'
+    });
+    
+    const authStatus = authResponse.status;
+    console.log('[create-paypal-checkout] PayPal auth response status:', authStatus);
+    
+    if (!authResponse.ok) {
+      const errorText = await extractErrorText(authResponse);
+      // Log full error details for debugging
+      console.error('[create-paypal-checkout] Auth error details:', errorText);
+      throw new Error(`Failed to authenticate with PayPal: ${errorText}`);
+    }
+    
+    const authData = await authResponse.json();
+    console.log('[create-paypal-checkout] PayPal auth successful, received token');
+    
+    if (!authData.access_token) {
+      console.error('[create-paypal-checkout] No access token in PayPal response:', authData);
+      throw new Error('PayPal did not return an access token');
+    }
+    
+    console.log('[create-paypal-checkout] Access token received successfully');
+    return authData.access_token;
+  } catch (fetchError) {
+    console.error('[create-paypal-checkout] Network error during auth request:', fetchError);
+    throw new Error(`Network error during PayPal authentication: ${fetchError.message}`);
   }
-  
-  const authData = await authResponse.json();
-  console.log('[create-paypal-checkout] PayPal auth successful, received token');
-  
-  if (!authData.access_token) {
-    console.error('[create-paypal-checkout] No access token in PayPal response:', authData);
-    throw new Error('PayPal did not return an access token');
-  }
-  
-  console.log('[create-paypal-checkout] Access token received successfully');
-  return authData.access_token;
 }
 
 /**
@@ -263,77 +343,3 @@ async function sendEmailNotification(formData: any, poemTitle: string) {
     // Don't throw, allow checkout to continue
   }
 }
-
-/**
- * Main handler function for the create-paypal-checkout endpoint
- */
-serve(async (req) => {
-  // Handle CORS preflight requests
-  const corsResponse = handleCorsPreflightRequest(req);
-  if (corsResponse) return corsResponse;
-
-  try {
-    console.log('[create-paypal-checkout] Starting execution with timestamp:', new Date().toISOString());
-    console.log('[create-paypal-checkout] Using PayPal environment: LIVE');
-    
-    // Validate PayPal credentials
-    validateCredentials();
-    
-    // Parse request body
-    let requestData;
-    try {
-      requestData = await req.json();
-      console.log('[create-paypal-checkout] Request data received:', JSON.stringify({
-        hasSuccessUrl: !!requestData.successUrl,
-        hasCancelUrl: !!requestData.cancelUrl,
-        poemTitle: requestData.poemTitle,
-        hasFormData: !!requestData.formData
-      }));
-    } catch (parseError) {
-      console.error('[create-paypal-checkout] Error parsing request body:', parseError);
-      return createErrorResponse('Invalid request format', 400);
-    }
-    
-    const { successUrl, cancelUrl, poemTitle, formData } = requestData;
-    
-    // Validate request parameters
-    validateRequestParams(successUrl, cancelUrl);
-
-    console.log('[create-paypal-checkout] Creating PayPal order with params:', { 
-      successUrl, 
-      cancelUrl, 
-      poemTitle,
-      hasFormData: !!formData
-    });
-    
-    // Get PayPal access token
-    const accessToken = await getPayPalAccessToken();
-    
-    // Create PayPal order
-    const orderData = await createPayPalOrder(accessToken, poemTitle, successUrl, cancelUrl);
-    
-    // Send email notification if form data is provided
-    await sendEmailNotification(formData, poemTitle);
-    
-    // Find the approval URL in the links array
-    const approvalUrl = findApprovalUrl(orderData);
-    
-    console.log('[create-paypal-checkout] Returning success response with approval URL:', approvalUrl);
-    
-    // Generate a unique poem ID for tracking
-    const poemId = generatePoemId(poemTitle);
-    
-    return createSuccessResponse({
-      id: orderData.id,
-      url: approvalUrl,
-      poemId: poemId
-    });
-  } catch (error) {
-    console.error('[create-paypal-checkout] Unhandled error:', error);
-    
-    return createErrorResponse(
-      error.message || 'Unexpected error creating PayPal checkout',
-      500
-    );
-  }
-});

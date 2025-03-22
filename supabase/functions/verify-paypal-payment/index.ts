@@ -8,6 +8,51 @@ const paypalSecretKey = Deno.env.get('PAYPAL_SECRET_KEY');
 const paypalBaseUrl = 'https://api-m.paypal.com';
 
 /**
+ * Main handler function for verifying PayPal payments
+ */
+serve(async (req) => {
+  // Handle CORS preflight requests
+  const corsResponse = handleCorsPreflightRequest(req);
+  if (corsResponse) return corsResponse;
+
+  return await verifyPayPalPayment(req);
+});
+
+/**
+ * Main handler function for verifying PayPal payments
+ */
+async function verifyPayPalPayment(req: Request) {
+  console.log('[verify-paypal-payment] Starting execution with timestamp:', new Date().toISOString());
+  
+  try {
+    // Validate environment variables
+    validateEnvironment();
+    
+    // Parse request body
+    const requestData = await parseRequestData(req);
+    const { orderId } = requestData;
+    
+    // Get PayPal access token
+    const accessToken = await getPayPalAccessToken();
+    
+    // Check order status
+    const orderData = await checkOrderStatus(accessToken, orderId);
+    
+    // Process the order based on its status
+    const result = await processOrderBasedOnStatus(orderData, accessToken);
+    
+    return createSuccessResponse(result);
+  } catch (error) {
+    console.error('[verify-paypal-payment] Unhandled error:', error);
+    
+    return createErrorResponse(
+      error.message || 'Unexpected error verifying PayPal payment',
+      500
+    );
+  }
+}
+
+/**
  * Validate if required environment variables are set
  */
 function validateEnvironment() {
@@ -51,59 +96,55 @@ async function parseRequestData(req: Request) {
 }
 
 /**
- * Create encoded authorization credentials for PayPal API
- */
-function createEncodedCredentials() {
-  // Using TextEncoder/TextDecoder for more reliable encoding
-  const authString = `${paypalClientId}:${paypalSecretKey}`;
-  const encoder = new TextEncoder();
-  const data = encoder.encode(authString);
-  const encodedCredentials = btoa(String.fromCharCode(...new Uint8Array(data)));
-  
-  console.log('[verify-paypal-payment] Using auth header: Basic ' + encodedCredentials.substring(0, 10) + '...');
-  return encodedCredentials;
-}
-
-/**
  * Get PayPal access token
  */
 async function getPayPalAccessToken() {
   console.log('[verify-paypal-payment] Requesting PayPal access token...');
   console.log('[verify-paypal-payment] PayPal API URL:', `${paypalBaseUrl}/v1/oauth2/token`);
   
-  const encodedCredentials = createEncodedCredentials();
-  console.log('[verify-paypal-payment] Sending auth request');
+  // Create authorization credentials
+  const credentials = `${paypalClientId}:${paypalSecretKey}`;
+  const encodedCredentials = btoa(credentials);
   
-  const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${encodedCredentials}`
-    },
-    body: 'grant_type=client_credentials'
-  });
-  
-  const authStatus = authResponse.status;
-  console.log('[verify-paypal-payment] PayPal auth response status:', authStatus);
-  
-  if (!authResponse.ok) {
-    const errorText = await extractErrorText(authResponse);
-    throw new Error(`Failed to authenticate with PayPal: ${errorText}`);
-  }
+  console.log('[verify-paypal-payment] Sending auth request with Basic auth');
   
   try {
-    const authData = await authResponse.json();
-    console.log('[verify-paypal-payment] PayPal auth successful, received token');
+    const authResponse = await fetch(`${paypalBaseUrl}/v1/oauth2/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${encodedCredentials}`
+      },
+      body: 'grant_type=client_credentials'
+    });
     
-    if (!authData.access_token) {
-      console.error('[verify-paypal-payment] No access token in PayPal response:', authData);
-      throw new Error('PayPal did not return an access token');
+    const authStatus = authResponse.status;
+    console.log('[verify-paypal-payment] PayPal auth response status:', authStatus);
+    
+    if (!authResponse.ok) {
+      const errorText = await extractErrorText(authResponse);
+      // Log detailed error info
+      console.error('[verify-paypal-payment] Auth error details:', errorText);
+      throw new Error(`Failed to authenticate with PayPal: ${errorText}`);
     }
     
-    return authData.access_token;
-  } catch (jsonError) {
-    console.error('[verify-paypal-payment] Error parsing auth response:', jsonError);
-    throw new Error('Error parsing PayPal authentication response');
+    try {
+      const authData = await authResponse.json();
+      console.log('[verify-paypal-payment] PayPal auth successful, received token');
+      
+      if (!authData.access_token) {
+        console.error('[verify-paypal-payment] No access token in PayPal response:', authData);
+        throw new Error('PayPal did not return an access token');
+      }
+      
+      return authData.access_token;
+    } catch (jsonError) {
+      console.error('[verify-paypal-payment] Error parsing auth response:', jsonError);
+      throw new Error('Error parsing PayPal authentication response');
+    }
+  } catch (fetchError) {
+    console.error('[verify-paypal-payment] Network error during auth request:', fetchError);
+    throw new Error(`Network error during PayPal authentication: ${fetchError.message}`);
   }
 }
 
@@ -235,45 +276,3 @@ async function processOrderBasedOnStatus(orderData: any, accessToken: string) {
     verified: false
   };
 }
-
-/**
- * Main handler function for verifying PayPal payments
- */
-async function verifyPayPalPayment(req: Request) {
-  console.log('[verify-paypal-payment] Starting execution with timestamp:', new Date().toISOString());
-  
-  try {
-    // Validate environment variables
-    validateEnvironment();
-    
-    // Parse request body
-    const requestData = await parseRequestData(req);
-    const { orderId } = requestData;
-    
-    // Get PayPal access token
-    const accessToken = await getPayPalAccessToken();
-    
-    // Check order status
-    const orderData = await checkOrderStatus(accessToken, orderId);
-    
-    // Process the order based on its status
-    const result = await processOrderBasedOnStatus(orderData, accessToken);
-    
-    return createSuccessResponse(result);
-  } catch (error) {
-    console.error('[verify-paypal-payment] Unhandled error:', error);
-    
-    return createErrorResponse(
-      error.message || 'Unexpected error verifying PayPal payment',
-      500
-    );
-  }
-}
-
-serve(async (req) => {
-  // Handle CORS preflight requests
-  const corsResponse = handleCorsPreflightRequest(req);
-  if (corsResponse) return corsResponse;
-
-  return await verifyPayPalPayment(req);
-});
