@@ -1,9 +1,9 @@
 
 // PayPal configuration and environment settings
 export const ENVIRONMENT = {
-  // Always use live PayPal environment
-  BASE_URL: 'https://api-m.paypal.com',
-  IS_LIVE: true
+  // Use sandbox PayPal environment for testing
+  BASE_URL: 'https://api-m.sandbox.paypal.com',
+  IS_SANDBOX: true
 };
 
 // Function to get and validate required environment variables
@@ -23,8 +23,9 @@ export function getEnvironmentVariables() {
     throw new Error('PayPal Secret Key is not configured');
   }
   
-  const maskedClientId = paypalClientId.substring(0, 4) + '...' + paypalClientId.substring(paypalClientId.length - 4);
+  const maskedClientId = paypalClientId.substring(0, 8) + '...' + paypalClientId.substring(paypalClientId.length - 8);
   console.log('[create-paypal-checkout] Using PayPal Client ID:', maskedClientId);
+  console.log('[create-paypal-checkout] Using PayPal environment: SANDBOX');
   
   return {
     paypalClientId,

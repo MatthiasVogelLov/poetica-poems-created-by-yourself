@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { usePayPalPayment } from './paypal/usePayPalPayment';
+import { supabase } from '@/integrations/supabase/client';
 import { useAdminBypass } from './useAdminBypass';
 import { 
   preparePaymentData, 

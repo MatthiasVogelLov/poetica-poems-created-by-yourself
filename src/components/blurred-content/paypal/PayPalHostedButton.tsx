@@ -42,7 +42,7 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
 
   const handlePayPalClick = async () => {
     try {
-      console.log('Starting PayPal payment process...');
+      console.log('Starting PayPal payment process (sandbox)...');
       setButtonLoading(true);
       
       // Call the create-paypal-payment function via Supabase
@@ -64,8 +64,13 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
           localStorage.setItem('paypal_order_id', data.orderId);
         }
         
-        // Open PayPal in the same window
-        window.location.href = data.redirectUrl;
+        // Open PayPal in a new window to handle the return flow better
+        window.open(data.redirectUrl, '_blank');
+        
+        // Show a message to the user about the new window
+        toast.info('PayPal Checkout', {
+          description: 'Bitte schließen Sie den Bezahlvorgang im PayPal-Fenster ab.'
+        });
       } else {
         console.error('No redirect URL returned from create-paypal-payment function');
         toast.error('PayPal Checkout konnte nicht gestartet werden');
@@ -91,7 +96,7 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
       <div className="flex flex-col items-center text-xs text-muted-foreground mt-2">
         <img src="https://www.paypalobjects.com/images/Debit_Credit_APM.svg" alt="Payment methods" className="h-6 mb-1" />
         <div className="flex items-center gap-1">
-          Abgewickelt durch 
+          <span className="text-xs text-gray-500">Sandbox-Modus</span> · Abgewickelt durch 
           <img src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg" alt="PayPal" className="h-3" />
         </div>
       </div>

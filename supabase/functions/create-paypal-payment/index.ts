@@ -3,11 +3,12 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/email-utils.ts";
 
 // PayPal API configuration
-const PAYPAL_API = 'https://api-m.paypal.com';
+// Use PayPal Sandbox environment for testing
+const PAYPAL_API = 'https://api-m.sandbox.paypal.com';
 const PAYPAL_CLIENT_ID = Deno.env.get('PAYPAL_CLIENT_ID');
 const PAYPAL_CLIENT_SECRET = Deno.env.get('PAYPAL_SECRET_KEY');
 
-// Create a basic PayPal order
+// Create a basic PayPal order in sandbox mode
 async function createPayPalOrder() {
   // Check for required environment variables
   if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
@@ -17,6 +18,10 @@ async function createPayPalOrder() {
   try {
     // Get access token
     const auth = btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`);
+    
+    console.log('[create-paypal-payment] Requesting PayPal access token...');
+    console.log('[create-paypal-payment] Using PayPal environment: SANDBOX');
+    
     const tokenResponse = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
       method: 'POST',
       headers: {
@@ -34,8 +39,9 @@ async function createPayPalOrder() {
 
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
+    console.log('[create-paypal-payment] Successfully got PayPal access token');
 
-    // Create order
+    // Create order with sandbox URLs
     const orderResponse = await fetch(`${PAYPAL_API}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
@@ -69,6 +75,7 @@ async function createPayPalOrder() {
     }
 
     const orderData = await orderResponse.json();
+    console.log('[create-paypal-payment] Order created:', orderData.id);
     
     // Find approval URL
     const approvalLink = orderData.links.find(link => link.rel === 'approve');
