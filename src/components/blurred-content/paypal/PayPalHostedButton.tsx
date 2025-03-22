@@ -25,6 +25,7 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
   // Create return URL to the current page with paid=true
   const currentPath = location.pathname;
   const returnUrl = `${window.location.origin}${currentPath}?paid=true&payment_provider=paypal`;
+  const cancelUrl = window.location.href;
   
   if (isLoading) {
     return (
@@ -38,20 +39,29 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading }) =>
     );
   }
   
+  // Using direct checkout link with auto-return parameters
   return (
     <div className="w-full">
       <form 
-        action="https://www.paypal.com/ncp/payment/W82598U7M5WML" 
+        action="https://www.paypal.com/cgi-bin/webscr" 
         method="post" 
-        target="_top" 
+        target="_top"
         className="w-full flex flex-col items-center gap-2"
       >
-        {/* Add hidden inputs for return flow */}
+        {/* PayPal Standard Checkout parameters */}
+        <input type="hidden" name="cmd" value="_xclick" />
+        <input type="hidden" name="business" value="matthiasvogel1973@gmail.com" />
+        <input type="hidden" name="lc" value="DE" />
+        <input type="hidden" name="item_name" value="Personalisiertes Gedicht" />
+        <input type="hidden" name="amount" value="1.29" />
+        <input type="hidden" name="currency_code" value="EUR" />
+        <input type="hidden" name="button_subtype" value="services" />
+        <input type="hidden" name="no_note" value="1" />
+        <input type="hidden" name="no_shipping" value="1" />
+        <input type="hidden" name="rm" value="1" /> {/* Return method: GET */}
         <input type="hidden" name="return" value={returnUrl} />
-        <input type="hidden" name="cancel_return" value={window.location.href} />
-        <input type="hidden" name="rm" value="2" /> {/* Return method: POST with variables */}
-        <input type="hidden" name="cbt" value="Zurück zu Poetica" /> {/* Custom return button text */}
-        <input type="hidden" name="bn" value="Poetica_Gedicht_Bezahlung" /> {/* Button source */}
+        <input type="hidden" name="cancel_return" value={cancelUrl} />
+        <input type="hidden" name="bn" value="PP-BuyNowBF:btn_buynowCC_LG.gif:NonHosted" />
         
         <button 
           type="submit"

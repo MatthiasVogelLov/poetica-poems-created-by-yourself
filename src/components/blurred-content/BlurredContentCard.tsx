@@ -27,7 +27,7 @@ const BlurredContentCard: React.FC<BlurredContentCardProps> = ({
     
     if (transactionId || paymentStatus === 'COMPLETED' || paymentStatus === 'success') {
       // Handle successful payment return
-      window.location.href = `${window.location.pathname}?paid=true&payment_provider=paypal`;
+      window.location.href = `${window.location.pathname}?paid=true&payment_provider=paypal&tx=${transactionId || ''}`;
     }
   }, [searchParams]);
 

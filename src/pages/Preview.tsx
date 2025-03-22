@@ -35,16 +35,15 @@ const Preview = () => {
     }
     
     // Show toast message if returning from payment
-    const isPayPalSuccess = isPaid || transactionId;
-    if (isPayPalSuccess && (paymentProvider || transactionId)) {
-      const provider = (paymentProvider === 'paypal' || transactionId) ? 'PayPal' : 'Kreditkarte';
+    if (isPaid && (paymentProvider || transactionId)) {
+      const provider = paymentProvider === 'paypal' || transactionId ? 'PayPal' : 'Kreditkarte';
       toast.success(`Zahlung erfolgreich (${provider})`, {
         description: "Vielen Dank für Ihren Kauf! Das vollständige Gedicht wurde freigeschaltet."
       });
       
       // If we don't have paid=true in URL but have tx, update URL
       if (!isPaid && transactionId) {
-        navigate('/preview?paid=true&payment_provider=paypal', { 
+        navigate('/preview?paid=true&payment_provider=paypal&tx=' + transactionId, { 
           state: location.state,
           replace: true 
         });

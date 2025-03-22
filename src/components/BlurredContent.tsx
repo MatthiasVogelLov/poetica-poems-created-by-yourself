@@ -33,20 +33,11 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
     // Check for various PayPal return parameters
     const isPaid = searchParams.get('paid') === 'true';
     const paymentProvider = searchParams.get('payment_provider');
-    const paymentStatus = searchParams.get('status');
     const transactionId = searchParams.get('tx');
     
-    // If we have a transaction ID or completed status from PayPal, mark as paid
-    const isPayPalSuccess = transactionId || paymentStatus === 'COMPLETED' || paymentStatus === 'success';
-    
-    if ((isPaid && paymentProvider === 'paypal') || isPayPalSuccess) {
-      console.log('User returned from PayPal payment', {
-        isPaid,
-        paymentProvider,
-        paymentStatus,
-        transactionId,
-        pathname: location.pathname
-      });
+    // If we have a transaction ID from PayPal, mark as paid
+    if (transactionId) {
+      console.log('User returned from PayPal payment with transaction ID:', transactionId);
       
       // If we're on the preview page, just ensure state is properly set
       if (location.pathname === '/preview') {
@@ -57,11 +48,32 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
         
         // If we don't have paid=true in the URL, add it
         if (!isPaid) {
-          navigate('/preview?paid=true&payment_provider=paypal', { 
+          navigate('/preview?paid=true&payment_provider=paypal&tx=' + transactionId, { 
             state: location.state,
             replace: true 
           });
         }
+      } else {
+        // If not on preview page, redirect to preview with paid=true
+        navigate('/preview?paid=true&payment_provider=paypal&tx=' + transactionId, { replace: true });
+      }
+      return;
+    }
+    
+    // Standard payment return check
+    if (isPaid && paymentProvider === 'paypal') {
+      console.log('User returned from PayPal payment', {
+        isPaid,
+        paymentProvider,
+        pathname: location.pathname
+      });
+      
+      // If we're on the preview page, just ensure state is properly set
+      if (location.pathname === '/preview') {
+        // We're already on the preview page, show success message
+        toast.success(`Zahlung erfolgreich (PayPal)`, {
+          description: "Ihr Gedicht wurde erfolgreich freigeschaltet."
+        });
       } else {
         // If not on preview page, redirect to preview with paid=true
         navigate('/preview?paid=true&payment_provider=paypal', { replace: true });
