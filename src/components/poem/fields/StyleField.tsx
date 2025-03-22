@@ -147,17 +147,21 @@ const StyleField: React.FC<StyleFieldProps> = ({ form }) => {
               <button 
                 type="button" 
                 className="inline-flex h-4 w-4 items-center justify-center rounded-full p-0 ml-1"
-                // Add type="button" to prevent form submission
                 onClick={(e) => {
-                  e.preventDefault(); // Prevent form submission
-                  e.stopPropagation(); // Stop event propagation
+                  e.preventDefault();
+                  e.stopPropagation();
                 }}
               >
                 <HelpCircle className="h-3 w-3" />
                 <span className="sr-only">Gedichtstile Informationen</span>
               </button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent 
+              className="sm:max-w-[500px]"
+              onInteractOutside={(e) => {
+                e.preventDefault();
+              }}
+            >
               <DialogHeader>
                 <DialogTitle>Gedichtstile</DialogTitle>
                 <DialogDescription>
@@ -176,10 +180,9 @@ const StyleField: React.FC<StyleFieldProps> = ({ form }) => {
                 <button 
                   type="button" 
                   className="inline-flex h-4 w-4 items-center justify-center rounded-full p-0 ml-1"
-                  // Add type="button" to prevent form submission
                   onClick={(e) => {
-                    e.preventDefault(); // Prevent form submission
-                    e.stopPropagation(); // Stop event propagation
+                    e.preventDefault();
+                    e.stopPropagation();
                   }}
                 >
                   <HelpCircle className="h-3 w-3" />
@@ -187,11 +190,15 @@ const StyleField: React.FC<StyleFieldProps> = ({ form }) => {
                 </button>
               </TooltipTrigger>
               <TooltipContent 
-                side="right" 
+                side="top" 
                 align="center" 
                 className="w-80 p-4"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
               >
-                <div className="max-h-[60vh] overflow-y-auto">
+                <div className="max-h-[60vh] overflow-y-auto pr-0">
                   <StyleHelpContent />
                 </div>
               </TooltipContent>

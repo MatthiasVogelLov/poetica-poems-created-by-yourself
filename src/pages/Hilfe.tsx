@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
-import GeneratorFooter from '../components/GeneratorFooter';
+import Footer from '../components/Footer';
 
 const Hilfe = () => {
   const [content, setContent] = useState<string>('');
@@ -32,7 +32,7 @@ const Hilfe = () => {
         </div>
       </div>
       
-      <GeneratorFooter />
+      <Footer />
     </div>
   );
 };
