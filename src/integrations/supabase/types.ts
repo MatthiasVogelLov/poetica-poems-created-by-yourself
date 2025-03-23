@@ -92,6 +92,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_poems: {
+        Row: {
+          content: string
+          content_type: string | null
+          created_at: string | null
+          id: string
+          length: string | null
+          occasion: string | null
+          style: string | null
+          title: string
+          updated_at: string | null
+          verse_type: string | null
+        }
+        Insert: {
+          content: string
+          content_type?: string | null
+          created_at?: string | null
+          id?: string
+          length?: string | null
+          occasion?: string | null
+          style?: string | null
+          title: string
+          updated_at?: string | null
+          verse_type?: string | null
+        }
+        Update: {
+          content?: string
+          content_type?: string | null
+          created_at?: string | null
+          id?: string
+          length?: string | null
+          occasion?: string | null
+          style?: string | null
+          title?: string
+          updated_at?: string | null
+          verse_type?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       audience_stats: {
