@@ -1,9 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
-import PoemEditor, { EditorPreferences } from './PoemEditor';
 import { Button } from "@/components/ui/button";
 import { PenLine } from "lucide-react";
 import { useIsMobile } from '@/hooks/use-mobile';
+import PoemEditor from './editor/PoemEditor';
+import { EditorPreferences } from './editor/types';
+import { getFontFamily } from './editor/editorOptions';
 
 interface PoemContentProps {
   poem: string;
@@ -26,7 +27,6 @@ const PoemContent: React.FC<PoemContentProps> = ({
   });
   const isMobile = useIsMobile();
   
-  // Add debugging to help identify poem loading issues
   useEffect(() => {
     if (!poem) {
       console.log('Warning: Empty poem content received in PoemContent component');
@@ -36,7 +36,6 @@ const PoemContent: React.FC<PoemContentProps> = ({
     }
   }, [poem]);
 
-  // Load saved preferences on component mount
   useEffect(() => {
     try {
       const savedPreferences = localStorage.getItem('poemEditorPreferences');
@@ -49,23 +48,6 @@ const PoemContent: React.FC<PoemContentProps> = ({
     }
   }, []);
 
-  // Map font value to actual CSS font-family
-  const getFontFamily = (fontValue: string) => {
-    switch (fontValue) {
-      case 'sans':
-        return 'font-sans';
-      case 'mono':
-        return 'font-mono';
-      case 'cursive':
-        return 'font-["Brush_Script_MT",cursive]';
-      case 'fantasy':
-        return 'font-["Copperplate",fantasy]';
-      default:
-        return 'font-serif';
-    }
-  };
-
-  // If poem is empty or undefined, show a helpful error message
   if (!currentPoem || currentPoem.trim() === '') {
     return (
       <div className="poem-text mb-8 text-center text-base sm:text-lg bg-red-50 p-6 rounded-lg border border-red-100">
@@ -86,15 +68,12 @@ const PoemContent: React.FC<PoemContentProps> = ({
     setEditorPreferences(preferences);
     setIsEditing(false);
     
-    // Log preferences to verify they're being saved
     console.log('Saving poem with preferences:', preferences);
     
-    // Call the parent component's handler if provided
     if (onPoemChange) {
       onPoemChange(updatedPoem);
     }
     
-    // Save to localStorage
     try {
       const poemData = localStorage.getItem('currentPoemData');
       if (poemData) {
@@ -112,7 +91,6 @@ const PoemContent: React.FC<PoemContentProps> = ({
     setIsEditing(false);
   };
 
-  // Show editor when in editing mode
   if (isEditing) {
     return (
       <div className="mb-8">
@@ -125,7 +103,6 @@ const PoemContent: React.FC<PoemContentProps> = ({
     );
   }
 
-  // Show poem content with edit button when paid
   return (
     <div className="poem-text mb-8 relative">
       {isPaid && (
