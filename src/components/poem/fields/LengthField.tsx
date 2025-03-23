@@ -20,7 +20,7 @@ const LengthField: React.FC<LengthFieldProps> = ({ form }) => {
       name="length"
       label="Länge"
       options={lengthOptions}
-      className="col-span-2"
+      className="w-full"
     />
   );
 };
