@@ -10,6 +10,7 @@ import PreviewFooter from '@/components/preview/PreviewFooter';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Preview = () => {
   const location = useLocation();
@@ -55,11 +56,57 @@ const Preview = () => {
     navigate
   );
   
+  // Store newly generated poem to the database when it's fully unlocked
+  useEffect(() => {
+    const savePoemToDatabase = async () => {
+      if ((isPaid || !!transactionId) && 
+          poemContent && 
+          poemTitle && 
+          location.state?.formData && 
+          !isGenerating) {
+        try {
+          console.log('Saving poem to database:', poemTitle);
+          
+          // Save poem to user_poems table
+          const { error } = await supabase
+            .from('user_poems')
+            .insert([
+              {
+                title: poemTitle,
+                content: poemContent,
+                occasion: location.state.formData.occasion,
+                content_type: location.state.formData.contentType,
+                style: location.state.formData.style,
+                verse_type: location.state.formData.verseType,
+                length: location.state.formData.length,
+              }
+            ]);
+            
+          if (error) {
+            console.error('Error saving poem to database:', error);
+            return;
+          }
+          
+          toast.success('Gedicht wurde in PoemsLand gespeichert', {
+            description: 'Sie können es jederzeit in PoemsLand ansehen.',
+            duration: 5000,
+          });
+          
+        } catch (error) {
+          console.error('Failed to save poem to database:', error);
+        }
+      }
+    };
+    
+    savePoemToDatabase();
+  }, [isPaid, transactionId, poemContent, poemTitle, location.state, isGenerating]);
+
   const goBack = () => {
     // When going back to generator, include state to indicate we're returning from preview
     navigate('/generator', { 
       state: { 
-        returnFromPreview: true 
+        returnFromPreview: true,
+        formData: location.state?.formData // Pass the original form data back
       } 
     });
   };

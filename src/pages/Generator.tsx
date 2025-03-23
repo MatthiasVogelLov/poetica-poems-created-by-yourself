@@ -10,14 +10,17 @@ import { toast } from 'sonner';
 
 const Generator = () => {
   const location = useLocation();
-
-  // If we have state from location, a poem was just created
-  // Send notification to admin and save to user_poems
+  
+  // Send notification to admin when a poem is generated
   useEffect(() => {
     const notifyAdmin = async () => {
       if (location.state?.generatedPoem) {
         try {
           console.log('Sending admin notification about new poem:', location.state.generatedPoem.title);
+          
+          // Get editor preferences if available
+          const editorPreferences = localStorage.getItem('poemEditorPreferences');
+          const parsedPreferences = editorPreferences ? JSON.parse(editorPreferences) : null;
 
           // Send notification to admin about new poem
           const {
@@ -27,40 +30,19 @@ const Generator = () => {
             body: {
               poemTitle: location.state.generatedPoem.title,
               poemContent: location.state.generatedPoem.poem,
-              formData: location.state.formData
+              formData: location.state.formData,
+              editorPreferences: parsedPreferences
             }
           });
+          
           if (error) {
             console.error('Error sending admin notification:', error);
             return;
           }
           console.log('Admin notification sent successfully:', data);
           
-          // Save poem to user_poems table
-          const { error: saveError } = await supabase
-            .from('user_poems')
-            .insert([
-              {
-                title: location.state.generatedPoem.title,
-                content: location.state.generatedPoem.poem,
-                occasion: location.state.formData.occasion,
-                content_type: location.state.formData.contentType,
-                style: location.state.formData.style,
-                verse_type: location.state.formData.verseType,
-                length: location.state.formData.length,
-              }
-            ]);
-            
-          if (saveError) {
-            console.error('Error saving poem to database:', saveError);
-            return;
-          }
-          
-          toast.success('Gedicht wurde in PoemsLand gespeichert', {
-            description: 'Sie können es jederzeit in PoemsLand ansehen.',
-            duration: 5000,
-          });
-          
+          // We're not saving to user_poems here anymore as this is done in Preview page
+          // when poem is fully unlocked (paid).
         } catch (error) {
           console.error('Failed to process poem:', error);
         }
