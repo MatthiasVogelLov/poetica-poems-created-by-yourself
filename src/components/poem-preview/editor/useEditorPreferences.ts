@@ -25,7 +25,16 @@ export function useEditorPreferences(initialPreferences?: Partial<EditorPreferen
   }, [initialPreferences]);
 
   const updatePreferences = (newPreferences: Partial<EditorPreferences>) => {
-    setPreferences(prev => ({ ...prev, ...newPreferences }));
+    setPreferences(prev => {
+      const updated = { ...prev, ...newPreferences };
+      // Save immediately when preferences are updated
+      try {
+        localStorage.setItem('poemEditorPreferences', JSON.stringify(updated));
+      } catch (e) {
+        console.error('Error auto-saving editor preferences:', e);
+      }
+      return updated;
+    });
   };
 
   const resetPreferences = () => {

@@ -6,7 +6,6 @@ import HeaderContent from '../components/generator/HeaderContent';
 import Footer from '../components/Footer';
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from 'react-router-dom';
-import { toast } from "sonner";
 
 const Generator = () => {
   const location = useLocation();
@@ -14,13 +13,6 @@ const Generator = () => {
   // If we have state from location, a poem was just created
   // Send notification to admin
   useEffect(() => {
-    // Show toast if returning from preview with cached poem
-    if (location.state?.fromCache) {
-      toast.success("Gedicht aus dem Cache geladen", {
-        description: "Ein passendes Gedicht wurde schnell aus dem Zwischenspeicher geladen."
-      });
-    }
-    
     const notifyAdmin = async () => {
       if (location.state?.generatedPoem) {
         try {
@@ -32,8 +24,7 @@ const Generator = () => {
             body: {
               poemTitle: location.state.generatedPoem.title,
               poemContent: location.state.generatedPoem.poem,
-              formData: location.state.formData,
-              fromCache: location.state.fromCache
+              formData: location.state.formData
             }
           });
           

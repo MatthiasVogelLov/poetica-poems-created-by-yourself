@@ -13,7 +13,7 @@ interface PoemCacheItem {
   };
 }
 
-// Get all cached poems
+// Get all cached poems - for admin purposes only
 export const getCachedPoems = (): PoemCacheItem[] => {
   try {
     const cachedPoemsJson = localStorage.getItem('cachedPoems');
@@ -26,7 +26,7 @@ export const getCachedPoems = (): PoemCacheItem[] => {
   return [];
 };
 
-// Add a poem to the cache
+// Add a poem to the cache - for admin/analytics purposes only
 export const addPoemToCache = (
   title: string,
   poem: string,
@@ -64,7 +64,7 @@ export const addPoemToCache = (
   }
 };
 
-// Find a poem in the cache based on parameters
+// Find a poem in the cache based on parameters - NOT USED for displaying complete poems to users
 export const findPoemInCache = (params: {
   audience: string;
   occasion: string;
@@ -72,48 +72,10 @@ export const findPoemInCache = (params: {
   style: string;
   length: string;
   keywords?: string;
-}): PoemCacheItem | null => {
-  try {
-    const cachedPoems = getCachedPoems();
-    
-    // For exact match without keywords, or with exact same keywords
-    const exactMatch = cachedPoems.find(item => 
-      item.params.audience === params.audience &&
-      item.params.occasion === params.occasion &&
-      item.params.contentType === params.contentType &&
-      item.params.style === params.style &&
-      item.params.length === params.length &&
-      item.params.keywords === params.keywords
-    );
-    
-    if (exactMatch) {
-      console.log('Exact poem match found in cache:', exactMatch.title);
-      return exactMatch;
-    }
-    
-    // If no exact match and no keywords were specified, find a match without keywords
-    if (!params.keywords || params.keywords.trim() === '') {
-      const similarMatch = cachedPoems.find(item => 
-        item.params.audience === params.audience &&
-        item.params.occasion === params.occasion &&
-        item.params.contentType === params.contentType &&
-        item.params.style === params.style &&
-        item.params.length === params.length &&
-        (!item.params.keywords || item.params.keywords.trim() === '')
-      );
-      
-      if (similarMatch) {
-        console.log('Similar poem match found in cache:', similarMatch.title);
-        return similarMatch;
-      }
-    }
-    
-    console.log('No matching poem found in cache');
-    return null;
-  } catch (error) {
-    console.error('Error searching poem cache:', error);
-    return null;
-  }
+}): null => {
+  // This function is intentionally disabled to prevent loading complete poems from cache
+  console.log('Find poem in cache is disabled - always generating new poems');
+  return null;
 };
 
 // Clear the poem cache
