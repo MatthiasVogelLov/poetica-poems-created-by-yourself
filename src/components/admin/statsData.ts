@@ -8,12 +8,13 @@ export interface StatItem {
 export const generateDummyStats = () => {
   // Poem count for each audience type
   const audienceData: StatItem[] = [
+    { name: 'Eltern', value: Math.floor(Math.random() * 600) + 300, todayValue: Math.floor(Math.random() * 12) + 3 },
     { name: 'Erwachsene', value: Math.floor(Math.random() * 1000) + 500, todayValue: Math.floor(Math.random() * 20) + 5 },
-    { name: 'Kinder', value: Math.floor(Math.random() * 600) + 300, todayValue: Math.floor(Math.random() * 15) + 2 },
-    { name: 'Partner', value: Math.floor(Math.random() * 800) + 400, todayValue: Math.floor(Math.random() * 12) + 3 },
     { name: 'Familie', value: Math.floor(Math.random() * 700) + 350, todayValue: Math.floor(Math.random() * 10) + 1 },
     { name: 'Freunde', value: Math.floor(Math.random() * 500) + 250, todayValue: Math.floor(Math.random() * 8) + 1 },
+    { name: 'Kinder', value: Math.floor(Math.random() * 600) + 300, todayValue: Math.floor(Math.random() * 15) + 2 },
     { name: 'Kollegen', value: Math.floor(Math.random() * 300) + 150, todayValue: Math.floor(Math.random() * 5) + 1 },
+    { name: 'Partner', value: Math.floor(Math.random() * 800) + 400, todayValue: Math.floor(Math.random() * 12) + 3 },
   ];
 
   // Poem count for each occasion
@@ -88,3 +89,4 @@ export const generateDummyStats = () => {
     keywordsTodayUsed
   };
 };
+

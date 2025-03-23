@@ -23,7 +23,7 @@ const ContentTypeField: React.FC<ContentTypeFieldProps> = ({ form }) => {
     <SelectField
       form={form}
       name="contentType"
-      label="Inhalt"
+      label="Thema"
       options={contentTypeOptions}
     />
   );

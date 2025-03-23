@@ -9,12 +9,13 @@ interface AudienceFieldProps {
 }
 
 const audienceOptions: SelectOption[] = [
-  { value: 'kinder', label: 'Kinder' },
+  { value: 'eltern', label: 'Eltern' },
   { value: 'erwachsene', label: 'Erwachsene' },
-  { value: 'partner', label: 'Partner/in' },
   { value: 'familie', label: 'Familie' },
   { value: 'freunde', label: 'Freunde' },
-  { value: 'kollegen', label: 'Kollegen' }
+  { value: 'kinder', label: 'Kinder' },
+  { value: 'kollegen', label: 'Kollegen' },
+  { value: 'partner', label: 'Partner/in' }
 ];
 
 const AudienceField: React.FC<AudienceFieldProps> = ({ form }) => {

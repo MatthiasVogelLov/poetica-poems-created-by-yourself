@@ -9,7 +9,6 @@ interface LengthFieldProps {
 }
 
 const lengthOptions: SelectOption[] = [
-  { value: 'kurz', label: 'Kurz (8-12 Zeilen)' },
   { value: 'mittel', label: 'Mittel (12-20 Zeilen)' },
   { value: 'lang', label: 'Lang (20-30 Zeilen)' }
 ];

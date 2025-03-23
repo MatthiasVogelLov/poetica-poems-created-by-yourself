@@ -1,5 +1,5 @@
 
-export type Audience = 'kinder' | 'erwachsene' | 'partner' | 'familie' | 'freunde' | 'kollegen';
+export type Audience = 'eltern' | 'erwachsene' | 'familie' | 'freunde' | 'kinder' | 'kollegen' | 'partner';
 export type Occasion = 
   | 'ostern' 
   | 'abschluss'
@@ -24,7 +24,7 @@ export type Occasion =
   | 'andere';
 export type ContentType = 'liebe' | 'freundschaft' | 'natur' | 'leben' | 'motivation' | 'humor' | 'trauer';
 export type Style = 'sonett' | 'ballade' | 'ode' | 'hymne' | 'epigramm' | 'haiku' | 'tanka' | 'freieverse' | 'elfchen' | 'klassisch' | 'modern' | 'romantisch' | 'humorvoll' | 'experimentell';
-export type Length = 'kurz' | 'mittel' | 'lang';
+export type Length = 'mittel' | 'lang';
 
 export interface PoemFormData {
   audience: Audience;
