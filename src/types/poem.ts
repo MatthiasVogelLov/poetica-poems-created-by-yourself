@@ -42,7 +42,7 @@ export const initialFormData: PoemFormData = {
   occasion: 'ostern',
   contentType: 'liebe',
   style: 'klassisch',
-  verseType: 'frei',
+  verseType: 'kreuzreim',
   length: 'mittel',
   keywords: '',
 };
