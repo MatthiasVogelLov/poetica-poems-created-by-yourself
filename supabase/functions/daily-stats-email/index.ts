@@ -15,12 +15,20 @@ serve(async (req) => {
   }
 
   try {
+    console.log("[daily-stats-email] Function started at:", new Date().toISOString());
+    
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    if (!resendApiKey) {
+      throw new Error('RESEND_API_KEY is not set');
+    }
+    
+    console.log("[daily-stats-email] Connected to Supabase, Resend API key found");
+    const resend = new Resend(resendApiKey);
     
     // Get yesterday's date (UTC)
     const yesterday = new Date();
@@ -33,7 +41,8 @@ serve(async (req) => {
     // Format as YYYY-MM-DD for display
     const yesterdayFormatted = yesterday.toISOString().split('T')[0];
     
-    console.log(`Generating stats email for ${yesterdayFormatted}`);
+    console.log(`[daily-stats-email] Generating stats email for ${yesterdayFormatted}`);
+    console.log(`[daily-stats-email] Date range: ${yesterday.toISOString()} to ${yesterdayEnd.toISOString()}`);
     
     // Query total poems created yesterday
     const { data: poemStats, error: poemError } = await supabase
@@ -45,6 +54,8 @@ serve(async (req) => {
     if (poemError) {
       throw new Error(`Error fetching poem stats: ${poemError.message}`);
     }
+    
+    console.log("[daily-stats-email] Poem stats fetched:", poemStats);
     
     // Query poems with keywords
     const { data: keywordStats, error: keywordError } = await supabase
@@ -58,6 +69,8 @@ serve(async (req) => {
       throw new Error(`Error fetching keyword stats: ${keywordError.message}`);
     }
     
+    console.log("[daily-stats-email] Keyword stats fetched:", keywordStats);
+    
     // Get audience breakdown
     const { data: audienceData, error: audienceError } = await supabase
       .from('audience_stats')
@@ -67,6 +80,8 @@ serve(async (req) => {
       throw new Error(`Error fetching audience stats: ${audienceError.message}`);
     }
     
+    console.log("[daily-stats-email] Audience data fetched, count:", audienceData?.length);
+    
     // Get occasion breakdown
     const { data: occasionData, error: occasionError } = await supabase
       .from('occasion_stats')
@@ -75,6 +90,8 @@ serve(async (req) => {
     if (occasionError) {
       throw new Error(`Error fetching occasion stats: ${occasionError.message}`);
     }
+    
+    console.log("[daily-stats-email] Occasion data fetched, count:", occasionData?.length);
     
     // Parse count results
     const totalPoems = Number(poemStats?.[0]?.count || 0);
@@ -147,15 +164,20 @@ serve(async (req) => {
       </html>
     `;
     
+    // Update the recipient email
+    const recipientEmail = "matthiasvogel1973@gmail.com"; // Replace with the admin email
+    
+    console.log(`[daily-stats-email] Sending email to ${recipientEmail}`);
+    
     // Send email
     const emailData = await resend.emails.send({
       from: "Poetica <onboarding@resend.dev>",  // Change this to your verified domain when in production
-      to: ["admin@example.com"],  // Replace with the actual admin email
+      to: [recipientEmail],
       subject: `Poetica Tagesstatistik: ${yesterdayFormatted}`,
       html: emailHtml,
     });
     
-    console.log('Stats email sent:', emailData);
+    console.log('[daily-stats-email] Stats email sent:', emailData);
 
     return new Response(
       JSON.stringify({ success: true, data: emailData }),

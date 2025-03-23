@@ -10,6 +10,11 @@ interface PoemContentProps {
   onPoemChange?: (updatedPoem: string) => void;
 }
 
+interface EditorPreferences {
+  font: string;
+  fontSize: string;
+}
+
 const PoemContent: React.FC<PoemContentProps> = ({ 
   poem, 
   isPaid = false,
@@ -17,6 +22,10 @@ const PoemContent: React.FC<PoemContentProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentPoem, setCurrentPoem] = useState(poem);
+  const [editorPreferences, setEditorPreferences] = useState<EditorPreferences>({
+    font: 'serif',
+    fontSize: 'text-base'
+  });
   
   // Add debugging to help identify poem loading issues
   useEffect(() => {
@@ -27,6 +36,34 @@ const PoemContent: React.FC<PoemContentProps> = ({
       setCurrentPoem(poem);
     }
   }, [poem]);
+
+  // Load saved preferences on component mount
+  useEffect(() => {
+    try {
+      const savedPreferences = localStorage.getItem('poemEditorPreferences');
+      if (savedPreferences) {
+        setEditorPreferences(JSON.parse(savedPreferences));
+      }
+    } catch (e) {
+      console.error('Error loading editor preferences:', e);
+    }
+  }, []);
+
+  // Map font value to actual CSS font-family
+  const getFontFamily = (fontValue: string) => {
+    switch (fontValue) {
+      case 'sans':
+        return 'font-sans';
+      case 'playfair':
+        return 'font-serif'; // Using Playfair Display via font-serif
+      case 'garamond':
+        return 'font-["EB_Garamond",serif]';
+      case 'georgia':
+        return 'font-["Georgia",serif]';
+      default:
+        return 'font-serif';
+    }
+  };
 
   // If poem is empty or undefined, show a helpful error message
   if (!currentPoem || currentPoem.trim() === '') {
@@ -100,7 +137,7 @@ const PoemContent: React.FC<PoemContentProps> = ({
           </Button>
         </div>
       )}
-      <div className="whitespace-pre-line text-center text-base sm:text-lg bg-gray-50 p-6 rounded-lg border border-gray-100 shadow-inner">
+      <div className={`whitespace-pre-line text-center ${getFontFamily(editorPreferences.font)} ${editorPreferences.fontSize} bg-gray-50 p-6 rounded-lg border border-gray-100 shadow-inner`}>
         {currentPoem}
       </div>
     </div>
