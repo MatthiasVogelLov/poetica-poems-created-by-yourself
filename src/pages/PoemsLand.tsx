@@ -28,8 +28,8 @@ const PoemsLand = () => {
   const [filteredPoems, setFilteredPoems] = useState<Poem[]>([]);
   const [selectedPoemId, setSelectedPoemId] = useState<string | null>(null);
   const [selectedPoem, setSelectedPoem] = useState<Poem | null>(null);
-  const [occasionFilter, setOccasionFilter] = useState<string>('');
-  const [contentTypeFilter, setContentTypeFilter] = useState<string>('');
+  const [occasionFilter, setOccasionFilter] = useState<string>('all');
+  const [contentTypeFilter, setContentTypeFilter] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -62,11 +62,11 @@ const PoemsLand = () => {
   useEffect(() => {
     let result = [...poems];
     
-    if (occasionFilter) {
+    if (occasionFilter && occasionFilter !== 'all') {
       result = result.filter(poem => poem.occasion === occasionFilter);
     }
     
-    if (contentTypeFilter) {
+    if (contentTypeFilter && contentTypeFilter !== 'all') {
       result = result.filter(poem => poem.content_type === contentTypeFilter);
     }
     
@@ -127,8 +127,8 @@ const PoemsLand = () => {
   };
 
   const clearFilters = () => {
-    setOccasionFilter('');
-    setContentTypeFilter('');
+    setOccasionFilter('all');
+    setContentTypeFilter('all');
   };
 
   const getOccasionDisplay = (occasion: string) => {
@@ -232,7 +232,7 @@ const PoemsLand = () => {
                       <SelectValue placeholder="Anlass" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Alle Anlässe</SelectItem>
+                      <SelectItem value="all">Alle Anlässe</SelectItem>
                       {getUniqueOccasions().map(occasion => (
                         <SelectItem key={occasion} value={occasion}>
                           {getOccasionDisplay(occasion)}
@@ -246,7 +246,7 @@ const PoemsLand = () => {
                       <SelectValue placeholder="Thema" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Alle Themen</SelectItem>
+                      <SelectItem value="all">Alle Themen</SelectItem>
                       {getUniqueContentTypes().map(contentType => (
                         <SelectItem key={contentType} value={contentType}>
                           {getContentTypeDisplay(contentType)}
@@ -255,7 +255,7 @@ const PoemsLand = () => {
                     </SelectContent>
                   </Select>
                   
-                  {(occasionFilter || contentTypeFilter) && (
+                  {(occasionFilter !== 'all' || contentTypeFilter !== 'all') && (
                     <Button variant="ghost" size="sm" onClick={clearFilters}>
                       Filter zurücksetzen
                     </Button>
