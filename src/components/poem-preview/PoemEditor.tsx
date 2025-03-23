@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { PenLine, Save, X } from "lucide-react";
+import { PenLine, Save, X, RefreshCw } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PoemEditorProps {
   initialPoem: string;
@@ -55,6 +56,14 @@ const backgroundColorOptions = [
   { value: 'bg-purple-50', label: 'Helllila' },
 ];
 
+// Default preferences
+const defaultPreferences: EditorPreferences = {
+  font: 'serif',
+  fontSize: 'text-base',
+  textColor: 'text-black',
+  backgroundColor: 'bg-gray-50'
+};
+
 const PoemEditor: React.FC<PoemEditorProps> = ({ 
   initialPoem, 
   onSave, 
@@ -65,6 +74,7 @@ const PoemEditor: React.FC<PoemEditorProps> = ({
   const [selectedFontSize, setSelectedFontSize] = useState('text-base');
   const [selectedTextColor, setSelectedTextColor] = useState('text-black');
   const [selectedBgColor, setSelectedBgColor] = useState('bg-gray-50');
+  const isMobile = useIsMobile();
   
   // Reset the editor content when the initial poem changes
   useEffect(() => {
@@ -112,6 +122,25 @@ const PoemEditor: React.FC<PoemEditorProps> = ({
     onSave(editedPoem, preferences);
   };
 
+  const handleReset = () => {
+    // Reset poem to initial state
+    setEditedPoem(initialPoem);
+    
+    // Reset preferences to defaults
+    setSelectedFont(defaultPreferences.font);
+    setSelectedFontSize(defaultPreferences.fontSize);
+    setSelectedTextColor(defaultPreferences.textColor);
+    setSelectedBgColor(defaultPreferences.backgroundColor);
+    
+    // Clear saved preferences in localStorage
+    try {
+      localStorage.setItem('poemEditorPreferences', JSON.stringify(defaultPreferences));
+      console.log('Reset editor preferences to defaults');
+    } catch (e) {
+      console.error('Error resetting editor preferences:', e);
+    }
+  };
+
   // Map font value to actual CSS font-family
   const getFontFamily = (fontValue: string) => {
     switch (fontValue) {
@@ -133,23 +162,34 @@ const PoemEditor: React.FC<PoemEditorProps> = ({
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center text-primary gap-1">
           <PenLine size={18} />
-          <span className="font-medium">Gedicht bearbeiten</span>
+          <span className={isMobile ? "sr-only" : "font-medium"}>Gedicht bearbeiten</span>
         </div>
         <div className="flex gap-2">
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={onCancel}
+            onClick={handleReset}
+            title="Zurücksetzen"
           >
-            <X size={16} className="mr-1" />
-            Abbrechen
+            <RefreshCw size={16} />
+            {!isMobile && <span className="ml-1">Zurücksetzen</span>}
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={onCancel}
+            title="Abbrechen"
+          >
+            <X size={16} />
+            {!isMobile && <span className="ml-1">Abbrechen</span>}
           </Button>
           <Button 
             size="sm" 
             onClick={handleSave}
+            title="Speichern"
           >
-            <Save size={16} className="mr-1" />
-            Speichern
+            <Save size={16} />
+            {!isMobile && <span className="ml-1">Speichern</span>}
           </Button>
         </div>
       </div>

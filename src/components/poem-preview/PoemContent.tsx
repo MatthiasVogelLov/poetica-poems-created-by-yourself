@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import PoemEditor, { EditorPreferences } from './PoemEditor';
 import { Button } from "@/components/ui/button";
 import { PenLine } from "lucide-react";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PoemContentProps {
   poem: string;
@@ -23,6 +24,7 @@ const PoemContent: React.FC<PoemContentProps> = ({
     textColor: 'text-black',
     backgroundColor: 'bg-gray-50'
   });
+  const isMobile = useIsMobile();
   
   // Add debugging to help identify poem loading issues
   useEffect(() => {
@@ -133,9 +135,10 @@ const PoemContent: React.FC<PoemContentProps> = ({
             size="sm" 
             className="h-8 px-2" 
             onClick={handleEditClick}
+            title="Bearbeiten"
           >
-            <PenLine size={16} className="mr-1" />
-            Bearbeiten
+            <PenLine size={16} className={isMobile ? "" : "mr-1"} />
+            {!isMobile && "Bearbeiten"}
           </Button>
         </div>
       )}
