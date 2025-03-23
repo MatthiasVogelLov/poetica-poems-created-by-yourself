@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
@@ -17,11 +18,13 @@ const Preview = () => {
   const isPaid = searchParams.get('paid') === 'true';
   const paymentProvider = searchParams.get('payment_provider');
   const transactionId = searchParams.get('tx');
+  const fromCache = location.state?.fromCache;
   
   useEffect(() => {
     console.log('Preview page loaded with payment status:', isPaid ? 'PAID' : 'NOT PAID');
     console.log('Payment provider:', paymentProvider || 'none');
     console.log('Transaction ID:', transactionId || 'none');
+    console.log('From cache:', fromCache ? 'YES' : 'NO');
     
     try {
       const poemData = localStorage.getItem('currentPoemData');
@@ -31,6 +34,12 @@ const Preview = () => {
       );
     } catch (e) {
       console.error('Error checking localStorage:', e);
+    }
+    
+    if (fromCache && !isPaid) {
+      toast.success("Gedicht aus dem Cache geladen", {
+        description: "Ein passendes Gedicht wurde schnell aus dem Zwischenspeicher geladen."
+      });
     }
     
     if (isPaid && (paymentProvider || transactionId)) {
@@ -46,7 +55,7 @@ const Preview = () => {
         });
       }
     }
-  }, [isPaid, paymentProvider, transactionId, location.state, navigate]);
+  }, [isPaid, paymentProvider, transactionId, location.state, navigate, fromCache]);
   
   const { poemTitle, poemContent, isGenerating } = usePoemLoader(
     isPaid || !!transactionId, 
@@ -74,6 +83,12 @@ const Preview = () => {
               <ArrowLeft className="w-4 h-4" />
               Zurück zum Generator
             </Button>
+            
+            {fromCache && (
+              <div className="text-xs text-muted-foreground bg-gray-100 px-2 py-1 rounded">
+                Schnell geladen aus dem Cache
+              </div>
+            )}
           </div>
           
           <PreviewHeader isPaid={isPaid || !!transactionId} onBackClick={goBack} />
