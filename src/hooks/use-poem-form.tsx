@@ -50,7 +50,7 @@ export function usePoemForm() {
     
     saveFormData(data);
     
-    if (!data.audience || !data.occasion || !data.contentType || !data.style || !data.length) {
+    if (!data.audience || !data.occasion || !data.contentType || !data.style || !data.verseType || !data.length) {
       toast({
         title: "Fehler",
         description: "Bitte füllen Sie alle erforderlichen Felder aus.",
@@ -79,6 +79,7 @@ export function usePoemForm() {
               occasion: data.occasion,
               contentType: data.contentType,
               style: data.style,
+              verseType: data.verseType,
               length: data.length,
               keywords: data.keywords
             }

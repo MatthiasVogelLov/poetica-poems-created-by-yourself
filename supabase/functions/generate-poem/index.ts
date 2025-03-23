@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
@@ -16,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { audience, occasion, contentType, style, length, keywords } = await req.json();
+    const { audience, occasion, contentType, style, verseType, length, keywords } = await req.json();
     
     // Generate a system prompt based on the form data
     let systemPrompt = "Du bist ein erfahrener Dichter, der personalisierte Gedichte auf Deutsch erstellt. ";
@@ -28,28 +27,17 @@ serve(async (req) => {
     userPrompt += `- Zielgruppe: ${audience}\n`;
     userPrompt += `- Anlass: ${occasion}\n`;
     userPrompt += `- Thema: ${contentType}\n`;
+    userPrompt += `- Stil: ${style}\n`;
     
-    // Add style specification with detailed instructions for German poem forms
-    if (style === 'sonett') {
-      userPrompt += `- Stil: Sonett (14 Zeilen, meistens in 4 Strophen: 2 Quartette und 2 Terzette, mit festem Reimschema)\n`;
-    } else if (style === 'ballade') {
-      userPrompt += `- Stil: Ballade (erzählerisch, meist mit wiederkehrendem Refrain)\n`;
-    } else if (style === 'ode') {
-      userPrompt += `- Stil: Ode (feierlich, erhaben und an eine Person oder Sache gerichtet)\n`;
-    } else if (style === 'hymne') {
-      userPrompt += `- Stil: Hymne (feierliches Loblied, erhaben und preisend)\n`;
-    } else if (style === 'epigramm') {
-      userPrompt += `- Stil: Epigramm (kurz, prägnant, mit einer pointierten Wendung am Ende)\n`;
-    } else if (style === 'haiku') {
-      userPrompt += `- Stil: Haiku (drei Zeilen mit 5-7-5 Silben, Naturbetrachtung)\n`;
-    } else if (style === 'tanka') {
-      userPrompt += `- Stil: Tanka (fünf Zeilen mit 5-7-5-7-7 Silben)\n`;
-    } else if (style === 'freieverse') {
-      userPrompt += `- Stil: Freie Verse (ohne festes Metrum und Reimschema)\n`;
-    } else if (style === 'elfchen') {
-      userPrompt += `- Stil: Elfchen (genau 11 Wörter in 5 Zeilen mit 1-2-3-4-1 Wörtern)\n`;
-    } else {
-      userPrompt += `- Stil: ${style}\n`;
+    // Add verse type specification
+    if (verseType === 'frei') {
+      userPrompt += `- Versart: Freie Verse (kein festes Reimschema)\n`;
+    } else if (verseType === 'paarreim') {
+      userPrompt += `- Versart: Paarreim (AABB Reimschema, aufeinanderfolgende Verse reimen sich)\n`;
+    } else if (verseType === 'kreuzreim') {
+      userPrompt += `- Versart: Kreuzreim (ABAB Reimschema, abwechselnde Verse reimen sich)\n`;
+    } else if (verseType === 'umarmenderreim') {
+      userPrompt += `- Versart: Umarmender Reim (ABBA Reimschema, die äußeren und inneren Verse reimen sich)\n`;
     }
     
     // Add length specification
@@ -66,7 +54,7 @@ serve(async (req) => {
       userPrompt += `- Verwende folgende Schlüsselwörter: ${keywords}\n`;
     }
     
-    userPrompt += `\nDas Gedicht sollte emotionale Tiefe haben und die Schlüsselwörter, falls angegeben, natürlich einbinden. Halte dich streng an die gewählte Gedichtform und deren Merkmale.`;
+    userPrompt += `\nDas Gedicht sollte emotionale Tiefe haben und die Schlüsselwörter, falls angegeben, natürlich einbinden. Halte dich streng an die gewählte Gedichtform, den Stil und das Reimschema.`;
 
     console.log("Sending to OpenAI with prompt:", userPrompt);
 
