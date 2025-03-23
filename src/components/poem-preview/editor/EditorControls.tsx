@@ -31,7 +31,7 @@ const EditorControls: React.FC<EditorControlsProps> = ({
           title="Zurücksetzen"
         >
           <RefreshCw size={16} />
-          {!isMobile && <span className="ml-1">Zurücksetzen</span>}
+          <span className="sr-only">Zurücksetzen</span>
         </Button>
         <Button 
           variant="outline" 
@@ -40,7 +40,7 @@ const EditorControls: React.FC<EditorControlsProps> = ({
           title="Abbrechen"
         >
           <X size={16} />
-          {!isMobile && <span className="ml-1">Abbrechen</span>}
+          <span className="sr-only">Abbrechen</span>
         </Button>
         <Button 
           size="sm" 
@@ -48,7 +48,7 @@ const EditorControls: React.FC<EditorControlsProps> = ({
           title="Speichern"
         >
           <Save size={16} />
-          {!isMobile && <span className="ml-1">Speichern</span>}
+          <span className="sr-only">Speichern</span>
         </Button>
       </div>
     </div>

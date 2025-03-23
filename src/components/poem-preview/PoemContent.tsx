@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { PenLine } from "lucide-react";
@@ -114,8 +115,8 @@ const PoemContent: React.FC<PoemContentProps> = ({
             onClick={handleEditClick}
             title="Bearbeiten"
           >
-            <PenLine size={16} className={isMobile ? "" : "mr-1"} />
-            {!isMobile && "Bearbeiten"}
+            <PenLine size={16} />
+            <span className="sr-only">Bearbeiten</span>
           </Button>
         </div>
       )}

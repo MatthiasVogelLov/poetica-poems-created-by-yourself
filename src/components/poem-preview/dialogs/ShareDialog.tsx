@@ -61,7 +61,13 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
         shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(poemText)}`;
         break;
       case 'whatsapp':
-        shareUrl = `https://wa.me/?text=${encodeURIComponent(poemText)}`;
+        // Mobile WhatsApp sharing - works better on mobile with direct link
+        shareUrl = `whatsapp://send?text=${encodeURIComponent(poemText)}`;
+        
+        // Fallback for desktop
+        if (!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+          shareUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(poemText)}`;
+        }
         break;
       case 'tiktok':
         toast.info('TikTok unterstützt kein direktes Teilen von Text. Bitte erstellen Sie ein Video in der TikTok-App und lesen Sie Ihr Gedicht vor.', {
@@ -77,11 +83,38 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
         });
         onOpenChange(false);
         return;
-      default:
-        navigator.clipboard.writeText(poemText)
-          .then(() => toast.success('Gedicht in die Zwischenablage kopiert'))
-          .catch(() => toast.error('Fehler beim Kopieren'));
+      case 'copy':
+        try {
+          // Use modern clipboard API
+          await navigator.clipboard.writeText(poemText);
+          toast.success('Gedicht in die Zwischenablage kopiert');
+        } catch (err) {
+          console.error('Clipboard error:', err);
+          
+          // Fallback method for older browsers or if permission denied
+          const textArea = document.createElement('textarea');
+          textArea.value = poemText;
+          textArea.style.position = 'fixed';  // Prevent scrolling to bottom
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          
+          try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+              toast.success('Gedicht in die Zwischenablage kopiert');
+            } else {
+              toast.error('Kopieren fehlgeschlagen. Bitte manuell kopieren.');
+            }
+          } catch (err) {
+            toast.error('Kopieren fehlgeschlagen. Bitte manuell kopieren.');
+          }
+          
+          document.body.removeChild(textArea);
+        }
         onOpenChange(false);
+        return;
+      default:
         return;
     }
     
@@ -133,23 +166,48 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
         
         // Handle different platforms
         if (platform === 'whatsapp') {
-          // For WhatsApp, we need to first save the image, then share it
           try {
             const imageUrl = URL.createObjectURL(blob);
             
-            // Check if Web Share API is available
-            if (navigator.share) {
-              const file = new File([blob], 'poetica-gedicht.png', { type: 'image/png' });
-              
-              await navigator.share({
-                files: [file],
-                title: title,
-                text: 'Mein Gedicht von Poetica'
-              });
-              
-              toast.success('Bild zum Teilen bereitgestellt');
+            // Special handling for mobile WhatsApp
+            if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+              // Check if Web Share API is available for modern mobile browsers
+              if (navigator.share) {
+                try {
+                  const file = new File([blob], 'poetica-gedicht.png', { type: 'image/png' });
+                  await navigator.share({
+                    files: [file],
+                    title: title,
+                    text: 'Mein Gedicht von Poetica'
+                  });
+                  toast.success('Bild zum Teilen bereitgestellt');
+                } catch (err) {
+                  console.error('Error with Web Share API:', err);
+                  // Fallback to direct WhatsApp link if Web Share API fails
+                  const link = document.createElement('a');
+                  link.href = `whatsapp://send?text=Mein Gedicht von Poetica`;
+                  link.click();
+                  
+                  // Also download the image so they can share it manually
+                  const download = document.createElement('a');
+                  download.href = imageUrl;
+                  download.download = 'poetica-gedicht.png';
+                  download.click();
+                }
+              } else {
+                // Direct WhatsApp link for older mobile browsers
+                const link = document.createElement('a');
+                link.href = `whatsapp://send?text=Mein Gedicht von Poetica`;
+                link.click();
+                
+                // Also download the image
+                const download = document.createElement('a');
+                download.href = imageUrl;
+                download.download = 'poetica-gedicht.png';
+                download.click();
+              }
             } else {
-              // Fallback for browsers without Web Share API
+              // Desktop fallback - download image and open web WhatsApp
               const link = document.createElement('a');
               link.href = imageUrl;
               link.download = 'poetica-gedicht.png';
@@ -157,12 +215,14 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
               link.click();
               document.body.removeChild(link);
               
+              window.open('https://web.whatsapp.com/', '_blank');
+              
               toast.success('Bild heruntergeladen für WhatsApp', {
                 description: 'Sie können das Bild jetzt in WhatsApp teilen'
               });
             }
           } catch (error) {
-            console.error('Error sharing image:', error);
+            console.error('Error sharing image to WhatsApp:', error);
             toast.error('Fehler beim Teilen des Bildes');
           }
         } else {
