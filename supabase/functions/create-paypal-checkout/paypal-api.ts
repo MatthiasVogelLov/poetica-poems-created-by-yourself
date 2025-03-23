@@ -74,7 +74,8 @@ export async function createPayPalOrder(accessToken: string, poemTitle: string, 
       brand_name: 'Poetica',
       user_action: 'PAY_NOW',
       shipping_preference: 'NO_SHIPPING',
-      landing_page: 'BILLING' // Show the billing page instead of LOGIN to avoid the seller account issue
+      // Change to use NO_PREFERENCE to force PayPal to show account selection page
+      landing_page: 'NO_PREFERENCE'
     }
   };
   

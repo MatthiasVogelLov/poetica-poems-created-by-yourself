@@ -42,7 +42,9 @@ export const usePayPalCheckout = () => {
       // Get current URL for return URLs
       const currentUrl = window.location.href;
       const baseUrl = window.location.origin + location.pathname;
-      const successUrl = `${baseUrl}?paid=true&payment_provider=paypal`;
+      // Add random parameter to prevent browser caching and force new session
+      const randomParam = Math.random().toString(36).substring(2, 10);
+      const successUrl = `${baseUrl}?paid=true&payment_provider=paypal&nocache=${randomParam}`;
       const cancelUrl = `${currentUrl}`;
       
       // Get poem title if available
@@ -93,19 +95,36 @@ export const usePayPalCheckout = () => {
         if (data.id) {
           localStorage.setItem('paypal_order_id', data.id);
           console.log('Saved PayPal order ID to localStorage:', data.id);
+          
+          // Save additional information to help with debugging
+          localStorage.setItem('paypal_last_checkout', JSON.stringify({
+            id: data.id,
+            timestamp: new Date().toISOString(),
+            poemTitle: poemTitle
+          }));
         }
         
         // Redirect to PayPal
         console.log('Redirecting to PayPal URL:', data.url);
         
-        // Add a delay to make sure console logs are visible
-        setTimeout(() => {
-          window.location.href = data.url;
-        }, 100);
+        // Use window.open to open in a new window/tab to avoid issues with the seller's account
+        const paypalWindow = window.open(data.url, '_blank');
         
-        toast.info('PayPal Checkout', {
-          description: 'Sie werden zu PayPal weitergeleitet...'
-        });
+        if (paypalWindow) {
+          toast.info('PayPal Checkout', {
+            description: 'PayPal öffnet sich in einem neuen Fenster.'
+          });
+        } else {
+          // Fallback for popup blockers
+          toast.info('PayPal Checkout', {
+            description: 'Sie werden zu PayPal weitergeleitet...'
+          });
+          
+          // Add a delay to make sure console logs are visible
+          setTimeout(() => {
+            window.location.href = data.url;
+          }, 100);
+        }
         
         return true;
       } else {
