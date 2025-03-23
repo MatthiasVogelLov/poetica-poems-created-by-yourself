@@ -16,7 +16,7 @@ const KeywordsField: React.FC<KeywordsFieldProps> = ({
             Schlüsselwörter (optional)
           </FormLabel>
           <FormControl>
-            <Textarea placeholder="Fügen Sie (getrennt durch Kommas) Details oder Schlüsselwörter hinzu ..." className="form-select min-h-[100px] resize-y bg-slate-50" />
+            <Textarea placeholder="Fügen Sie (getrennt durch Kommas) Details oder Schlüsselwörter hinzu ..." className="form-select min-h-[100px] resize-y bg-white" />
           </FormControl>
           <FormMessage />
         </FormItem>} />;
