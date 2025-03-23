@@ -40,6 +40,18 @@ export async function sendEmailNotification(
       })
       .join('');
 
+    // Apply styling based on preferences, using default since this is initial email
+    const poemStyle = `
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 16px;
+      color: #000000;
+      background-color: #f9fafb;
+      line-height: 1.8;
+      text-align: center;
+      padding: 20px;
+      border-radius: 5px;
+    `;
+
     // Format poem content for email
     const formattedPoemContent = formData.poem ? formatPoemForEmail(formData.poem) : '<p>Kein Gedichttext verfügbar</p>';
 
@@ -52,7 +64,7 @@ export async function sendEmailNotification(
           <h1 style="color: #1d3557; border-bottom: 1px solid #ddd; padding-bottom: 10px;">${poemTitle}</h1>
           
           <h2 style="color: #457b9d; margin-top: 20px;">Gedicht</h2>
-          <div style="white-space: pre-line; font-family: 'Playfair Display', serif; background-color: #f8f9fa; padding: 20px; border-radius: 5px; line-height: 1.6;">
+          <div style="${poemStyle}">
             ${formattedPoemContent}
           </div>
           

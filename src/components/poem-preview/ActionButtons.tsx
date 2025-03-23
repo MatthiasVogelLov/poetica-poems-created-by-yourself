@@ -110,15 +110,20 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ poem, title }) => {
           <Send size={isMobile ? 14 : 16} />
           <span className={isMobile ? "text-xs" : ""}>E-Mail senden</span>
         </Button>
-        <Button
-          onClick={handlePrint}
-          variant="outline"
-          size={isMobile ? "sm" : "default"}
-          className="flex items-center gap-1 sm:gap-2"
-        >
-          <Printer size={isMobile ? 14 : 16} />
-          <span className={isMobile ? "text-xs" : ""}>Drucken</span>
-        </Button>
+        
+        {/* Hide print button on mobile */}
+        {!isMobile && (
+          <Button
+            onClick={handlePrint}
+            variant="outline"
+            size="default"
+            className="flex items-center gap-2"
+          >
+            <Printer size={16} />
+            <span>Drucken</span>
+          </Button>
+        )}
+        
         <Button
           onClick={() => setShareDialogOpen(true)}
           variant="outline"

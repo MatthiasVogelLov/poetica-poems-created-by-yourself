@@ -20,6 +20,12 @@ interface SendPoemRequest {
   poemTitle: string;
   poemContent: string;
   personalMessage?: string;
+  editorPreferences?: {
+    font: string;
+    fontSize: string;
+    textColor: string;
+    backgroundColor: string;
+  };
 }
 
 serve(async (req) => {
@@ -44,14 +50,15 @@ serve(async (req) => {
     const { data, error } = await parseRequestBody<SendPoemRequest>(req);
     if (error) return createErrorResponse(error, 400);
     
-    const { recipientEmail, recipientName, poemTitle, poemContent, personalMessage } = data!;
+    const { recipientEmail, recipientName, poemTitle, poemContent, personalMessage, editorPreferences } = data!;
     
     console.log('[send-poem] Extracted data:', { 
       recipientEmail, 
       recipientNameProvided: !!recipientName,
       poemTitleLength: poemTitle?.length,
       poemContentLength: poemContent?.length,
-      hasPersonalMessage: !!personalMessage
+      hasPersonalMessage: !!personalMessage,
+      hasEditorPreferences: !!editorPreferences
     });
     
     // Validate required fields
@@ -64,6 +71,93 @@ serve(async (req) => {
     }
 
     console.log(`[send-poem] Preparing to send email to: ${recipientEmail}, with CC to: ${adminEmail}`);
+
+    // Apply styling based on preferences
+    const getFontFamily = (fontValue) => {
+      switch (fontValue) {
+        case 'sans':
+          return 'font-family: Arial, Helvetica, sans-serif;';
+        case 'mono':
+          return 'font-family: "Courier New", Courier, monospace;';
+        case 'cursive':
+          return 'font-family: "Brush Script MT", cursive;';
+        case 'fantasy':
+          return 'font-family: "Copperplate", fantasy;';
+        default:
+          return 'font-family: Georgia, "Times New Roman", serif;';
+      }
+    };
+
+    const getFontSize = (sizeValue) => {
+      switch (sizeValue) {
+        case 'text-lg':
+          return 'font-size: 18px;';
+        case 'text-xl':
+          return 'font-size: 20px;';
+        case 'text-2xl':
+          return 'font-size: 24px;';
+        case 'text-3xl':
+          return 'font-size: 30px;';
+        default:
+          return 'font-size: 16px;';
+      }
+    };
+
+    const getTextColor = (colorValue) => {
+      switch (colorValue) {
+        case 'text-gray-700':
+          return 'color: #374151;';
+        case 'text-blue-700':
+          return 'color: #1d4ed8;';
+        case 'text-green-700':
+          return 'color: #15803d;';
+        case 'text-purple-700':
+          return 'color: #7e22ce;';
+        default:
+          return 'color: #000000;';
+      }
+    };
+
+    const getBackgroundColor = (bgValue) => {
+      switch (bgValue) {
+        case 'bg-white':
+          return 'background-color: #ffffff;';
+        case 'bg-blue-50':
+          return 'background-color: #eff6ff;';
+        case 'bg-green-50':
+          return 'background-color: #f0fdf4;';
+        case 'bg-purple-50':
+          return 'background-color: #faf5ff;';
+        default:
+          return 'background-color: #f9fafb;'; // gray-50
+      }
+    };
+
+    // Apply styling based on preferences
+    let poemStyle = '';
+    if (editorPreferences) {
+      poemStyle = `
+        ${getFontFamily(editorPreferences.font)}
+        ${getFontSize(editorPreferences.fontSize)}
+        ${getTextColor(editorPreferences.textColor)}
+        ${getBackgroundColor(editorPreferences.backgroundColor)}
+        line-height: 1.8;
+        text-align: center;
+        padding: 20px;
+        border-radius: 5px;
+      `;
+    } else {
+      poemStyle = `
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 16px;
+        color: #000000;
+        background-color: #f9fafb;
+        line-height: 1.8;
+        text-align: center;
+        padding: 20px;
+        border-radius: 5px;
+      `;
+    }
 
     // Format poem content for email
     const formattedPoemContent = formatPoemForEmail(poemContent);
@@ -95,7 +189,7 @@ serve(async (req) => {
               ${poemTitle}
             </h1>
             
-            <div style="font-family: 'Playfair Display', serif; text-align: center; background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px;">
+            <div style="${poemStyle}">
               ${formattedPoemContent}
             </div>
             
@@ -128,13 +222,14 @@ serve(async (req) => {
               <p><strong>Empfänger:</strong> ${recipientEmail}</p>
               <p><strong>Name:</strong> ${recipientName || 'Nicht angegeben'}</p>
               <p><strong>Gesendet am:</strong> ${new Date().toLocaleString('de-DE')}</p>
+              <p><strong>Formatierungseinstellungen:</strong> ${editorPreferences ? JSON.stringify(editorPreferences) : 'Standard'}</p>
             </div>
             
             <h2 style="font-family: 'Playfair Display', serif; color: #1d3557; margin-bottom: 10px; text-align: center;">
               ${poemTitle}
             </h2>
             
-            <div style="font-family: 'Playfair Display', serif; background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px;">
+            <div style="${poemStyle}">
               ${formattedPoemContent}
             </div>
             

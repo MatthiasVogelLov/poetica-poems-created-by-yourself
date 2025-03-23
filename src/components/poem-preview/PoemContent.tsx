@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import PoemEditor from './editor/PoemEditor';
 import { EditorPreferences } from './editor/types';
 import { getFontFamily } from './editor/editorOptions';
+import { supabase } from "@/integrations/supabase/client";
 
 interface PoemContentProps {
   poem: string;
@@ -41,13 +42,41 @@ const PoemContent: React.FC<PoemContentProps> = ({
     try {
       const savedPreferences = localStorage.getItem('poemEditorPreferences');
       if (savedPreferences) {
-        setEditorPreferences(JSON.parse(savedPreferences));
-        console.log('Loaded editor preferences:', JSON.parse(savedPreferences));
+        const parsedPrefs = JSON.parse(savedPreferences);
+        setEditorPreferences(parsedPrefs);
+        console.log('Loaded editor preferences:', parsedPrefs);
+        
+        // Send editor preferences to the server for the admin copy email
+        if (isPaid && poem) {
+          try {
+            const poemData = localStorage.getItem('currentPoemData');
+            if (poemData) {
+              const parsedData = JSON.parse(poemData);
+              const { poemTitle, formData } = parsedData;
+              
+              if (poemTitle && formData) {
+                console.log('Notifying admin about poem with editor preferences');
+                supabase.functions.invoke('notify-poem', {
+                  body: {
+                    poemTitle,
+                    formData,
+                    poemContent: poem,
+                    editorPreferences: parsedPrefs
+                  }
+                }).catch(err => {
+                  console.error('Error notifying admin about poem:', err);
+                });
+              }
+            }
+          } catch (e) {
+            console.error('Error sending poem notification with preferences:', e);
+          }
+        }
       }
     } catch (e) {
       console.error('Error loading editor preferences:', e);
     }
-  }, []);
+  }, [isPaid, poem]);
 
   if (!currentPoem || currentPoem.trim() === '') {
     return (
@@ -82,6 +111,21 @@ const PoemContent: React.FC<PoemContentProps> = ({
         parsedData.poem = updatedPoem;
         localStorage.setItem('currentPoemData', JSON.stringify(parsedData));
         console.log('Updated poem saved to localStorage');
+        
+        // Send notification with updated poem and preferences
+        if (isPaid) {
+          console.log('Notifying admin about updated poem with editor preferences');
+          supabase.functions.invoke('notify-poem', {
+            body: {
+              poemTitle: parsedData.poemTitle,
+              formData: parsedData.formData,
+              poemContent: updatedPoem,
+              editorPreferences: preferences
+            }
+          }).catch(err => {
+            console.error('Error notifying admin about updated poem:', err);
+          });
+        }
       }
     } catch (e) {
       console.error('Error saving updated poem to localStorage:', e);
@@ -105,7 +149,7 @@ const PoemContent: React.FC<PoemContentProps> = ({
   }
 
   return (
-    <div className="poem-text mb-8 relative">
+    <div className="poem-text mb-8 relative poem-container">
       {isPaid && (
         <div className="absolute top-2 right-2">
           <Button 
@@ -116,7 +160,7 @@ const PoemContent: React.FC<PoemContentProps> = ({
             title="Bearbeiten"
           >
             <PenLine size={16} />
-            <span className="sr-only">Bearbeiten</span>
+            <span className={isMobile ? "sr-only" : ""}>Bearbeiten</span>
           </Button>
         </div>
       )}
