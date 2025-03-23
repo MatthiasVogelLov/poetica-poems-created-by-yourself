@@ -105,11 +105,11 @@ const FeatureCard = ({
   title,
   description,
   delay = 0
-}) => <div className="bg-white p-6 rounded-lg shadow-sm border border-border/50 hover:shadow-md transition-all duration-300" style={{
+}) => <div style={{
   animation: 'slide-up 0.5s ease-out forwards',
   animationDelay: `${delay}ms`,
   opacity: 0
-}}>
+}} className="p-6 rounded-lg shadow-sm border border-border/50 hover:shadow-md transition-all duration-300 bg-zinc-100">
     <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-6">
       <Icon size={20} className="text-primary" />
     </div>
