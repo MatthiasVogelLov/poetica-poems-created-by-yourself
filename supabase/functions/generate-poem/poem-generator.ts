@@ -39,7 +39,10 @@ export async function generatePoem(formData: any) {
   }
 
   const data = await openAIResponse.json();
-  const poemContent = data.choices[0].message.content;
+  let poemContent = data.choices[0].message.content;
+  
+  // Remove rhyme scheme indicators like (A), (B) from the poem
+  poemContent = poemContent.replace(/\s*\([A-Z]\)\s*(?=$|,|\.|;)/g, '');
 
   // Generate title
   const title = generateTitleFromOccasion(occasion, style);

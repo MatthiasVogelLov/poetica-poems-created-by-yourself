@@ -13,7 +13,8 @@ interface PromptParams {
 export function generateSystemPrompt() {
   let systemPrompt = "Du bist ein erfahrener Dichter, der personalisierte Gedichte auf Deutsch erstellt. ";
   systemPrompt += "Deine Gedichte sind kreativ, einfühlsam und entsprechen genau den Anforderungen des Nutzers. ";
-  systemPrompt += "Du beherrschst verschiedene deutsche Gedichtformen wie Sonett, Ballade, Ode, Hymne, Epigramm, Haiku, Tanka, Freie Verse und Elfchen.";
+  systemPrompt += "Du beherrschst verschiedene deutsche Gedichtformen wie Sonett, Ballade, Ode, Hymne, Epigramm, Haiku, Tanka, Freie Verse und Elfchen. ";
+  systemPrompt += "Wichtig: Markiere die Reimschema-Indikatoren wie (A), (B) usw. NICHT am Ende der Zeilen.";
   
   return systemPrompt;
 }
@@ -52,6 +53,7 @@ export function generateUserPrompt({ audience, occasion, contentType, style, ver
   }
   
   userPrompt += `\nDas Gedicht sollte emotionale Tiefe haben und die Schlüsselwörter, falls angegeben, natürlich einbinden. Halte dich streng an die gewählte Gedichtform, den Stil und das Reimschema.`;
+  userPrompt += `\nWichtig: Füge KEINE Reimschema-Indikatoren wie (A), (B) usw. am Ende der Zeilen hinzu.`;
 
   return userPrompt;
 }
