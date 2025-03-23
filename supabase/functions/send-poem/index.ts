@@ -133,6 +133,68 @@ serve(async (req) => {
       }
     };
 
+    // Get readable names for formatting options
+    const getReadableFontName = (fontValue) => {
+      switch (fontValue) {
+        case 'sans': return 'Sans-Serif';
+        case 'mono': return 'Monospace';
+        case 'cursive': return 'Cursive';
+        case 'fantasy': return 'Fantasy';
+        default: return 'Serif';
+      }
+    };
+
+    const getReadableFontSize = (sizeValue) => {
+      switch (sizeValue) {
+        case 'text-lg': return 'Größer';
+        case 'text-xl': return 'Groß';
+        case 'text-2xl': return 'Sehr Groß';
+        case 'text-3xl': return 'Extra Groß';
+        default: return 'Normal';
+      }
+    };
+
+    const getReadableTextColor = (colorValue) => {
+      switch (colorValue) {
+        case 'text-gray-700': return 'Dunkelgrau';
+        case 'text-blue-700': return 'Blau';
+        case 'text-green-700': return 'Grün';
+        case 'text-purple-700': return 'Lila';
+        default: return 'Schwarz';
+      }
+    };
+
+    const getReadableBackgroundColor = (bgValue) => {
+      switch (bgValue) {
+        case 'bg-white': return 'Weiß';
+        case 'bg-blue-50': return 'Hellblau';
+        case 'bg-green-50': return 'Hellgrün';
+        case 'bg-purple-50': return 'Helllila';
+        default: return 'Hellgrau';
+      }
+    };
+
+    // Format editor preferences for display
+    let formattingHtml = '<span>Standard</span>';
+    if (editorPreferences) {
+      formattingHtml = `
+        <div style="margin-top: 8px;">
+          <div style="display: inline-block; padding: 4px 8px; margin-right: 6px; background-color: #f0f0f0; border-radius: 4px;">
+            <strong>Schriftart:</strong> ${getReadableFontName(editorPreferences.font)}
+          </div>
+          <div style="display: inline-block; padding: 4px 8px; margin-right: 6px; background-color: #f0f0f0; border-radius: 4px;">
+            <strong>Größe:</strong> ${getReadableFontSize(editorPreferences.fontSize)}
+          </div>
+          <div style="display: inline-block; padding: 4px 8px; margin-right: 6px; background-color: #f0f0f0; border-radius: 4px;">
+            <strong>Textfarbe:</strong> ${getReadableTextColor(editorPreferences.textColor)}
+          </div>
+          <div style="display: inline-block; padding: 4px 8px; margin-right: 6px; background-color: #f0f0f0; border-radius: 4px;">
+            <strong>Hintergrund:</strong> ${getReadableBackgroundColor(editorPreferences.backgroundColor)}
+          </div>
+        </div>
+      `;
+    }
+
     // Apply styling based on preferences
     let poemStyle = '';
     if (editorPreferences) {
@@ -222,7 +284,7 @@ serve(async (req) => {
               <p><strong>Empfänger:</strong> ${recipientEmail}</p>
               <p><strong>Name:</strong> ${recipientName || 'Nicht angegeben'}</p>
               <p><strong>Gesendet am:</strong> ${new Date().toLocaleString('de-DE')}</p>
-              <p><strong>Formatierungseinstellungen:</strong> ${editorPreferences ? JSON.stringify(editorPreferences) : 'Standard'}</p>
+              <p><strong>Formatierungseinstellungen:</strong> ${formattingHtml}</p>
             </div>
             
             <h2 style="font-family: 'Playfair Display', serif; color: #1d3557; margin-bottom: 10px; text-align: center;">

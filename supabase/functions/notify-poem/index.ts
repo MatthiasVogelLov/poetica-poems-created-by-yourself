@@ -72,6 +72,26 @@ serve(async (req) => {
 
     console.log('[notify-poem] Formatted form data for email');
 
+    // Extract keywords if available
+    const keywords = formData?.keywords || '';
+    const keywordsArray = keywords.split(',')
+      .map(k => k.trim())
+      .filter(k => k.length > 0);
+
+    // Prepare keywords section for display  
+    const keywordsHtml = keywordsArray.length > 0 
+      ? `
+        <div style="margin-top: 20px;">
+          <h3 style="color: #1d3557; margin-bottom: 10px;">Benutzer-Schlüsselwörter:</h3>
+          <ul style="background-color: #fff9db; padding: 12px 24px; border-radius: 5px; border-left: 4px solid #fcc419;">
+            ${keywordsArray.map(word => `<li style="margin-bottom: 6px;"><strong>${word}</strong></li>`).join('')}
+          </ul>
+        </div>`
+      : `<div style="margin-top: 20px;">
+          <h3 style="color: #1d3557; margin-bottom: 10px;">Benutzer-Schlüsselwörter:</h3>
+          <p style="font-style: italic; color: #666;">Keine Schlüsselwörter vom Benutzer angegeben</p>
+        </div>`;
+
     // Enhanced formatting based on editor preferences
     const getFontFamily = (fontValue) => {
       switch (fontValue) {
@@ -133,6 +153,68 @@ serve(async (req) => {
       }
     };
 
+    // Get readable names for formatting options
+    const getReadableFontName = (fontValue) => {
+      switch (fontValue) {
+        case 'sans': return 'Sans-Serif';
+        case 'mono': return 'Monospace';
+        case 'cursive': return 'Cursive';
+        case 'fantasy': return 'Fantasy';
+        default: return 'Serif';
+      }
+    };
+
+    const getReadableFontSize = (sizeValue) => {
+      switch (sizeValue) {
+        case 'text-lg': return 'Größer';
+        case 'text-xl': return 'Groß';
+        case 'text-2xl': return 'Sehr Groß';
+        case 'text-3xl': return 'Extra Groß';
+        default: return 'Normal';
+      }
+    };
+
+    const getReadableTextColor = (colorValue) => {
+      switch (colorValue) {
+        case 'text-gray-700': return 'Dunkelgrau';
+        case 'text-blue-700': return 'Blau';
+        case 'text-green-700': return 'Grün';
+        case 'text-purple-700': return 'Lila';
+        default: return 'Schwarz';
+      }
+    };
+
+    const getReadableBackgroundColor = (bgValue) => {
+      switch (bgValue) {
+        case 'bg-white': return 'Weiß';
+        case 'bg-blue-50': return 'Hellblau';
+        case 'bg-green-50': return 'Hellgrün';
+        case 'bg-purple-50': return 'Helllila';
+        default: return 'Hellgrau';
+      }
+    };
+
+    // Format editor preferences for display
+    let formattingHtml = '<span>Standard</span>';
+    if (editorPreferences) {
+      formattingHtml = `
+        <div style="margin-top: 8px;">
+          <div style="display: inline-block; padding: 4px 8px; margin-right: 6px; background-color: #f0f0f0; border-radius: 4px;">
+            <strong>Schriftart:</strong> ${getReadableFontName(editorPreferences.font)}
+          </div>
+          <div style="display: inline-block; padding: 4px 8px; margin-right: 6px; background-color: #f0f0f0; border-radius: 4px;">
+            <strong>Größe:</strong> ${getReadableFontSize(editorPreferences.fontSize)}
+          </div>
+          <div style="display: inline-block; padding: 4px 8px; margin-right: 6px; background-color: #f0f0f0; border-radius: 4px;">
+            <strong>Textfarbe:</strong> ${getReadableTextColor(editorPreferences.textColor)}
+          </div>
+          <div style="display: inline-block; padding: 4px 8px; margin-right: 6px; background-color: #f0f0f0; border-radius: 4px;">
+            <strong>Hintergrund:</strong> ${getReadableBackgroundColor(editorPreferences.backgroundColor)}
+          </div>
+        </div>
+      `;
+    }
+
     // Apply styling based on preferences
     let poemStyle = '';
     if (editorPreferences) {
@@ -171,10 +253,18 @@ serve(async (req) => {
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #1d3557; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Neues Gedicht erstellt: ${poemTitle}</h1>
           
+          <div style="margin: 20px 0; padding: 10px; background-color: #e8f4ff; border-radius: 5px;">
+            <p><strong>Empfänger:</strong> ${recipientEmail}</p>
+            <p><strong>Gesendet am:</strong> ${new Date().toLocaleString('de-DE')}</p>
+            <p><strong>Formatierungseinstellungen:</strong> ${formattingHtml}</p>
+          </div>
+          
           <h2 style="color: #457b9d; margin-top: 20px;">Gedicht</h2>
           <div style="${poemStyle}">
             ${formattedPoemContent || 'Kein Gedichttext verfügbar'}
           </div>
+          
+          ${keywordsHtml}
           
           <h2 style="color: #457b9d; margin-top: 20px;">Gewählte Einstellungen</h2>
           <ul style="line-height: 1.6;">
