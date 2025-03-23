@@ -1,36 +1,118 @@
 
-import { toast } from 'sonner';
+import { useState } from 'react';
+import { toast } from "sonner";
 import html2canvas from 'html2canvas';
 import { supabase } from "@/integrations/supabase/client";
 
-interface ImageShareProps {
+interface UsePoemSharingProps {
   poem: string;
   title: string;
-  onOpenChange: (open: boolean) => void;
-  setIsCapturingImage: React.Dispatch<React.SetStateAction<boolean>>;
+  onCompleted?: () => void;
 }
 
-export const useImageShare = ({
-  poem,
-  title,
-  onOpenChange,
-  setIsCapturingImage
-}: ImageShareProps) => {
-  const trackImageShareUsage = async (platform: string) => {
+export function usePoemSharing({ poem, title, onCompleted }: UsePoemSharingProps) {
+  const [isCapturingImage, setIsCapturingImage] = useState(false);
+
+  // Track feature usage in Supabase
+  const trackShareUsage = async (platform: string, type: 'text' | 'image') => {
     try {
       await supabase.functions.invoke('track-stats', {
         body: {
           action: 'feature_used',
           data: {
-            featureName: `share_image_${platform}`
+            featureName: `share_${type === 'image' ? 'image_' : ''}${platform}`
           }
         }
       });
     } catch (error) {
-      console.error('Error tracking image share feature usage:', error);
+      console.error(`Error tracking ${type} share feature usage:`, error);
     }
   };
 
+  // Handle text sharing
+  const handleTextShare = async (platform: string) => {
+    const poemText = `${title}\n\n${poem}\n\nErstellt mit poetica.apvora.com`;
+    let shareUrl = '';
+    
+    // Track feature usage
+    await trackShareUsage(platform, 'text');
+    
+    switch(platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=https://poetica.apvora.com&quote=${encodeURIComponent(poemText)}`;
+        break;
+        
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(poemText)}`;
+        break;
+        
+      case 'whatsapp':
+        // Mobile WhatsApp sharing - works better on mobile with direct link
+        shareUrl = `whatsapp://send?text=${encodeURIComponent(poemText)}`;
+        
+        // Fallback for desktop
+        if (!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+          shareUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(poemText)}`;
+        }
+        break;
+        
+      case 'tiktok':
+        toast.info('TikTok unterstützt kein direktes Teilen von Text. Bitte erstellen Sie ein Video in der TikTok-App und lesen Sie Ihr Gedicht vor.', {
+          duration: 5000,
+          description: "Sie können einen Screenshot machen und dann in TikTok als Hintergrund verwenden."
+        });
+        onCompleted?.();
+        return;
+        
+      case 'instagram':
+        toast.info('Instagram unterstützt kein direktes Teilen. Bitte machen Sie einen Screenshot und teilen Sie ihn über die Instagram-App.', {
+          duration: 5000,
+          description: "Tippen Sie auf den Bildschirm und halten Sie gedrückt, um einen Screenshot zu machen."
+        });
+        onCompleted?.();
+        return;
+        
+      case 'copy':
+        try {
+          // Use modern clipboard API
+          await navigator.clipboard.writeText(poemText);
+          toast.success('Gedicht in die Zwischenablage kopiert');
+        } catch (err) {
+          console.error('Clipboard error:', err);
+          
+          // Fallback method for older browsers or if permission denied
+          const textArea = document.createElement('textarea');
+          textArea.value = poemText;
+          textArea.style.position = 'fixed';  // Prevent scrolling to bottom
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          
+          try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+              toast.success('Gedicht in die Zwischenablage kopiert');
+            } else {
+              toast.error('Kopieren fehlgeschlagen. Bitte manuell kopieren.');
+            }
+          } catch (err) {
+            toast.error('Kopieren fehlgeschlagen. Bitte manuell kopieren.');
+          }
+          
+          document.body.removeChild(textArea);
+        }
+        onCompleted?.();
+        return;
+        
+      default:
+        return;
+    }
+    
+    window.open(shareUrl, '_blank', 'noopener,noreferrer');
+    onCompleted?.();
+  };
+
+  // Handle image sharing
   const handleImageShare = async (platform: string) => {
     setIsCapturingImage(true);
     
@@ -60,7 +142,7 @@ export const useImageShare = ({
         }
         
         // Track feature usage
-        await trackImageShareUsage(platform);
+        await trackShareUsage(platform, 'image');
         
         // Handle different platforms
         if (platform === 'whatsapp') {
@@ -124,7 +206,7 @@ export const useImageShare = ({
             toast.error('Fehler beim Teilen des Bildes');
           }
         } else {
-          // For other platforms or copy
+          // For other platforms or direct download
           const imageUrl = URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = imageUrl;
@@ -138,7 +220,7 @@ export const useImageShare = ({
           });
         }
         
-        onOpenChange(false);
+        onCompleted?.();
       }, 'image/png');
     } catch (error) {
       console.error('Error capturing image:', error);
@@ -148,5 +230,9 @@ export const useImageShare = ({
     }
   };
 
-  return { handleImageShare };
-};
+  return {
+    isCapturingImage,
+    handleTextShare,
+    handleImageShare
+  };
+}

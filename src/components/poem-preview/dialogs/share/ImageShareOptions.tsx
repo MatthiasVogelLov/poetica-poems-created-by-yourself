@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ImageIcon } from 'lucide-react';
-import { useImageShare } from './hooks/useImageShare';
 import { ShareIcons } from './icons/ShareIcons';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePoemSharing } from '@/hooks/use-poem-sharing';
 
 interface ImageShareOptionsProps {
   poem: string;
@@ -17,13 +17,12 @@ const ImageShareOptions: React.FC<ImageShareOptionsProps> = ({
   title, 
   onOpenChange 
 }) => {
-  const [isCapturingImage, setIsCapturingImage] = useState(false);
-  const { handleImageShare } = useImageShare({ 
+  const { isCapturingImage, handleImageShare } = usePoemSharing({ 
     poem, 
     title, 
-    onOpenChange, 
-    setIsCapturingImage 
+    onCompleted: () => onOpenChange(false) 
   });
+  
   const isMobile = useIsMobile();
   const { WhatsAppIcon } = ShareIcons;
 

@@ -2,9 +2,9 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Facebook, Twitter, Instagram, Copy } from 'lucide-react';
-import { useShareHandlers } from './hooks/useShareHandlers';
 import { ShareIcons } from './icons/ShareIcons';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePoemSharing } from '@/hooks/use-poem-sharing';
 
 interface TextShareOptionsProps {
   poem: string;
@@ -17,7 +17,12 @@ const TextShareOptions: React.FC<TextShareOptionsProps> = ({
   title, 
   onOpenChange 
 }) => {
-  const { handleTextShare } = useShareHandlers({ poem, title, onOpenChange });
+  const { handleTextShare } = usePoemSharing({ 
+    poem, 
+    title, 
+    onCompleted: () => onOpenChange(false) 
+  });
+  
   const isMobile = useIsMobile();
   const { WhatsAppIcon, TikTokIcon } = ShareIcons;
   
