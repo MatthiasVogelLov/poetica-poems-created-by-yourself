@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import PoemTitle from '@/components/poem-preview/PoemTitle';
 import PoemContent from '@/components/poem-preview/PoemContent';
+import ActionButtons from '@/components/poem-preview/ActionButtons';
 
 interface Poem {
   id: string;
@@ -49,7 +50,10 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
       
       <div className="bg-white rounded-lg p-6 shadow-sm border">
         <PoemTitle title={poem.title} />
-        <PoemContent poem={poem.content} isPaid={true} />
+        <PoemContent poem={poem.content} isPaid={true} isInPoemsLand={true} />
+        
+        {/* Add sharing features */}
+        <ActionButtons poem={poem.content} title={poem.title} />
         
         <div className="flex justify-between items-center mt-6 text-sm text-muted-foreground">
           <div className="flex gap-2">

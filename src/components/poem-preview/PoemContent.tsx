@@ -12,12 +12,14 @@ interface PoemContentProps {
   poem: string;
   isPaid?: boolean;
   onPoemChange?: (updatedPoem: string) => void;
+  isInPoemsLand?: boolean;
 }
 
 const PoemContent: React.FC<PoemContentProps> = ({ 
   poem, 
   isPaid = false,
-  onPoemChange 
+  onPoemChange,
+  isInPoemsLand = false
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentPoem, setCurrentPoem] = useState(poem);
@@ -40,43 +42,46 @@ const PoemContent: React.FC<PoemContentProps> = ({
 
   useEffect(() => {
     try {
-      const savedPreferences = localStorage.getItem('poemEditorPreferences');
-      if (savedPreferences) {
-        const parsedPrefs = JSON.parse(savedPreferences);
-        setEditorPreferences(parsedPrefs);
-        console.log('Loaded editor preferences:', parsedPrefs);
-        
-        // Send editor preferences to the server for the admin copy email
-        if (isPaid && poem) {
-          try {
-            const poemData = localStorage.getItem('currentPoemData');
-            if (poemData) {
-              const parsedData = JSON.parse(poemData);
-              const { poemTitle, formData } = parsedData;
-              
-              if (poemTitle && formData) {
-                console.log('Notifying admin about poem with editor preferences');
-                supabase.functions.invoke('notify-poem', {
-                  body: {
-                    poemTitle,
-                    formData,
-                    poemContent: poem,
-                    editorPreferences: parsedPrefs
-                  }
-                }).catch(err => {
-                  console.error('Error notifying admin about poem:', err);
-                });
+      // Only load saved preferences if this is NOT in PoemsLand
+      if (!isInPoemsLand) {
+        const savedPreferences = localStorage.getItem('poemEditorPreferences');
+        if (savedPreferences) {
+          const parsedPrefs = JSON.parse(savedPreferences);
+          setEditorPreferences(parsedPrefs);
+          console.log('Loaded editor preferences:', parsedPrefs);
+          
+          // Send editor preferences to the server for the admin copy email
+          if (isPaid && poem) {
+            try {
+              const poemData = localStorage.getItem('currentPoemData');
+              if (poemData) {
+                const parsedData = JSON.parse(poemData);
+                const { poemTitle, formData } = parsedData;
+                
+                if (poemTitle && formData) {
+                  console.log('Notifying admin about poem with editor preferences');
+                  supabase.functions.invoke('notify-poem', {
+                    body: {
+                      poemTitle,
+                      formData,
+                      poemContent: poem,
+                      editorPreferences: parsedPrefs
+                    }
+                  }).catch(err => {
+                    console.error('Error notifying admin about poem:', err);
+                  });
+                }
               }
+            } catch (e) {
+              console.error('Error sending poem notification with preferences:', e);
             }
-          } catch (e) {
-            console.error('Error sending poem notification with preferences:', e);
           }
         }
       }
     } catch (e) {
       console.error('Error loading editor preferences:', e);
     }
-  }, [isPaid, poem]);
+  }, [isPaid, poem, isInPoemsLand]);
 
   if (!currentPoem || currentPoem.trim() === '') {
     return (
@@ -150,7 +155,7 @@ const PoemContent: React.FC<PoemContentProps> = ({
 
   return (
     <div className="poem-text mb-8 relative poem-container">
-      {isPaid && (
+      {isPaid && !isInPoemsLand && (
         <div className="absolute top-2 right-2">
           <Button 
             variant="ghost" 
