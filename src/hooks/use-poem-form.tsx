@@ -1,25 +1,51 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { PoemFormData, initialFormData } from '@/types/poem';
 import { supabase } from '@/integrations/supabase/client';
 
+const saveFormData = (data: PoemFormData) => {
+  localStorage.setItem('lastPoemFormData', JSON.stringify(data));
+};
+
+const loadFormData = (): PoemFormData | null => {
+  const savedData = localStorage.getItem('lastPoemFormData');
+  if (savedData) {
+    try {
+      return JSON.parse(savedData);
+    } catch (error) {
+      console.error('Error parsing saved form data:', error);
+    }
+  }
+  return null;
+};
+
 export function usePoemForm() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   
+  const savedFormData = loadFormData() || initialFormData;
+  
   const form = useForm<PoemFormData>({
-    defaultValues: initialFormData,
+    defaultValues: savedFormData,
     mode: 'onSubmit',
   });
+  
+  useEffect(() => {
+    if (location.state?.clearForm) {
+      localStorage.removeItem('lastPoemFormData');
+      form.reset(initialFormData);
+    }
+  }, [location.state, form]);
   
   const handleSubmit = async (data: PoemFormData) => {
     setIsLoading(true);
     
-    // Check if any required fields are empty
+    saveFormData(data);
+    
     if (!data.audience || !data.occasion || !data.contentType || !data.style || !data.length) {
       toast({
         title: "Fehler",
@@ -31,7 +57,6 @@ export function usePoemForm() {
     }
     
     try {
-      // Call our edge function using the supabase client
       const { data: responseData, error } = await supabase.functions.invoke('generate-poem', {
         body: data
       });
@@ -40,7 +65,6 @@ export function usePoemForm() {
         throw new Error(error.message);
       }
       
-      // Track poem generation in our stats
       try {
         await supabase.functions.invoke('track-stats', {
           body: {
@@ -56,24 +80,21 @@ export function usePoemForm() {
           }
         });
         
-        // If keywords were used, track them separately
         if (data.keywords) {
           await supabase.functions.invoke('track-stats', {
             body: {
               action: 'keyword_used',
               data: {
                 keywords: data.keywords,
-                poemId: responseData.id // If the poem ID is available from the response
+                poemId: responseData.id
               }
             }
           });
         }
       } catch (trackError) {
-        // Don't stop the flow if tracking fails
         console.error('Error tracking poem generation:', trackError);
       }
       
-      // Navigate to preview with form data and generated poem
       navigate('/preview', { 
         state: { 
           formData: data,

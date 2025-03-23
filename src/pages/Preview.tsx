@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
@@ -7,6 +6,8 @@ import { usePoemLoader } from '@/hooks/use-poem-loader';
 import PreviewHeader from '@/components/preview/PreviewHeader';
 import LoadingIndicator from '@/components/preview/LoadingIndicator';
 import PreviewFooter from '@/components/preview/PreviewFooter';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import { toast } from "sonner";
 
 const Preview = () => {
@@ -59,6 +60,7 @@ const Preview = () => {
   );
   
   const goBack = () => {
+    // Go back to generator but keep form data (don't clear it)
     navigate('/generator');
   };
   
@@ -68,6 +70,18 @@ const Preview = () => {
       
       <div className="pt-16 sm:pt-20 pb-10 sm:pb-20">
         <div className="container-narrow px-4 sm:px-8">
+          <div className="mb-4 flex justify-between items-center">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={goBack}
+              className="flex items-center gap-1"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Zurück zum Generator
+            </Button>
+          </div>
+          
           <PreviewHeader isPaid={isPaid || !!transactionId} onBackClick={goBack} />
           
           {isGenerating ? (
