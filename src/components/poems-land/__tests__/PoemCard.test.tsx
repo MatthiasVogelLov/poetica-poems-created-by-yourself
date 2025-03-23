@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom'; // Add this import
 import PoemCard from '../PoemCard';
 
 describe('PoemCard Component', () => {

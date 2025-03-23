@@ -1,4 +1,5 @@
 
+import '@testing-library/jest-dom'; // Add this import
 import { getOccasionDisplay, getContentTypeDisplay } from '../poem-display-helpers';
 
 describe('Poem Display Helpers', () => {

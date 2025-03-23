@@ -125,7 +125,24 @@ describe('usePoems Hook', () => {
     global.confirm = jest.fn().mockReturnValue(true);
     
     // Mock successful deletion
-    (supabase.from('user_poems').delete().eq('id', '1') as any) = { error: null };
+    const mockDeleteResponse = { error: null };
+    const mockEqReturn = {
+      then: jest.fn().mockResolvedValue(mockDeleteResponse)
+    };
+    const mockDeleteReturn = {
+      eq: jest.fn().mockReturnValue(mockEqReturn)
+    };
+    (supabase.from as jest.Mock).mockImplementation((table) => {
+      if (table === 'user_poems') {
+        return {
+          select: jest.fn().mockReturnThis(),
+          order: jest.fn().mockReturnThis(),
+          then: jest.fn().mockResolvedValue({ data: mockPoems, error: null }),
+          delete: jest.fn().mockReturnValue(mockDeleteReturn)
+        };
+      }
+      return {};
+    });
 
     const { result, waitForNextUpdate } = renderHook(() => usePoems());
     
