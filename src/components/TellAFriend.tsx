@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 const TellAFriend = () => {
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [senderName, setSenderName] = useState('');
   const [message, setMessage] = useState('Hallo,\n\nIch habe diese tolle Webseite zum Erstellen personalisierter Gedichte entdeckt und dachte, das könnte dich interessieren!\n\nSchau sie dir an: https://poetica.apvora.com');
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -23,6 +25,13 @@ const TellAFriend = () => {
       return;
     }
 
+    if (!senderName) {
+      toast.error("Fehler", {
+        description: "Bitte geben Sie Ihren Namen ein."
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -31,6 +40,7 @@ const TellAFriend = () => {
       const { data, error } = await supabase.functions.invoke('tell-a-friend', {
         body: {
           recipientEmail: email,
+          senderName: senderName,
           message: message
         }
       });
@@ -45,6 +55,8 @@ const TellAFriend = () => {
 
       setIsOpen(false);
       setEmail('');
+      setName('');
+      setSenderName('');
       setMessage('Hallo,\n\nIch habe diese tolle Webseite zum Erstellen personalisierter Gedichte entdeckt und dachte, das könnte dich interessieren!\n\nSchau sie dir an: https://poetica.apvora.com');
     } catch (error) {
       console.error("Error sending recommendation:", error);
@@ -73,13 +85,24 @@ const TellAFriend = () => {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">E-Mail-Adresse</Label>
+            <Label htmlFor="senderName">Von <span className="text-destructive">*</span></Label>
+            <Input 
+              id="senderName" 
+              placeholder="Ihr Name" 
+              value={senderName} 
+              onChange={(e) => setSenderName(e.target.value)} 
+              required
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="email">E-Mail-Adresse <span className="text-destructive">*</span></Label>
             <Input 
               id="email" 
               placeholder="freund@example.com" 
               type="email" 
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
+              required
             />
           </div>
           <div className="grid gap-2">

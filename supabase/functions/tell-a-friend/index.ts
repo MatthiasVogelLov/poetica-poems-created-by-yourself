@@ -14,6 +14,7 @@ const resendApiKey = Deno.env.get('RESEND_API_KEY');
 
 interface TellAFriendRequest {
   recipientEmail: string;
+  senderName: string;
   message: string;
 }
 
@@ -38,11 +39,11 @@ serve(async (req) => {
     const { data, error } = await parseRequestBody<TellAFriendRequest>(req);
     if (error) return createErrorResponse(error);
     
-    const { recipientEmail, message } = data!;
-    console.log(`Sending recommendation email to: ${recipientEmail}`);
+    const { recipientEmail, senderName, message } = data!;
+    console.log(`Sending recommendation email to: ${recipientEmail} from: ${senderName}`);
     
     // Validate required fields
-    if (!recipientEmail || !message) {
+    if (!recipientEmail || !senderName) {
       return createErrorResponse('Missing required fields');
     }
 
@@ -53,7 +54,7 @@ serve(async (req) => {
     const emailResult = await resend.emails.send({
       from: 'Poetica <noreply@poetica.apvora.com>',
       to: recipientEmail,
-      subject: 'Eine Empfehlung für dich: Poetica - Erstelle personalisierte Gedichte',
+      subject: `Empfehlung von ${senderName}: Poetica - Erstelle personalisierte Gedichte`,
       html: `
         <div style="font-family: serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: left; margin-bottom: 20px;">
