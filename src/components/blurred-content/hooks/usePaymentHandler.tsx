@@ -107,24 +107,15 @@ export const usePaymentHandler = (navigate: NavigateFunction, location: Location
         await handlePayPalClick();
       } else {
         // Default to Stripe
-        try {
-          const checkoutData = await processStripeCheckout(paymentData);
-          
-          // Redirect to Stripe checkout
-          if (checkoutData?.url) {
-            console.log('Redirecting to Stripe:', checkoutData.url);
-            window.location.href = checkoutData.url;
-          } else {
-            console.error('No Stripe checkout URL received', checkoutData);
-            throw new Error('Keine Checkout-URL erhalten');
-          }
-        } catch (err) {
-          console.error('Stripe checkout error:', err);
-          if (err.message.includes('Edge Function')) {
-            throw new Error('Fehler beim Verbinden mit dem Zahlungsdienstleister. Bitte versuchen Sie es später erneut.');
-          } else {
-            throw err;
-          }
+        const checkoutData = await processStripeCheckout(paymentData);
+        
+        // Redirect to Stripe checkout
+        if (checkoutData?.url) {
+          console.log('Redirecting to Stripe:', checkoutData.url);
+          window.location.href = checkoutData.url;
+        } else {
+          console.error('No Stripe checkout URL received', checkoutData);
+          throw new Error('Keine Checkout-URL erhalten');
         }
       }
     } catch (error) {

@@ -88,7 +88,6 @@ serve(async (req) => {
           message: 'Nach Bezahlung kehren Sie automatisch zu Ihrem Gedicht zurück.'
         }
       }
-      // Removed the problematic appearance customization
     });
 
     console.log('[create-checkout] Checkout session created:', { 
