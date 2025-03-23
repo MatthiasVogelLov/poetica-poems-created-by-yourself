@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import PoemEditor from './PoemEditor';
+import PoemEditor, { EditorPreferences } from './PoemEditor';
 import { Button } from "@/components/ui/button";
 import { PenLine } from "lucide-react";
 
@@ -8,11 +8,6 @@ interface PoemContentProps {
   poem: string;
   isPaid?: boolean;
   onPoemChange?: (updatedPoem: string) => void;
-}
-
-interface EditorPreferences {
-  font: string;
-  fontSize: string;
 }
 
 const PoemContent: React.FC<PoemContentProps> = ({ 
@@ -24,7 +19,9 @@ const PoemContent: React.FC<PoemContentProps> = ({
   const [currentPoem, setCurrentPoem] = useState(poem);
   const [editorPreferences, setEditorPreferences] = useState<EditorPreferences>({
     font: 'serif',
-    fontSize: 'text-base'
+    fontSize: 'text-base',
+    textColor: 'text-black',
+    backgroundColor: 'bg-gray-50'
   });
   
   // Add debugging to help identify poem loading issues
@@ -43,6 +40,7 @@ const PoemContent: React.FC<PoemContentProps> = ({
       const savedPreferences = localStorage.getItem('poemEditorPreferences');
       if (savedPreferences) {
         setEditorPreferences(JSON.parse(savedPreferences));
+        console.log('Loaded editor preferences:', JSON.parse(savedPreferences));
       }
     } catch (e) {
       console.error('Error loading editor preferences:', e);
@@ -54,12 +52,12 @@ const PoemContent: React.FC<PoemContentProps> = ({
     switch (fontValue) {
       case 'sans':
         return 'font-sans';
-      case 'playfair':
-        return 'font-serif'; // Using Playfair Display via font-serif
-      case 'garamond':
-        return 'font-["EB_Garamond",serif]';
-      case 'georgia':
-        return 'font-["Georgia",serif]';
+      case 'mono':
+        return 'font-mono';
+      case 'cursive':
+        return 'font-["Brush_Script_MT",cursive]';
+      case 'fantasy':
+        return 'font-["Copperplate",fantasy]';
       default:
         return 'font-serif';
     }
@@ -81,9 +79,13 @@ const PoemContent: React.FC<PoemContentProps> = ({
     setIsEditing(true);
   };
 
-  const handleSave = (updatedPoem: string) => {
+  const handleSave = (updatedPoem: string, preferences: EditorPreferences) => {
     setCurrentPoem(updatedPoem);
+    setEditorPreferences(preferences);
     setIsEditing(false);
+    
+    // Log preferences to verify they're being saved
+    console.log('Saving poem with preferences:', preferences);
     
     // Call the parent component's handler if provided
     if (onPoemChange) {
@@ -137,7 +139,7 @@ const PoemContent: React.FC<PoemContentProps> = ({
           </Button>
         </div>
       )}
-      <div className={`whitespace-pre-line text-center ${getFontFamily(editorPreferences.font)} ${editorPreferences.fontSize} bg-gray-50 p-6 rounded-lg border border-gray-100 shadow-inner`}>
+      <div className={`whitespace-pre-line text-center ${getFontFamily(editorPreferences.font)} ${editorPreferences.fontSize} ${editorPreferences.textColor} ${editorPreferences.backgroundColor} p-6 rounded-lg border border-gray-100 shadow-inner`}>
         {currentPoem}
       </div>
     </div>

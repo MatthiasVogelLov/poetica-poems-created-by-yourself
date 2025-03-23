@@ -7,17 +7,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface PoemEditorProps {
   initialPoem: string;
-  onSave: (updatedPoem: string) => void;
+  onSave: (updatedPoem: string, preferences: EditorPreferences) => void;
   onCancel: () => void;
 }
 
-// Font options
+// Define editor preferences type
+export interface EditorPreferences {
+  font: string;
+  fontSize: string;
+  textColor: string;
+  backgroundColor: string;
+}
+
+// Font options with more distinctive choices
 const fontOptions = [
   { value: 'serif', label: 'Serif' },
   { value: 'sans', label: 'Sans-Serif' },
-  { value: 'playfair', label: 'Playfair' },
-  { value: 'garamond', label: 'Garamond' },
-  { value: 'georgia', label: 'Georgia' },
+  { value: 'mono', label: 'Monospace' },
+  { value: 'cursive', label: 'Cursive' },
+  { value: 'fantasy', label: 'Fantasy' },
 ];
 
 // Font size options
@@ -29,6 +37,24 @@ const fontSizeOptions = [
   { value: 'text-3xl', label: 'Extra Groß' },
 ];
 
+// Text color options
+const textColorOptions = [
+  { value: 'text-black', label: 'Schwarz' },
+  { value: 'text-gray-700', label: 'Dunkelgrau' },
+  { value: 'text-blue-700', label: 'Blau' },
+  { value: 'text-green-700', label: 'Grün' },
+  { value: 'text-purple-700', label: 'Lila' },
+];
+
+// Background color options
+const backgroundColorOptions = [
+  { value: 'bg-gray-50', label: 'Hellgrau' },
+  { value: 'bg-white', label: 'Weiß' },
+  { value: 'bg-blue-50', label: 'Hellblau' },
+  { value: 'bg-green-50', label: 'Hellgrün' },
+  { value: 'bg-purple-50', label: 'Helllila' },
+];
+
 const PoemEditor: React.FC<PoemEditorProps> = ({ 
   initialPoem, 
   onSave, 
@@ -37,55 +63,66 @@ const PoemEditor: React.FC<PoemEditorProps> = ({
   const [editedPoem, setEditedPoem] = useState(initialPoem);
   const [selectedFont, setSelectedFont] = useState('serif');
   const [selectedFontSize, setSelectedFontSize] = useState('text-base');
+  const [selectedTextColor, setSelectedTextColor] = useState('text-black');
+  const [selectedBgColor, setSelectedBgColor] = useState('bg-gray-50');
   
   // Reset the editor content when the initial poem changes
   useEffect(() => {
     setEditedPoem(initialPoem);
   }, [initialPoem]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditedPoem(e.target.value);
-  };
-
-  const handleSave = () => {
-    // Store font preferences in localStorage
-    try {
-      localStorage.setItem('poemEditorPreferences', JSON.stringify({
-        font: selectedFont,
-        fontSize: selectedFontSize
-      }));
-    } catch (e) {
-      console.error('Error saving editor preferences:', e);
-    }
-    
-    onSave(editedPoem);
-  };
-  
   // Load saved preferences on component mount
   useEffect(() => {
     try {
       const savedPreferences = localStorage.getItem('poemEditorPreferences');
       if (savedPreferences) {
-        const { font, fontSize } = JSON.parse(savedPreferences);
-        setSelectedFont(font || 'serif');
-        setSelectedFontSize(fontSize || 'text-base');
+        const prefs = JSON.parse(savedPreferences);
+        setSelectedFont(prefs.font || 'serif');
+        setSelectedFontSize(prefs.fontSize || 'text-base');
+        setSelectedTextColor(prefs.textColor || 'text-black');
+        setSelectedBgColor(prefs.backgroundColor || 'bg-gray-50');
       }
     } catch (e) {
       console.error('Error loading editor preferences:', e);
     }
   }, []);
 
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEditedPoem(e.target.value);
+  };
+
+  const handleSave = () => {
+    // Create preferences object
+    const preferences: EditorPreferences = {
+      font: selectedFont,
+      fontSize: selectedFontSize,
+      textColor: selectedTextColor,
+      backgroundColor: selectedBgColor
+    };
+    
+    // Store preferences in localStorage
+    try {
+      localStorage.setItem('poemEditorPreferences', JSON.stringify(preferences));
+      console.log('Saved editor preferences:', preferences);
+    } catch (e) {
+      console.error('Error saving editor preferences:', e);
+    }
+    
+    // Pass both poem and preferences to parent component
+    onSave(editedPoem, preferences);
+  };
+
   // Map font value to actual CSS font-family
   const getFontFamily = (fontValue: string) => {
     switch (fontValue) {
       case 'sans':
         return 'font-sans';
-      case 'playfair':
-        return 'font-serif'; // Using Playfair Display via font-serif
-      case 'garamond':
-        return 'font-["EB_Garamond",serif]';
-      case 'georgia':
-        return 'font-["Georgia",serif]';
+      case 'mono':
+        return 'font-mono';
+      case 'cursive':
+        return 'font-["Brush_Script_MT",cursive]';
+      case 'fantasy':
+        return 'font-["Copperplate",fantasy]';
       default:
         return 'font-serif';
     }
@@ -149,12 +186,44 @@ const PoemEditor: React.FC<PoemEditorProps> = ({
             </SelectContent>
           </Select>
         </div>
+        
+        <div>
+          <label className="text-sm font-medium mb-1 block text-gray-700">Textfarbe</label>
+          <Select value={selectedTextColor} onValueChange={setSelectedTextColor}>
+            <SelectTrigger>
+              <SelectValue placeholder="Textfarbe wählen" />
+            </SelectTrigger>
+            <SelectContent>
+              {textColorOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div>
+          <label className="text-sm font-medium mb-1 block text-gray-700">Hintergrund</label>
+          <Select value={selectedBgColor} onValueChange={setSelectedBgColor}>
+            <SelectTrigger>
+              <SelectValue placeholder="Hintergrund wählen" />
+            </SelectTrigger>
+            <SelectContent>
+              {backgroundColorOptions.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       
       <Textarea
         value={editedPoem}
         onChange={handleChange}
-        className={`min-h-[300px] whitespace-pre-line bg-gray-50 text-center ${getFontFamily(selectedFont)} ${selectedFontSize}`}
+        className={`min-h-[300px] whitespace-pre-line text-center ${getFontFamily(selectedFont)} ${selectedFontSize} ${selectedTextColor} ${selectedBgColor}`}
         placeholder="Gedicht bearbeiten..."
       />
       
