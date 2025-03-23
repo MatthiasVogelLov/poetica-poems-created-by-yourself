@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import BlurredContent from './BlurredContent';
 import { Card, CardContent } from '@/components/ui/card';
 import PoemTitle from './poem-preview/PoemTitle';
@@ -18,7 +18,9 @@ const PoemPreview = ({
   poem,
   isPaid = false
 }: PoemPreviewProps) => {
-  const lines = poem.split('\n');
+  const [currentPoem, setCurrentPoem] = useState(poem);
+  
+  const lines = currentPoem.split('\n');
   
   // For preview, show only first 10 lines if not paid
   const visibleLines = isPaid ? lines : lines.slice(0, Math.min(10, lines.length));
@@ -26,6 +28,11 @@ const PoemPreview = ({
 
   // Add print styles when component mounts
   usePrintStyles();
+
+  // Handle poem changes from the editor
+  const handlePoemChange = (updatedPoem: string) => {
+    setCurrentPoem(updatedPoem);
+  };
 
   return (
     <Card className="w-full max-w-2xl mx-auto rounded-xl shadow-md overflow-hidden animate-fade-in poem-container transition-all hover:shadow-lg">
@@ -39,8 +46,12 @@ const PoemPreview = ({
         
         {isPaid ? (
           <>
-            <PoemContent poem={poem} />
-            <ActionButtons poem={poem} title={title} />
+            <PoemContent 
+              poem={currentPoem} 
+              isPaid={isPaid} 
+              onPoemChange={handlePoemChange}
+            />
+            <ActionButtons poem={currentPoem} title={title} />
           </>
         ) : (
           <>

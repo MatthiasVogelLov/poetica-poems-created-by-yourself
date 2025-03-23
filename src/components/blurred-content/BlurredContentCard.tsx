@@ -78,6 +78,7 @@ const BlurredContentCard: React.FC<BlurredContentCardProps> = ({
           onClick={() => onPaymentClick('stripe')} 
         />
         
+        {/* PayPal button temporarily hidden, but code is kept for future use
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
@@ -94,6 +95,7 @@ const BlurredContentCard: React.FC<BlurredContentCardProps> = ({
           isLoading={isLoading} 
           onClick={() => onPaymentClick('paypal')} 
         />
+        */}
       </div>
     </div>
   );
