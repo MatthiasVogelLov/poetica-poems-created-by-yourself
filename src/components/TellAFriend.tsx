@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const TellAFriend = () => {
   const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('Hallo,\n\nIch habe diese tolle Webseite zum Erstellen personalisierter Gedichte entdeckt und dachte, das könnte dich interessieren!\n\nSchau sie dir an: https://poetica.advora.com');
+  const [message, setMessage] = useState('Hallo,\n\nIch habe diese tolle Webseite zum Erstellen personalisierter Gedichte entdeckt und dachte, das könnte dich interessieren!\n\nSchau sie dir an: https://poetica.apvora.com');
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -45,7 +45,7 @@ const TellAFriend = () => {
 
       setIsOpen(false);
       setEmail('');
-      setMessage('Hallo,\n\nIch habe diese tolle Webseite zum Erstellen personalisierter Gedichte entdeckt und dachte, das könnte dich interessieren!\n\nSchau sie dir an: https://poetica.advora.com');
+      setMessage('Hallo,\n\nIch habe diese tolle Webseite zum Erstellen personalisierter Gedichte entdeckt und dachte, das könnte dich interessieren!\n\nSchau sie dir an: https://poetica.apvora.com');
     } catch (error) {
       console.error("Error sending recommendation:", error);
       

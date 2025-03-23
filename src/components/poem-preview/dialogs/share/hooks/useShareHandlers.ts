@@ -29,7 +29,7 @@ export const useShareHandlers = ({
   };
 
   const handleTextShare = async (platform: string) => {
-    const poemText = `${title}\n\n${poem}\n\nErstellt mit poetica.advora.com`;
+    const poemText = `${title}\n\n${poem}\n\nErstellt mit poetica.apvora.com`;
     let shareUrl = '';
     
     // Track feature usage
@@ -37,7 +37,7 @@ export const useShareHandlers = ({
     
     switch(platform) {
       case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=https://poetica.advora.com&quote=${encodeURIComponent(poemText)}`;
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=https://poetica.apvora.com&quote=${encodeURIComponent(poemText)}`;
         break;
       case 'twitter':
         shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(poemText)}`;
