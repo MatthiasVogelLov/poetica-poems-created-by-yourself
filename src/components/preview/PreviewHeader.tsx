@@ -1,24 +1,17 @@
-
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 interface PreviewHeaderProps {
   isPaid: boolean;
   onBackClick: () => void;
 }
-
 const PreviewHeader: React.FC<PreviewHeaderProps> = ({
   isPaid,
   onBackClick
 }) => {
   const isMobile = useIsMobile();
-  
   return <div className="max-w-3xl mx-auto text-center mb-4 sm:mb-6">
-      <button onClick={onBackClick} className="btn-ghost mb-6 sm:mb-8 inline-flex items-center gap-2 text-sm sm:text-base">
-        <ArrowLeft size={isMobile ? 16 : 20} />
-        <span>Zurück zum Generator</span>
-      </button>
+      
       
       <h1 className="heading-lg mb-3 sm:mb-4 animate-slide-up text-2xl sm:text-4xl">
         {isPaid ? 'Ihr Gedicht ist fertig' : 'Vorschau Ihres Gedichts'}
@@ -30,5 +23,4 @@ const PreviewHeader: React.FC<PreviewHeaderProps> = ({
       </p>
     </div>;
 };
-
 export default PreviewHeader;
