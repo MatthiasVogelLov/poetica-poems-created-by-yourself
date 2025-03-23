@@ -13,7 +13,7 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="pt-32 pb-20 md:pt-40 md:pb-32 bg-teal-100">
+      <section className="pt-32 pb-20 md:pt-40 md:pb-32 bg-lime-100">
         <div className="container-wide">
           <div className="max-w-3xl mx-auto text-center">
             <span className="inline-block px-3 py-1 bg-primary/10 rounded-full text-primary text-sm font-medium mb-6 animate-fade-in">
@@ -41,7 +41,7 @@ const Index = () => {
       </section>
       
       {/* Features Section */}
-      <section className="py-20 bg-teal-100">
+      <section className="py-20 bg-secondary/50">
         <div className="container-wide">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <span className="subheading mb-4 block">Funktionen</span>
@@ -60,7 +60,7 @@ const Index = () => {
       </section>
       
       {/* How It Works Section */}
-      <section className="py-20 bg-teal-100">
+      <section className="py-20">
         <div className="container-wide">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <span className="subheading mb-4 block">Prozess</span>
@@ -105,11 +105,11 @@ const FeatureCard = ({
   title,
   description,
   delay = 0
-}) => <div style={{
+}) => <div className="bg-white p-6 rounded-lg shadow-sm border border-border/50 hover:shadow-md transition-all duration-300" style={{
   animation: 'slide-up 0.5s ease-out forwards',
   animationDelay: `${delay}ms`,
   opacity: 0
-}} className="p-6 rounded-lg shadow-sm border border-border/50 hover:shadow-md transition-all duration-300 bg-zinc-100">
+}}>
     <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-6">
       <Icon size={20} className="text-primary" />
     </div>
