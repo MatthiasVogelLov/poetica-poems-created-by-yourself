@@ -1,6 +1,27 @@
 
 export type Audience = 'kinder' | 'erwachsene' | 'partner' | 'familie' | 'freunde' | 'kollegen';
-export type Occasion = 'ostern' | 'geburtstag' | 'hochzeit' | 'jubilaeum' | 'trauerfall' | 'weihnachten' | 'valentinstag' | 'andere';
+export type Occasion = 
+  | 'ostern' 
+  | 'abschluss'
+  | 'babyparty'
+  | 'einzug'
+  | 'geburtstag' 
+  | 'hochzeit' 
+  | 'junggesellenabschied'
+  | 'jubilaeum' 
+  | 'kommunion'
+  | 'konfirmation'
+  | 'ruhestand'
+  | 'scheidung'
+  | 'schulanfang'
+  | 'taufe'
+  | 'trauerfall' 
+  | 'trennung'
+  | 'umzug'
+  | 'valentinstag' 
+  | 'verlobung'
+  | 'weihnachten'
+  | 'andere';
 export type ContentType = 'liebe' | 'freundschaft' | 'natur' | 'leben' | 'motivation' | 'humor' | 'trauer';
 export type Style = 'sonett' | 'ballade' | 'ode' | 'hymne' | 'epigramm' | 'haiku' | 'tanka' | 'freieverse' | 'elfchen' | 'klassisch' | 'modern' | 'romantisch' | 'humorvoll' | 'experimentell';
 export type Length = 'kurz' | 'mittel' | 'lang';

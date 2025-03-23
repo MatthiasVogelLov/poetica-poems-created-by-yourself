@@ -1,4 +1,3 @@
-
 export interface StatItem {
   name: string;
   value: number;
@@ -19,12 +18,26 @@ export const generateDummyStats = () => {
 
   // Poem count for each occasion
   const occasionData: StatItem[] = [
+    { name: 'Ostern', value: Math.floor(Math.random() * 700) + 350, todayValue: Math.floor(Math.random() * 12) + 3 },
+    { name: 'Abschluss', value: Math.floor(Math.random() * 400) + 200, todayValue: Math.floor(Math.random() * 7) + 1 },
+    { name: 'Geburt/Babyparty', value: Math.floor(Math.random() * 600) + 300, todayValue: Math.floor(Math.random() * 10) + 2 },
+    { name: 'Einzug', value: Math.floor(Math.random() * 300) + 150, todayValue: Math.floor(Math.random() * 5) + 1 },
     { name: 'Geburtstag', value: Math.floor(Math.random() * 1200) + 600, todayValue: Math.floor(Math.random() * 25) + 8 },
     { name: 'Hochzeit', value: Math.floor(Math.random() * 800) + 400, todayValue: Math.floor(Math.random() * 15) + 5 },
+    { name: 'Junggesellenabschied', value: Math.floor(Math.random() * 300) + 150, todayValue: Math.floor(Math.random() * 6) + 1 },
     { name: 'Jubiläum', value: Math.floor(Math.random() * 500) + 250, todayValue: Math.floor(Math.random() * 10) + 2 },
+    { name: 'Kommunion', value: Math.floor(Math.random() * 350) + 175, todayValue: Math.floor(Math.random() * 7) + 1 },
+    { name: 'Konfirmation', value: Math.floor(Math.random() * 350) + 175, todayValue: Math.floor(Math.random() * 7) + 1 },
+    { name: 'Ruhestand', value: Math.floor(Math.random() * 400) + 200, todayValue: Math.floor(Math.random() * 8) + 2 },
+    { name: 'Scheidung', value: Math.floor(Math.random() * 200) + 100, todayValue: Math.floor(Math.random() * 4) + 1 },
+    { name: 'Schulanfang', value: Math.floor(Math.random() * 300) + 150, todayValue: Math.floor(Math.random() * 6) + 1 },
+    { name: 'Taufe', value: Math.floor(Math.random() * 400) + 200, todayValue: Math.floor(Math.random() * 8) + 2 },
     { name: 'Trauerfall', value: Math.floor(Math.random() * 300) + 150, todayValue: Math.floor(Math.random() * 5) + 1 },
-    { name: 'Weihnachten', value: Math.floor(Math.random() * 700) + 350, todayValue: Math.floor(Math.random() * 12) + 3 },
+    { name: 'Trennung', value: Math.floor(Math.random() * 200) + 100, todayValue: Math.floor(Math.random() * 4) + 1 },
+    { name: 'Umzug', value: Math.floor(Math.random() * 250) + 125, todayValue: Math.floor(Math.random() * 5) + 1 },
     { name: 'Valentinstag', value: Math.floor(Math.random() * 600) + 300, todayValue: Math.floor(Math.random() * 8) + 2 },
+    { name: 'Verlobung', value: Math.floor(Math.random() * 400) + 200, todayValue: Math.floor(Math.random() * 7) + 2 },
+    { name: 'Weihnachten', value: Math.floor(Math.random() * 700) + 350, todayValue: Math.floor(Math.random() * 12) + 3 },
     { name: 'Andere', value: Math.floor(Math.random() * 400) + 200, todayValue: Math.floor(Math.random() * 6) + 1 },
   ];
 
