@@ -23,7 +23,7 @@ export type Occasion =
   | 'weihnachten'
   | 'andere';
 export type ContentType = 'liebe' | 'freundschaft' | 'natur' | 'leben' | 'motivation' | 'humor' | 'trauer';
-export type Style = 'sonett' | 'ballade' | 'ode' | 'hymne' | 'epigramm' | 'haiku' | 'tanka' | 'freieverse' | 'elfchen' | 'klassisch' | 'modern' | 'romantisch' | 'humorvoll' | 'experimentell';
+export type Style = 'klassisch' | 'modern' | 'romantisch' | 'humorvoll' | 'experimentell';
 export type Length = 'mittel' | 'lang';
 
 export interface PoemFormData {
