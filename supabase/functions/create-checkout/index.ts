@@ -87,6 +87,19 @@ serve(async (req) => {
         submit: {
           message: 'Nach Bezahlung kehren Sie automatisch zu Ihrem Gedicht zurück.'
         }
+      },
+      // Adding custom appearance options for the message
+      appearance: {
+        variables: {
+          colorText: '#045426', // Greenish color for text
+        },
+        rules: {
+          '.Block-formSubmitMessage': {
+            'font-weight': 'bold',
+            'font-size': '16px', // Increasing font size by approximately 2 points
+            'color': '#F2FCE2' // Light green color for better visibility
+          }
+        }
       }
     });
 
