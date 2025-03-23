@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Printer, Send, Share2, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import EmailDialog from './dialogs/EmailDialog';
-import ShareDialog from './dialogs/ShareDialog';
+import ShareDialog from './dialogs/share';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 
