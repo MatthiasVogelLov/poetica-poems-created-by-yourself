@@ -42,7 +42,7 @@ const Generator = () => {
   return <div className="min-h-screen bg-white">
       <Header />
       
-      <div className="pt-32 pb-20 bg-teal-100">
+      <div className="pt-32 pb-20 bg-slate-100">
         <div className="container-narrow">
           <HeaderContent />
           <PoemForm />
