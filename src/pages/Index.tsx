@@ -4,7 +4,6 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import TellAFriend from '../components/TellAFriend';
 import { Sparkles, Heart, Star, Users, Calendar, Type } from 'lucide-react';
-
 const Index = () => {
   const navigate = useNavigate();
   const goToGenerator = () => {
@@ -14,7 +13,7 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="pt-32 pb-20 md:pt-40 md:pb-32">
+      <section className="pt-32 pb-20 md:pt-40 md:pb-32 bg-lime-100">
         <div className="container-wide">
           <div className="max-w-3xl mx-auto text-center">
             <span className="inline-block px-3 py-1 bg-primary/10 rounded-full text-primary text-sm font-medium mb-6 animate-fade-in">
@@ -101,7 +100,6 @@ const Index = () => {
       <Footer />
     </div>;
 };
-
 const FeatureCard = ({
   icon: Icon,
   title,
@@ -118,7 +116,6 @@ const FeatureCard = ({
     <h3 className="text-xl font-medium mb-3">{title}</h3>
     <p className="text-muted-foreground">{description}</p>
   </div>;
-
 const StepCard = ({
   number,
   title,
@@ -135,7 +132,6 @@ const StepCard = ({
     <h3 className="text-xl font-medium mb-3">{title}</h3>
     <p className="text-muted-foreground">{description}</p>
   </div>;
-
 const features = [{
   icon: Users,
   title: "Für jeden Empfänger",
@@ -171,5 +167,4 @@ const steps = [{
   title: "Generieren & Teilen",
   description: "Erhalten Sie Ihr Gedicht, speichern Sie es oder teilen Sie direkt mit Ihren Liebsten."
 }];
-
 export default Index;
