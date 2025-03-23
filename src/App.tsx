@@ -10,6 +10,7 @@ import Preview from "./pages/Preview";
 import Kontakt from "./pages/Kontakt";
 import Hilfe from "./pages/Hilfe";
 import Admin from "./pages/Admin";
+import PoemsLand from "./pages/PoemsLand";
 import NotFound from "./pages/NotFound";
 
 // Create a new query client instance
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/kontakt" element={<Kontakt />} />
           <Route path="/hilfe" element={<Hilfe />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/poemsland" element={<PoemsLand />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
