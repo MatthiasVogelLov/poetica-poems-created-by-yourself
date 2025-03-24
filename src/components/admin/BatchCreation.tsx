@@ -59,9 +59,6 @@ const BatchCreation = () => {
   const generateTemplatePoems = async () => {
     setIsGenerating(true);
     try {
-      // In a real implementation, this would call an API that generates the poems
-      // For now, we'll simulate creating a few poems based on the template
-      
       for (let i = 0; i < templateData.count; i++) {
         // Use either the selected values or random values based on useRandomOptions
         const audience = templateData.useRandomOptions ? 
@@ -77,11 +74,30 @@ const BatchCreation = () => {
         const length = templateData.useRandomOptions ? 
           getRandomOption('length') : templateData.length;
 
+        // Call the generate-poem edge function to create a real poem
+        const { data: generationResult, error: generationError } = await supabase.functions.invoke('generate-poem', {
+          body: {
+            audience: audience,
+            occasion: occasion,
+            contentType: contentType,
+            style: style,
+            verseType: verseType,
+            length: length,
+            keywords: templateData.keywords
+          }
+        });
+        
+        if (generationError) {
+          console.error('Error generating poem:', generationError);
+          throw generationError;
+        }
+        
+        // Save the generated poem to the database
         const { data, error } = await supabase
           .from('user_poems')
           .insert({
-            title: `Template Poem ${i + 1} - ${occasion}`,
-            content: `This is a simulated poem based on template.\nKeywords: ${templateData.keywords}\nStyle: ${style}`,
+            title: generationResult.title || `Gedicht - ${occasion}`,
+            content: generationResult.poem,
             occasion: occasion,
             content_type: contentType,
             style: style,
@@ -100,7 +116,7 @@ const BatchCreation = () => {
       fetchBatchPoems();
     } catch (error) {
       console.error('Error generating poems:', error);
-      toast.error('Fehler bei der Gedichterstellung');
+      toast.error('Fehler bei der Gedichterstellung: ' + (error.message || 'Unbekannter Fehler'));
     } finally {
       setIsGenerating(false);
     }
