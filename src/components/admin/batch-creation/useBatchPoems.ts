@@ -30,6 +30,15 @@ export const useBatchPoems = () => {
       
       setTotalCount(count || 0);
       
+      // Check if we need to adjust the page (if we're on a page that no longer exists)
+      const totalPages = Math.ceil((count || 0) / poemsPerPage);
+      if (page > totalPages && totalPages > 0) {
+        setPage(totalPages);
+        // The useEffect will trigger fetchBatchPoems again with the correct page
+        setIsLoading(false);
+        return;
+      }
+      
       // Then fetch the actual page of data
       const { data, error } = await supabase
         .from('user_poems')
@@ -77,6 +86,12 @@ export const useBatchPoems = () => {
           poem.id === poemId ? { ...poem, status: newStatus } : poem
         )
       );
+      
+      // Refresh count if we've deleted or changed status, especially if it might be the last item
+      if (newStatus === 'deleted' && batchPoems.length <= 1) {
+        // We need to refetch to update counts and navigate to previous page if needed
+        await fetchBatchPoems();
+      }
       
       toast.success(`Gedicht ${newStatus === 'published' ? 'veröffentlicht' : 'gelöscht'}`);
     } catch (error) {

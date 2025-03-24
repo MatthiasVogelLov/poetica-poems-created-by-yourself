@@ -49,6 +49,12 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
       : `/poemsland?preview=${poem.id}`;
   };
 
+  // Determine if we should show publish button
+  const showPublishButton = poem.status === 'draft' && onStatusChange;
+
+  // Always show delete button for any status except 'deleted'
+  const showDeleteButton = onStatusChange && poem.status !== 'deleted';
+
   return (
     <TableRow key={poem.id} className={getRowClassName()}>
       <TableCell className="font-medium">{poem.title}</TableCell>
@@ -70,7 +76,7 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
             <Eye size={16} />
           </Button>
           
-          {poem.status === 'draft' && onStatusChange && (
+          {showPublishButton && (
             <Button 
               variant="outline" 
               size="icon" 
@@ -83,7 +89,7 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
             </Button>
           )}
           
-          {onStatusChange && poem.status !== 'deleted' && (
+          {showDeleteButton && (
             <Button 
               variant="outline" 
               size="icon" 

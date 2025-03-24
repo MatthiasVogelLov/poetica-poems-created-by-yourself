@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.0';
 
@@ -48,6 +47,40 @@ serve(async (req) => {
 
         console.log(`Updating poem with data:`, poemData);
         
+        // For published poems, when setting status to 'deleted',
+        // we keep a copy in user_poems with status 'deleted' but don't actually delete it
+        // This way it remains in PoemsLand if it was published
+        if (poemData.status === 'deleted') {
+          // First check if the poem is published or not
+          const { data: poemInfo, error: poemInfoError } = await supabase
+            .from('user_poems')
+            .select('status, batch_created')
+            .eq('id', poemId)
+            .single();
+            
+          if (poemInfoError) {
+            console.error('Error getting poem info:', poemInfoError);
+            return createResponse({ error: 'Failed to get poem info', details: poemInfoError }, 500);
+          }
+          
+          // If the poem is published, just mark it as deleted but don't affect PoemsLand visibility
+          if (poemInfo.status === 'published') {
+            const { data: updateData, error: updateError } = await supabase
+              .from('user_poems')
+              .update({...poemData})
+              .eq('id', poemId)
+              .select();
+
+            if (updateError) {
+              console.error('Error updating poem:', updateError);
+              return createResponse({ error: 'Failed to update poem', details: updateError }, 500);
+            }
+
+            return createResponse({ success: true, data: updateData });
+          }
+        }
+        
+        // For all other status changes or non-published poems
         const { data: updateData, error: updateError } = await supabase
           .from('user_poems')
           .update(poemData)
