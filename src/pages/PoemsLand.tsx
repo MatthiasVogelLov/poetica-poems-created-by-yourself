@@ -59,9 +59,17 @@ const PoemsLand = () => {
     ? `/poemsland/${selectedPoemId}` 
     : '/poemsland';
 
-  // Create structured data objects
-  const createPoemStructuredData = () => {
-    if (!selectedPoem) return null;
+  // Create structured data for the current view
+  const getPoemStructuredData = () => {
+    if (!selectedPoem) {
+      return {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "PoemsLand - Gedichtsammlung",
+        "description": "Eine Sammlung personalisierter Gedichte für verschiedene Anlässe und Themen",
+        "inLanguage": "de"
+      };
+    }
     
     return {
       "@context": "https://schema.org",
@@ -76,18 +84,6 @@ const PoemsLand = () => {
       "inLanguage": "de"
     };
   };
-
-  const collectionStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "PoemsLand - Gedichtsammlung",
-    "description": "Eine Sammlung personalisierter Gedichte für verschiedene Anlässe und Themen",
-    "inLanguage": "de"
-  };
-
-  // Choose the appropriate structured data and convert to safe JSON string
-  const structuredData = createPoemStructuredData() || collectionStructuredData;
-  const jsonLdString = JSON.stringify(structuredData).replace(/</g, '\\u003c');
 
   // When going back from a single poem view, navigate to the poems list
   const handleGoBack = () => {
@@ -118,8 +114,15 @@ const PoemsLand = () => {
             <meta property="article:tag" content={getOccasionDisplay(selectedPoem.occasion || '')} />
           </>
         )}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString }} />
       </Helmet>
+      
+      {/* Add structured data separately */}
+      <script 
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(getPoemStructuredData()).replace(/</g, '\\u003c')
+        }}
+      />
       
       <Header />
       
