@@ -1,18 +1,21 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom'; // Add this import
+import '@testing-library/jest-dom';
 import PoemFilters from '../PoemFilters';
 
 describe('PoemFilters Component', () => {
   const mockProps = {
     occasionFilter: 'all',
     contentTypeFilter: 'all',
+    audienceFilter: 'all',
     setOccasionFilter: jest.fn(),
     setContentTypeFilter: jest.fn(),
+    setAudienceFilter: jest.fn(),
     clearFilters: jest.fn(),
     occasions: ['hochzeit', 'geburtstag'],
     contentTypes: ['liebe', 'freundschaft'],
+    audiences: ['erwachsene', 'kinder'],
     getOccasionDisplay: jest.fn(occasion => {
       const map = {
         'hochzeit': 'Hochzeit',
@@ -26,6 +29,13 @@ describe('PoemFilters Component', () => {
         'freundschaft': 'Freundschaft'
       };
       return map[contentType] || contentType;
+    }),
+    getAudienceDisplay: jest.fn(audience => {
+      const map = {
+        'erwachsene': 'Erwachsene',
+        'kinder': 'Kinder'
+      };
+      return map[audience] || audience;
     })
   };
 
@@ -45,6 +55,12 @@ describe('PoemFilters Component', () => {
     expect(screen.getByText('Alle Themen')).toBeInTheDocument();
     expect(screen.getByText('Liebe')).toBeInTheDocument();
     expect(screen.getByText('Freundschaft')).toBeInTheDocument();
+    
+    // Open the audience dropdown
+    fireEvent.click(screen.getAllByRole('combobox')[2]);
+    expect(screen.getByText('Alle Zielgruppen')).toBeInTheDocument();
+    expect(screen.getByText('Erwachsene')).toBeInTheDocument();
+    expect(screen.getByText('Kinder')).toBeInTheDocument();
   });
 
   test('calls filter setters when options are selected', () => {
@@ -59,6 +75,11 @@ describe('PoemFilters Component', () => {
     fireEvent.click(screen.getAllByRole('combobox')[1]);
     fireEvent.click(screen.getByText('Liebe'));
     expect(mockProps.setContentTypeFilter).toHaveBeenCalledWith('liebe');
+    
+    // Select an audience
+    fireEvent.click(screen.getAllByRole('combobox')[2]);
+    fireEvent.click(screen.getByText('Erwachsene'));
+    expect(mockProps.setAudienceFilter).toHaveBeenCalledWith('erwachsene');
   });
 
   test('shows reset button when filters are active', () => {
