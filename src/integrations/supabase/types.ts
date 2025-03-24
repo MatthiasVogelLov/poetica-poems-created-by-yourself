@@ -94,36 +94,42 @@ export type Database = {
       }
       user_poems: {
         Row: {
+          batch_created: boolean | null
           content: string
           content_type: string | null
           created_at: string | null
           id: string
           length: string | null
           occasion: string | null
+          status: string | null
           style: string | null
           title: string
           updated_at: string | null
           verse_type: string | null
         }
         Insert: {
+          batch_created?: boolean | null
           content: string
           content_type?: string | null
           created_at?: string | null
           id?: string
           length?: string | null
           occasion?: string | null
+          status?: string | null
           style?: string | null
           title: string
           updated_at?: string | null
           verse_type?: string | null
         }
         Update: {
+          batch_created?: boolean | null
           content?: string
           content_type?: string | null
           created_at?: string | null
           id?: string
           length?: string | null
           occasion?: string | null
+          status?: string | null
           style?: string | null
           title?: string
           updated_at?: string | null
@@ -177,6 +183,51 @@ export type Database = {
           occasion: string | null
           today: number | null
           total: number | null
+        }
+        Relationships: []
+      }
+      published_poems: {
+        Row: {
+          batch_created: boolean | null
+          content: string | null
+          content_type: string | null
+          created_at: string | null
+          id: string | null
+          length: string | null
+          occasion: string | null
+          status: string | null
+          style: string | null
+          title: string | null
+          updated_at: string | null
+          verse_type: string | null
+        }
+        Insert: {
+          batch_created?: boolean | null
+          content?: string | null
+          content_type?: string | null
+          created_at?: string | null
+          id?: string | null
+          length?: string | null
+          occasion?: string | null
+          status?: string | null
+          style?: string | null
+          title?: string | null
+          updated_at?: string | null
+          verse_type?: string | null
+        }
+        Update: {
+          batch_created?: boolean | null
+          content?: string | null
+          content_type?: string | null
+          created_at?: string | null
+          id?: string | null
+          length?: string | null
+          occasion?: string | null
+          status?: string | null
+          style?: string | null
+          title?: string | null
+          updated_at?: string | null
+          verse_type?: string | null
         }
         Relationships: []
       }

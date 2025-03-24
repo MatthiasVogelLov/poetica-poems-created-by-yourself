@@ -3,6 +3,7 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StatsGrid from '@/components/admin/StatsGrid';
 import ContentEditor from '@/components/admin/ContentEditor';
+import BatchCreation from '@/components/admin/BatchCreation';
 
 interface ContentManagementTabsProps {
   activeTab: string;
@@ -23,8 +24,9 @@ const ContentManagementTabs: React.FC<ContentManagementTabsProps> = ({
 
   return (
     <Tabs defaultValue="stats" className="w-full" value={activeTab} onValueChange={onTabChange}>
-      <TabsList className="grid grid-cols-3 mb-8">
+      <TabsList className="grid grid-cols-4 mb-8">
         <TabsTrigger value="stats">Statistiken</TabsTrigger>
+        <TabsTrigger value="batch">Batch Creation</TabsTrigger>
         {contentSections.map(section => (
           <TabsTrigger key={section} value={section} className="capitalize">
             {section}
@@ -34,6 +36,10 @@ const ContentManagementTabs: React.FC<ContentManagementTabsProps> = ({
       
       <TabsContent value="stats" className="focus:outline-none">
         <StatsGrid />
+      </TabsContent>
+      
+      <TabsContent value="batch" className="focus:outline-none">
+        <BatchCreation />
       </TabsContent>
       
       {contentSections.map(section => (

@@ -10,6 +10,8 @@ export interface Poem {
   occasion: string;
   content_type: string;
   created_at: string;
+  status?: string;
+  batch_created?: boolean;
 }
 
 export const usePoems = () => {
@@ -26,9 +28,11 @@ export const usePoems = () => {
     const fetchPoems = async () => {
       setIsLoading(true);
       try {
+        // Fetch both user-created poems and published batch poems
         const { data, error } = await supabase
           .from('user_poems')
           .select('*')
+          .or('batch_created.is.null,and(batch_created.eq.true,status.eq.published)')
           .order('created_at', { ascending: false });
         
         if (error) throw error;
@@ -70,6 +74,7 @@ export const usePoems = () => {
             .from('user_poems')
             .select('*')
             .eq('id', selectedPoemId)
+            .or('batch_created.is.null,and(batch_created.eq.true,status.eq.published)')
             .single();
           
           if (error) throw error;

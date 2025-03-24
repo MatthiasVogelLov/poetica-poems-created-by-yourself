@@ -17,7 +17,7 @@ import {
 import { StatItem, StatsData } from '@/types/stats';
 
 interface DownloadButtonProps {
-  currentData?: StatItem[];
+  currentData?: StatItem[] | any[];
   dataTitle?: string;
   allStats?: StatsData;
 }
