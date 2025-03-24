@@ -87,6 +87,12 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
           </CardContent>
         </Card>
       </div>
+
+      {/* Hidden SEO content that will be rendered in the page source */}
+      <div className="poem-seo-content">
+        <h1>{poem.title}</h1>
+        <div>{poem.content.split('\n').map((line, i) => <p key={i}>{line}</p>)}</div>
+      </div>
     </>
   );
 };

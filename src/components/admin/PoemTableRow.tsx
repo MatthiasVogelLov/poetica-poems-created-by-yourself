@@ -71,28 +71,29 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
           </Button>
           
           {poem.status === 'draft' && onStatusChange && (
-            <>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                title="In PoemsLand veröffentlichen"
-                onClick={() => onStatusChange(poem.id, 'published')}
-                className="text-green-600 hover:text-green-800 hover:bg-green-50"
-                disabled={isPublishing}
-              >
-                {isPublishing ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                title="Gedicht löschen"
-                onClick={() => onStatusChange(poem.id, 'deleted')}
-                className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                disabled={isPublishing}
-              >
-                <X size={16} />
-              </Button>
-            </>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              title="In PoemsLand veröffentlichen"
+              onClick={() => onStatusChange(poem.id, 'published')}
+              className="text-green-600 hover:text-green-800 hover:bg-green-50"
+              disabled={isPublishing}
+            >
+              {isPublishing ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+            </Button>
+          )}
+          
+          {onStatusChange && poem.status !== 'deleted' && (
+            <Button 
+              variant="outline" 
+              size="icon" 
+              title="Gedicht löschen"
+              onClick={() => onStatusChange(poem.id, 'deleted')}
+              className="text-red-600 hover:text-red-800 hover:bg-red-50"
+              disabled={isPublishing}
+            >
+              <X size={16} />
+            </Button>
           )}
         </div>
       </TableCell>

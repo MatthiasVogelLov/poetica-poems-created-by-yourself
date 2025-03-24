@@ -31,10 +31,8 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
 
   const robots = isPreview ? 'noindex, nofollow' : 'index, follow';
 
-  // Include the full poem content in a pre-rendered div for SEO
-  const poemContentHtml = poem.content.replace(/\n/g, '<br />');
-  const seoContentString = `<div class="hidden-seo-content"><h1>${poem.title}</h1><div>${poemContentHtml}</div></div>`;
-
+  // Make poem content SEO-friendly by directly adding it to the HTML source
+  // This ensures search engines can index the full content
   return (
     <Helmet>
       <title>{title}</title>
@@ -55,9 +53,22 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
 
       {/* Pre-rendered poem content for SEO (hidden from view but visible to crawlers) */}
       {!isPreview && (
-        <noscript>
-          {seoContentString}
-        </noscript>
+        <>
+          {/* Add the poem content directly to the HTML for search engines */}
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "CreativeWork",
+              "name": poem.title,
+              "text": poem.content
+            })}
+          </script>
+          
+          {/* Add a hidden div with the poem content that will be rendered in the HTML source */}
+          <style>
+            {`.poem-seo-content { display: none; }`}
+          </style>
+        </>
       )}
     </Helmet>
   );
