@@ -3,14 +3,18 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle } from 'lucide-react';
-import { Occasion, ContentType } from '@/types/poem';
+import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
 import BatchSelectField from '../BatchSelectField';
 
 interface ManualPoemData {
   title: string;
   content: string;
+  audience: Audience;
   occasion: Occasion;
   contentType: ContentType;
+  style: Style;
+  verseType: VerseType;
+  length: Length;
 }
 
 interface ManualFormProps {
@@ -37,7 +41,22 @@ const ManualForm: React.FC<ManualFormProps> = ({
         />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <BatchSelectField
+          label="Zielgruppe"
+          options={[
+            { value: 'eltern', label: 'Eltern' },
+            { value: 'erwachsene', label: 'Erwachsene' },
+            { value: 'familie', label: 'Familie' },
+            { value: 'freunde', label: 'Freunde' },
+            { value: 'kinder', label: 'Kinder' },
+            { value: 'kollegen', label: 'Kollegen' },
+            { value: 'partner', label: 'Partner' }
+          ]}
+          value={poemData.audience}
+          onChange={(value) => onFieldChange('audience', value)}
+        />
+        
         <BatchSelectField
           label="Anlass"
           options={[
@@ -66,6 +85,43 @@ const ManualForm: React.FC<ManualFormProps> = ({
           ]}
           value={poemData.contentType}
           onChange={(value) => onFieldChange('contentType', value)}
+        />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <BatchSelectField
+          label="Stil"
+          options={[
+            { value: 'klassisch', label: 'Klassisch' },
+            { value: 'modern', label: 'Modern' },
+            { value: 'romantisch', label: 'Romantisch' },
+            { value: 'humorvoll', label: 'Humorvoll' },
+            { value: 'experimentell', label: 'Experimentell' }
+          ]}
+          value={poemData.style}
+          onChange={(value) => onFieldChange('style', value)}
+        />
+        
+        <BatchSelectField
+          label="Reimschema"
+          options={[
+            { value: 'frei', label: 'Frei' },
+            { value: 'paarreim', label: 'Paarreim' },
+            { value: 'kreuzreim', label: 'Kreuzreim' },
+            { value: 'umarmenderreim', label: 'Umarmender Reim' }
+          ]}
+          value={poemData.verseType}
+          onChange={(value) => onFieldChange('verseType', value)}
+        />
+        
+        <BatchSelectField
+          label="Länge"
+          options={[
+            { value: 'mittel', label: 'Mittel' },
+            { value: 'lang', label: 'Lang' }
+          ]}
+          value={poemData.length}
+          onChange={(value) => onFieldChange('length', value)}
         />
       </div>
       

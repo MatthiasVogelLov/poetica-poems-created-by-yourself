@@ -31,8 +31,12 @@ const BatchCreation = () => {
   const [manualPoemData, setManualPoemData] = useState({
     title: '',
     content: '',
+    audience: 'erwachsene' as Audience,
     occasion: 'geburtstag' as Occasion,
-    contentType: 'liebe' as ContentType
+    contentType: 'liebe' as ContentType,
+    style: 'klassisch' as Style,
+    verseType: 'kreuzreim' as VerseType,
+    length: 'mittel' as Length,
   });
 
   const { 
@@ -100,6 +104,9 @@ const BatchCreation = () => {
           content: manualPoemData.content,
           occasion: manualPoemData.occasion,
           content_type: manualPoemData.contentType,
+          style: manualPoemData.style,
+          verse_type: manualPoemData.verseType,
+          length: manualPoemData.length,
           batch_created: true,
           status: 'draft'
         })
@@ -112,8 +119,12 @@ const BatchCreation = () => {
       setManualPoemData({
         title: '',
         content: '',
+        audience: 'erwachsene' as Audience,
         occasion: 'geburtstag' as Occasion,
-        contentType: 'liebe' as ContentType
+        contentType: 'liebe' as ContentType,
+        style: 'klassisch' as Style,
+        verseType: 'kreuzreim' as VerseType,
+        length: 'mittel' as Length,
       });
       fetchBatchPoems();
     } catch (error) {
