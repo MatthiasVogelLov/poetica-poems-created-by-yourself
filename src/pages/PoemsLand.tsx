@@ -51,6 +51,28 @@ const PoemsLand = () => {
     ? `/poemsland/${selectedPoemId}` 
     : '/poemsland';
 
+  // Create structured data as a string instead of an object
+  const structuredData = selectedPoem 
+    ? JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Poem", 
+        "name": selectedPoem.title,
+        "author": {
+          "@type": "Organization",
+          "name": "PoemsLand"
+        },
+        "datePublished": selectedPoem.created_at,
+        "keywords": [selectedPoem.occasion, selectedPoem.content_type].filter(Boolean).join(", "),
+        "inLanguage": "de"
+      })
+    : JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "PoemsLand - Gedichtsammlung",
+        "description": "Eine Sammlung personalisierter Gedichte für verschiedene Anlässe und Themen",
+        "inLanguage": "de"
+      });
+
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
@@ -64,33 +86,12 @@ const PoemsLand = () => {
         <link rel="canonical" href={`https://poetica.apvora.com${canonicalPath}`} />
         {selectedPoem && (
           <>
-            <meta property="article:published_time" content={selectedPoem.created_at} />
+            <meta property="article:published_time" content={selectedPoem.created_at || ''} />
             <meta property="article:section" content={getContentTypeDisplay(selectedPoem.content_type || '')} />
             <meta property="article:tag" content={getOccasionDisplay(selectedPoem.occasion || '')} />
           </>
         )}
-        <script type="application/ld+json">
-          {JSON.stringify(
-            selectedPoem ? {
-              "@context": "https://schema.org",
-              "@type": "Poem", 
-              "name": selectedPoem.title,
-              "author": {
-                "@type": "Organization",
-                "name": "PoemsLand"
-              },
-              "datePublished": selectedPoem.created_at,
-              "keywords": [selectedPoem.occasion, selectedPoem.content_type].filter(Boolean).join(", "),
-              "inLanguage": "de"
-            } : {
-              "@context": "https://schema.org",
-              "@type": "CollectionPage",
-              "name": "PoemsLand - Gedichtsammlung",
-              "description": "Eine Sammlung personalisierter Gedichte für verschiedene Anlässe und Themen",
-              "inLanguage": "de"
-            }
-          )}
-        </script>
+        <script type="application/ld+json">{structuredData}</script>
       </Helmet>
       
       <Header />
