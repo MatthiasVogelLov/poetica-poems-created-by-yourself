@@ -76,7 +76,7 @@ const PoemsLand = () => {
     : '/poemsland';
 
   // Create structured data for the current view
-  const getPoemStructuredData = () => {
+  const getStructuredData = () => {
     if (!selectedPoem) {
       return {
         "@context": "https://schema.org",
@@ -120,6 +120,9 @@ const PoemsLand = () => {
     }
   };
 
+  // Serialize structured data to JSON string
+  const structuredDataString = JSON.stringify(getStructuredData()).replace(/</g, '\\u003c');
+
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
@@ -140,11 +143,11 @@ const PoemsLand = () => {
         )}
       </Helmet>
       
-      {/* Add structured data separately */}
+      {/* Move structured data outside of Helmet to fix the Symbol conversion error */}
       <script 
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(getPoemStructuredData()).replace(/</g, '\\u003c')
+          __html: structuredDataString
         }}
       />
       
