@@ -1,16 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, FileUp, Wand2 } from 'lucide-react';
 import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
 import BatchPoemsList from './BatchPoemsList';
 import { supabase } from '@/integrations/supabase/client';
-import BatchSelectField from './BatchSelectField';
 import { toast } from 'sonner';
+import TemplateForm from './TemplateForm';
+import ManualForm from './ManualForm';
 
 const BatchCreation = () => {
   const { toast: hookToast } = useToast();
@@ -181,187 +179,21 @@ const BatchCreation = () => {
               <TabsTrigger value="manual">Manuell</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="template" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Anzahl der Gedichte</label>
-                  <input 
-                    type="number" 
-                    value={templateData.count} 
-                    onChange={(e) => handleTemplateChange('count', parseInt(e.target.value) || 1)}
-                    min="1"
-                    max="20"
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Schlüsselwörter</label>
-                  <input 
-                    type="text" 
-                    value={templateData.keywords} 
-                    onChange={(e) => handleTemplateChange('keywords', e.target.value)}
-                    className="w-full p-2 border rounded"
-                    placeholder="Komma-getrennte Keywords"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <BatchSelectField
-                  label="Zielgruppe"
-                  options={[
-                    { value: 'eltern', label: 'Eltern' },
-                    { value: 'erwachsene', label: 'Erwachsene' },
-                    { value: 'familie', label: 'Familie' },
-                    { value: 'freunde', label: 'Freunde' },
-                    { value: 'kinder', label: 'Kinder' },
-                    { value: 'kollegen', label: 'Kollegen' },
-                    { value: 'partner', label: 'Partner' }
-                  ]}
-                  value={templateData.audience}
-                  onChange={(value) => handleTemplateChange('audience', value)}
-                />
-                
-                <BatchSelectField
-                  label="Anlass"
-                  options={[
-                    { value: 'geburtstag', label: 'Geburtstag' },
-                    { value: 'hochzeit', label: 'Hochzeit' },
-                    { value: 'jubilaeum', label: 'Jubiläum' },
-                    { value: 'valentinstag', label: 'Valentinstag' },
-                    { value: 'weihnachten', label: 'Weihnachten' },
-                    { value: 'ostern', label: 'Ostern' },
-                    { value: 'andere', label: 'Andere' }
-                  ]}
-                  value={templateData.occasion}
-                  onChange={(value) => handleTemplateChange('occasion', value)}
-                />
-                
-                <BatchSelectField
-                  label="Thema"
-                  options={[
-                    { value: 'liebe', label: 'Liebe' },
-                    { value: 'freundschaft', label: 'Freundschaft' },
-                    { value: 'natur', label: 'Natur' },
-                    { value: 'leben', label: 'Leben' },
-                    { value: 'motivation', label: 'Motivation' },
-                    { value: 'humor', label: 'Humor' },
-                    { value: 'trauer', label: 'Trauer' }
-                  ]}
-                  value={templateData.contentType}
-                  onChange={(value) => handleTemplateChange('contentType', value)}
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <BatchSelectField
-                  label="Stil"
-                  options={[
-                    { value: 'klassisch', label: 'Klassisch' },
-                    { value: 'modern', label: 'Modern' },
-                    { value: 'romantisch', label: 'Romantisch' },
-                    { value: 'humorvoll', label: 'Humorvoll' },
-                    { value: 'experimentell', label: 'Experimentell' }
-                  ]}
-                  value={templateData.style}
-                  onChange={(value) => handleTemplateChange('style', value)}
-                />
-                
-                <BatchSelectField
-                  label="Reimschema"
-                  options={[
-                    { value: 'frei', label: 'Frei' },
-                    { value: 'paarreim', label: 'Paarreim' },
-                    { value: 'kreuzreim', label: 'Kreuzreim' },
-                    { value: 'umarmenderreim', label: 'Umarmender Reim' }
-                  ]}
-                  value={templateData.verseType}
-                  onChange={(value) => handleTemplateChange('verseType', value)}
-                />
-                
-                <BatchSelectField
-                  label="Länge"
-                  options={[
-                    { value: 'mittel', label: 'Mittel' },
-                    { value: 'lang', label: 'Lang' }
-                  ]}
-                  value={templateData.length}
-                  onChange={(value) => handleTemplateChange('length', value)}
-                />
-              </div>
-              
-              <Button 
-                onClick={generateTemplatePoems} 
-                disabled={isGenerating}
-                className="w-full mt-6"
-              >
-                <Wand2 className="mr-2 h-4 w-4" />
-                {isGenerating ? 'Generiere Gedichte...' : `${templateData.count} Gedichte generieren`}
-              </Button>
+            <TabsContent value="template">
+              <TemplateForm 
+                templateData={templateData}
+                onFieldChange={handleTemplateChange}
+                onGenerate={generateTemplatePoems}
+                isGenerating={isGenerating}
+              />
             </TabsContent>
             
-            <TabsContent value="manual" className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Titel</label>
-                <input 
-                  type="text" 
-                  value={manualPoemData.title} 
-                  onChange={(e) => handleManualChange('title', e.target.value)}
-                  className="w-full p-2 border rounded"
-                  placeholder="Gedichttitel"
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <BatchSelectField
-                  label="Anlass"
-                  options={[
-                    { value: 'geburtstag', label: 'Geburtstag' },
-                    { value: 'hochzeit', label: 'Hochzeit' },
-                    { value: 'jubilaeum', label: 'Jubiläum' },
-                    { value: 'valentinstag', label: 'Valentinstag' },
-                    { value: 'weihnachten', label: 'Weihnachten' },
-                    { value: 'ostern', label: 'Ostern' },
-                    { value: 'andere', label: 'Andere' }
-                  ]}
-                  value={manualPoemData.occasion}
-                  onChange={(value) => handleManualChange('occasion', value)}
-                />
-                
-                <BatchSelectField
-                  label="Thema"
-                  options={[
-                    { value: 'liebe', label: 'Liebe' },
-                    { value: 'freundschaft', label: 'Freundschaft' },
-                    { value: 'natur', label: 'Natur' },
-                    { value: 'leben', label: 'Leben' },
-                    { value: 'motivation', label: 'Motivation' },
-                    { value: 'humor', label: 'Humor' },
-                    { value: 'trauer', label: 'Trauer' }
-                  ]}
-                  value={manualPoemData.contentType}
-                  onChange={(value) => handleManualChange('contentType', value)}
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium mb-2 block">Gedichtinhalt</label>
-                <Textarea
-                  value={manualPoemData.content}
-                  onChange={(e) => handleManualChange('content', e.target.value)}
-                  className="min-h-[200px]"
-                  placeholder="Geben Sie hier den Inhalt des Gedichts ein..."
-                />
-              </div>
-              
-              <Button 
-                onClick={createManualPoem}
-                className="w-full mt-6"
-              >
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Gedicht erstellen
-              </Button>
+            <TabsContent value="manual">
+              <ManualForm 
+                poemData={manualPoemData}
+                onFieldChange={handleManualChange}
+                onSubmit={createManualPoem}
+              />
             </TabsContent>
           </Tabs>
         </CardContent>
