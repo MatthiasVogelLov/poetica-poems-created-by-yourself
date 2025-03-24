@@ -1,9 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
-import { getRandomOption } from './batch-creation/poemUtils';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -21,6 +19,7 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
 }) => {
   const [poem, setPoem] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
 
   // Fetch the poem when the dialog opens
@@ -49,30 +48,33 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
     fetchPoem();
   }, [poemId]);
 
-  // Generate a new poem with the same parameters
+  // Generate a new poem via OpenAI API
   const handleRegeneratePoem = async () => {
     if (!poem) return;
     
-    setLoading(true);
+    setGenerating(true);
     try {
-      // In a real implementation, this would call an API that generates the poem
-      // For now, we'll simulate updating the same poem
-      const audience = getRandomOption('audience');
-      const occasion = getRandomOption('occasion');
-      const contentType = getRandomOption('contentType');
-      const style = getRandomOption('style');
-      const verseType = getRandomOption('verseType');
-      const length = getRandomOption('length');
+      // Call the generate-poem edge function to create a new poem
+      const { data: generationResult, error: generationError } = await supabase.functions.invoke('generate-poem', {
+        body: {
+          audience: poem.audience || 'erwachsene',
+          occasion: poem.occasion || 'geburtstag',
+          contentType: poem.content_type || 'liebe',
+          style: poem.style || 'klassisch',
+          verseType: poem.verse_type || 'kreuzreim',
+          length: poem.length || 'mittel',
+          keywords: ''
+        }
+      });
       
+      if (generationError) throw generationError;
+      
+      // Update the poem in the database
       const { data, error } = await supabase
         .from('user_poems')
         .update({
-          content: `Dies ist ein neu generiertes Gedicht.\nAnlass: ${occasion}\nThema: ${contentType}\nStil: ${style}`,
-          occasion: occasion,
-          content_type: contentType,
-          style: style,
-          verse_type: verseType,
-          length: length
+          content: generationResult.poem,
+          title: generationResult.title || poem.title
         })
         .eq('id', poemId)
         .select('*')
@@ -85,7 +87,7 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
       console.error('Error regenerating poem:', error);
       toast.error('Fehler bei der Neuererstellung des Gedichts');
     } finally {
-      setLoading(false);
+      setGenerating(false);
     }
   };
 
@@ -110,6 +112,9 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{poem?.title || 'Gedicht Vorschau'}</DialogTitle>
+          <DialogDescription>
+            Hier sehen Sie die vollständige Vorschau des Gedichts, wie es in PoemsLand erscheinen wird.
+          </DialogDescription>
         </DialogHeader>
         
         {loading ? (
@@ -118,7 +123,7 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
           </div>
         ) : (
           <>
-            <div className="poem-container rounded-lg p-6 border shadow-sm mt-4">
+            <div className="poem-container rounded-lg p-6 border shadow-sm mt-4 max-h-[60vh] overflow-y-auto">
               <h2 className="text-xl font-serif text-center mb-6">{poem?.title}</h2>
               
               <div className="whitespace-pre-wrap text-center font-serif leading-relaxed">
@@ -136,6 +141,11 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
                     {poem.content_type}
                   </span>
                 )}
+                {poem?.style && (
+                  <span className="bg-gray-100 rounded-full px-3 py-1">
+                    {poem.style}
+                  </span>
+                )}
               </div>
             </div>
             
@@ -143,9 +153,16 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
               <Button
                 variant="outline"
                 onClick={handleRegeneratePoem}
-                disabled={loading}
+                disabled={generating}
               >
-                Neu generieren
+                {generating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Wird generiert...
+                  </>
+                ) : (
+                  'Neu generieren'
+                )}
               </Button>
               
               {poem?.status === 'draft' && (
@@ -154,7 +171,14 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
                   disabled={publishing}
                   className="bg-green-600 hover:bg-green-700"
                 >
-                  In PoemsLand veröffentlichen
+                  {publishing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Wird veröffentlicht...
+                    </>
+                  ) : (
+                    'In PoemsLand veröffentlichen'
+                  )}
                 </Button>
               )}
             </div>

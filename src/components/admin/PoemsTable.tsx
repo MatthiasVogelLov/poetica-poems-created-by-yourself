@@ -62,6 +62,7 @@ const PoemsTable: React.FC<PoemsTableProps> = ({ poems, onStatusChange }) => {
               <PoemTableRow 
                 key={poem.id}
                 poem={poem}
+                onStatusChange={onStatusChange}
                 onPreviewClick={handlePreviewClick}
               />
             ))}
