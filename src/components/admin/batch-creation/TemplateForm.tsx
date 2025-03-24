@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Wand2 } from 'lucide-react';
 import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
 import BatchSelectField from '../BatchSelectField';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface TemplateFormData {
   count: number;
@@ -14,6 +16,7 @@ interface TemplateFormData {
   verseType: VerseType;
   length: Length;
   keywords: string;
+  useRandomOptions: boolean;
 }
 
 interface TemplateFormProps {
@@ -56,89 +59,104 @@ const TemplateForm: React.FC<TemplateFormProps> = ({
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <BatchSelectField
-          label="Zielgruppe"
-          options={[
-            { value: 'eltern', label: 'Eltern' },
-            { value: 'erwachsene', label: 'Erwachsene' },
-            { value: 'familie', label: 'Familie' },
-            { value: 'freunde', label: 'Freunde' },
-            { value: 'kinder', label: 'Kinder' },
-            { value: 'kollegen', label: 'Kollegen' },
-            { value: 'partner', label: 'Partner' }
-          ]}
-          value={templateData.audience}
-          onChange={(value) => onFieldChange('audience', value)}
+      <div className="flex items-center space-x-2 py-4">
+        <Switch
+          id="random-mode"
+          checked={templateData.useRandomOptions}
+          onCheckedChange={(value) => onFieldChange('useRandomOptions', value)}
         />
-        
-        <BatchSelectField
-          label="Anlass"
-          options={[
-            { value: 'geburtstag', label: 'Geburtstag' },
-            { value: 'hochzeit', label: 'Hochzeit' },
-            { value: 'jubilaeum', label: 'Jubiläum' },
-            { value: 'valentinstag', label: 'Valentinstag' },
-            { value: 'weihnachten', label: 'Weihnachten' },
-            { value: 'ostern', label: 'Ostern' },
-            { value: 'andere', label: 'Andere' }
-          ]}
-          value={templateData.occasion}
-          onChange={(value) => onFieldChange('occasion', value)}
-        />
-        
-        <BatchSelectField
-          label="Thema"
-          options={[
-            { value: 'liebe', label: 'Liebe' },
-            { value: 'freundschaft', label: 'Freundschaft' },
-            { value: 'natur', label: 'Natur' },
-            { value: 'leben', label: 'Leben' },
-            { value: 'motivation', label: 'Motivation' },
-            { value: 'humor', label: 'Humor' },
-            { value: 'trauer', label: 'Trauer' }
-          ]}
-          value={templateData.contentType}
-          onChange={(value) => onFieldChange('contentType', value)}
-        />
+        <Label htmlFor="random-mode" className="font-medium">
+          Optionen zufällig auswählen
+        </Label>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <BatchSelectField
-          label="Stil"
-          options={[
-            { value: 'klassisch', label: 'Klassisch' },
-            { value: 'modern', label: 'Modern' },
-            { value: 'romantisch', label: 'Romantisch' },
-            { value: 'humorvoll', label: 'Humorvoll' },
-            { value: 'experimentell', label: 'Experimentell' }
-          ]}
-          value={templateData.style}
-          onChange={(value) => onFieldChange('style', value)}
-        />
-        
-        <BatchSelectField
-          label="Reimschema"
-          options={[
-            { value: 'frei', label: 'Frei' },
-            { value: 'paarreim', label: 'Paarreim' },
-            { value: 'kreuzreim', label: 'Kreuzreim' },
-            { value: 'umarmenderreim', label: 'Umarmender Reim' }
-          ]}
-          value={templateData.verseType}
-          onChange={(value) => onFieldChange('verseType', value)}
-        />
-        
-        <BatchSelectField
-          label="Länge"
-          options={[
-            { value: 'mittel', label: 'Mittel' },
-            { value: 'lang', label: 'Lang' }
-          ]}
-          value={templateData.length}
-          onChange={(value) => onFieldChange('length', value)}
-        />
-      </div>
+      {!templateData.useRandomOptions && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <BatchSelectField
+              label="Zielgruppe"
+              options={[
+                { value: 'eltern', label: 'Eltern' },
+                { value: 'erwachsene', label: 'Erwachsene' },
+                { value: 'familie', label: 'Familie' },
+                { value: 'freunde', label: 'Freunde' },
+                { value: 'kinder', label: 'Kinder' },
+                { value: 'kollegen', label: 'Kollegen' },
+                { value: 'partner', label: 'Partner' }
+              ]}
+              value={templateData.audience}
+              onChange={(value) => onFieldChange('audience', value)}
+            />
+            
+            <BatchSelectField
+              label="Anlass"
+              options={[
+                { value: 'geburtstag', label: 'Geburtstag' },
+                { value: 'hochzeit', label: 'Hochzeit' },
+                { value: 'jubilaeum', label: 'Jubiläum' },
+                { value: 'valentinstag', label: 'Valentinstag' },
+                { value: 'weihnachten', label: 'Weihnachten' },
+                { value: 'ostern', label: 'Ostern' },
+                { value: 'andere', label: 'Andere' }
+              ]}
+              value={templateData.occasion}
+              onChange={(value) => onFieldChange('occasion', value)}
+            />
+            
+            <BatchSelectField
+              label="Thema"
+              options={[
+                { value: 'liebe', label: 'Liebe' },
+                { value: 'freundschaft', label: 'Freundschaft' },
+                { value: 'natur', label: 'Natur' },
+                { value: 'leben', label: 'Leben' },
+                { value: 'motivation', label: 'Motivation' },
+                { value: 'humor', label: 'Humor' },
+                { value: 'trauer', label: 'Trauer' }
+              ]}
+              value={templateData.contentType}
+              onChange={(value) => onFieldChange('contentType', value)}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <BatchSelectField
+              label="Stil"
+              options={[
+                { value: 'klassisch', label: 'Klassisch' },
+                { value: 'modern', label: 'Modern' },
+                { value: 'romantisch', label: 'Romantisch' },
+                { value: 'humorvoll', label: 'Humorvoll' },
+                { value: 'experimentell', label: 'Experimentell' }
+              ]}
+              value={templateData.style}
+              onChange={(value) => onFieldChange('style', value)}
+            />
+            
+            <BatchSelectField
+              label="Reimschema"
+              options={[
+                { value: 'frei', label: 'Frei' },
+                { value: 'paarreim', label: 'Paarreim' },
+                { value: 'kreuzreim', label: 'Kreuzreim' },
+                { value: 'umarmenderreim', label: 'Umarmender Reim' }
+              ]}
+              value={templateData.verseType}
+              onChange={(value) => onFieldChange('verseType', value)}
+            />
+            
+            <BatchSelectField
+              label="Länge"
+              options={[
+                { value: 'mittel', label: 'Mittel' },
+                { value: 'lang', label: 'Lang' }
+              ]}
+              value={templateData.length}
+              onChange={(value) => onFieldChange('length', value)}
+            />
+          </div>
+        </>
+      )}
       
       <Button 
         onClick={onGenerate} 
@@ -146,7 +164,12 @@ const TemplateForm: React.FC<TemplateFormProps> = ({
         className="w-full mt-6"
       >
         <Wand2 className="mr-2 h-4 w-4" />
-        {isGenerating ? 'Generiere Gedichte...' : `${templateData.count} Gedichte generieren`}
+        {isGenerating 
+          ? 'Generiere Gedichte...' 
+          : templateData.useRandomOptions 
+            ? `${templateData.count} Gedichte mit zufälligen Optionen generieren` 
+            : `${templateData.count} Gedichte generieren`
+        }
       </Button>
     </div>
   );

@@ -10,6 +10,7 @@ import ManualForm from './batch-creation/ManualForm';
 import BatchPoemsList from './BatchPoemsList';
 import { useBatchPoems } from './batch-creation/useBatchPoems';
 import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
+import { getRandomOption } from './batch-creation/poemUtils';
 
 const BatchCreation = () => {
   const { toast: hookToast } = useToast();
@@ -24,7 +25,8 @@ const BatchCreation = () => {
     style: 'klassisch' as Style,
     verseType: 'kreuzreim' as VerseType,
     length: 'mittel' as Length,
-    keywords: ''
+    keywords: '',
+    useRandomOptions: false
   });
 
   // State for the manual creation form
@@ -61,16 +63,30 @@ const BatchCreation = () => {
       // For now, we'll simulate creating a few poems based on the template
       
       for (let i = 0; i < templateData.count; i++) {
+        // Use either the selected values or random values based on useRandomOptions
+        const audience = templateData.useRandomOptions ? 
+          getRandomOption('audience') : templateData.audience;
+        const occasion = templateData.useRandomOptions ? 
+          getRandomOption('occasion') : templateData.occasion;
+        const contentType = templateData.useRandomOptions ? 
+          getRandomOption('contentType') : templateData.contentType;
+        const style = templateData.useRandomOptions ? 
+          getRandomOption('style') : templateData.style;
+        const verseType = templateData.useRandomOptions ? 
+          getRandomOption('verseType') : templateData.verseType;
+        const length = templateData.useRandomOptions ? 
+          getRandomOption('length') : templateData.length;
+
         const { data, error } = await supabase
           .from('user_poems')
           .insert({
-            title: `Template Poem ${i + 1} - ${templateData.occasion}`,
-            content: `This is a simulated poem based on template.\nKeywords: ${templateData.keywords}\nStyle: ${templateData.style}`,
-            occasion: templateData.occasion,
-            content_type: templateData.contentType,
-            style: templateData.style,
-            verse_type: templateData.verseType,
-            length: templateData.length,
+            title: `Template Poem ${i + 1} - ${occasion}`,
+            content: `This is a simulated poem based on template.\nKeywords: ${templateData.keywords}\nStyle: ${style}`,
+            occasion: occasion,
+            content_type: contentType,
+            style: style,
+            verse_type: verseType,
+            length: length,
             batch_created: true,
             status: 'draft'
           })
