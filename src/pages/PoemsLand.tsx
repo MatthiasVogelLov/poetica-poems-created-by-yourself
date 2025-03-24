@@ -1,15 +1,14 @@
+
 import React, { useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useNavigate, useParams } from 'react-router-dom';
-import PoemFilters from '@/components/poems-land/PoemFilters';
-import PoemsList from '@/components/poems-land/PoemsList';
 import SinglePoemView from '@/components/poems-land/SinglePoemView';
 import { usePoems } from '@/hooks/use-poems';
 import { getOccasionDisplay, getContentTypeDisplay } from '@/utils/poem-display-helpers';
-import { Helmet } from 'react-helmet';
-import { Button } from '@/components/ui/button';
-import { PenLine } from 'lucide-react';
+import PoemSEO from '@/components/poems-land/PoemSEO';
+import PoemStructuredData, { getStructuredData } from '@/components/poems-land/PoemStructuredData';
+import PoemsListView from '@/components/poems-land/PoemsListView';
 
 const PoemsLand = () => {
   const { poemSlug } = useParams();
@@ -22,8 +21,6 @@ const PoemsLand = () => {
     selectedPoem,
     occasionFilter,
     contentTypeFilter,
-    poemSlugs,
-    slugToId,
     setSelectedPoemId,
     setOccasionFilter,
     setContentTypeFilter,
@@ -50,7 +47,7 @@ const PoemsLand = () => {
     } else {
       setSelectedPoemId(null);
     }
-  }, [poemSlug, findPoemBySlug, setSelectedPoemId, navigate, slugToId]);
+  }, [poemSlug, findPoemBySlug, setSelectedPoemId, navigate]);
 
   useEffect(() => {
     if (selectedPoem) {
@@ -59,43 +56,6 @@ const PoemsLand = () => {
       document.title = "PoemsLand - Sammlung personalisierter Gedichte";
     }
   }, [selectedPoem]);
-
-  const metaDescription = selectedPoem 
-    ? `Lesen Sie das Gedicht "${selectedPoem.title}" zum Thema ${getContentTypeDisplay(selectedPoem.content_type || '')} für ${getOccasionDisplay(selectedPoem.occasion || '')}. Ein schönes Gedicht in PoemsLand.`
-    : "Entdecken Sie eine vielfältige Sammlung personalisierter Gedichte für jeden Anlass in PoemsLand - von Geburtstagen und Hochzeiten bis hin zu besonderen Jubiläen und Feiertagen.";
-
-  const keywords = selectedPoem
-    ? `Gedicht, ${selectedPoem.title}, ${getOccasionDisplay(selectedPoem.occasion || '')}, ${getContentTypeDisplay(selectedPoem.content_type || '')}, personalisiert, Poesie`
-    : "Gedichte, personalisierte Gedichte, Gedichtsammlung, PoemsLand, Hochzeit, Geburtstag, Jubiläum, Poesie, Reimgedichte, Liebesgedichte";
-
-  const canonicalPath = selectedPoem && selectedPoemId
-    ? `/poemsland/${getSlugForPoemId(selectedPoemId) || ''}` 
-    : '/poemsland';
-
-  const getStructuredData = () => {
-    if (!selectedPoem) {
-      return {
-        "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        "name": "PoemsLand - Gedichtsammlung",
-        "description": "Eine Sammlung personalisierter Gedichte für verschiedene Anlässe und Themen",
-        "inLanguage": "de"
-      };
-    }
-    
-    return {
-      "@context": "https://schema.org",
-      "@type": "Poem", 
-      "name": selectedPoem.title || '',
-      "author": {
-        "@type": "Organization",
-        "name": "PoemsLand"
-      },
-      "datePublished": selectedPoem.created_at || '',
-      "keywords": [selectedPoem.occasion, selectedPoem.content_type].filter(Boolean).join(', '),
-      "inLanguage": "de"
-    };
-  };
 
   const handleGoBack = () => {
     setSelectedPoemId(null);
@@ -113,34 +73,18 @@ const PoemsLand = () => {
     }
   };
 
-  const structuredDataString = JSON.stringify(getStructuredData()).replace(/</g, '\\u003c');
+  const structuredDataString = JSON.stringify(getStructuredData(selectedPoem)).replace(/</g, '\\u003c');
 
   return (
     <div className="min-h-screen bg-white">
-      <Helmet>
-        <title>{selectedPoem ? `${selectedPoem.title} - PoemsLand` : "PoemsLand - Sammlung personalisierter Gedichte"}</title>
-        <meta name="description" content={metaDescription} />
-        <meta name="keywords" content={keywords} />
-        <meta property="og:title" content={selectedPoem ? `${selectedPoem.title} - PoemsLand` : "PoemsLand"} />
-        <meta property="og:description" content={metaDescription} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={`https://poetica.apvora.com${canonicalPath}`} />
-        <link rel="canonical" href={`https://poetica.apvora.com${canonicalPath}`} />
-        {selectedPoem && (
-          <>
-            <meta property="article:published_time" content={selectedPoem.created_at || ''} />
-            <meta property="article:section" content={getContentTypeDisplay(selectedPoem.content_type || '')} />
-            <meta property="article:tag" content={getOccasionDisplay(selectedPoem.occasion || '')} />
-          </>
-        )}
-      </Helmet>
-      
-      <script 
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: structuredDataString
-        }}
+      <PoemSEO 
+        selectedPoem={selectedPoem}
+        selectedPoemId={selectedPoemId}
+        getSlugForPoemId={getSlugForPoemId}
+        structuredDataString={structuredDataString}
       />
+      
+      <PoemStructuredData structuredDataString={structuredDataString} />
       
       <Header />
       
@@ -154,40 +98,22 @@ const PoemsLand = () => {
               getContentTypeDisplay={getContentTypeDisplay}
             />
           ) : (
-            <>
-              <h1 className="text-3xl font-serif mb-8 text-center">PoemsLand</h1>
-              
-              <PoemFilters 
-                occasionFilter={occasionFilter}
-                contentTypeFilter={contentTypeFilter}
-                setOccasionFilter={setOccasionFilter}
-                setContentTypeFilter={setContentTypeFilter}
-                clearFilters={clearFilters}
-                occasions={getUniqueOccasions()}
-                contentTypes={getUniqueContentTypes()}
-                getOccasionDisplay={getOccasionDisplay}
-                getContentTypeDisplay={getContentTypeDisplay}
-              />
-              
-              <PoemsList 
-                poems={filteredPoems}
-                isLoading={isLoading}
-                handleDeletePoem={handleDeletePoem}
-                setSelectedPoemId={navigateToPoemDetail}
-                getOccasionDisplay={getOccasionDisplay}
-                getContentTypeDisplay={getContentTypeDisplay}
-              />
-              
-              <div className="mt-8 text-center">
-                <Button 
-                  onClick={handleCreatePoem}
-                  className="px-4 py-2 text-sm flex items-center gap-2 mx-auto"
-                >
-                  <PenLine className="w-4 h-4" />
-                  <span>Erstelle Dein eigenes Gedicht</span>
-                </Button>
-              </div>
-            </>
+            <PoemsListView 
+              filteredPoems={filteredPoems}
+              isLoading={isLoading}
+              occasionFilter={occasionFilter}
+              contentTypeFilter={contentTypeFilter}
+              setOccasionFilter={setOccasionFilter}
+              setContentTypeFilter={setContentTypeFilter}
+              clearFilters={clearFilters}
+              getUniqueOccasions={getUniqueOccasions}
+              getUniqueContentTypes={getUniqueContentTypes}
+              handleDeletePoem={handleDeletePoem}
+              navigateToPoemDetail={navigateToPoemDetail}
+              handleCreatePoem={handleCreatePoem}
+              getOccasionDisplay={getOccasionDisplay}
+              getContentTypeDisplay={getContentTypeDisplay}
+            />
           )}
         </div>
       </div>
