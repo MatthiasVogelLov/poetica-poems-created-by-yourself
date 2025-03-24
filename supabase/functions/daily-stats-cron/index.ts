@@ -32,6 +32,24 @@ serve(async (req) => {
     
     console.log("[daily-stats-cron] Cron job set up successfully:", data);
     
+    // Force execute the email function once to test
+    try {
+      console.log("[daily-stats-cron] Testing email function execution...");
+      const testResult = await fetch(`${supabaseUrl}/functions/v1/daily-stats-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseKey}`
+        },
+        body: JSON.stringify({ test: true })
+      });
+      
+      const testResponse = await testResult.json();
+      console.log("[daily-stats-cron] Test email execution result:", testResponse);
+    } catch (testError) {
+      console.error("[daily-stats-cron] Error testing email function:", testError);
+    }
+    
     return new Response(
       JSON.stringify({ 
         success: true, 

@@ -1,23 +1,12 @@
 
 import React from 'react';
-import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import PoemTitle from '@/components/poem-preview/PoemTitle';
-import PoemContent from '@/components/poem-preview/PoemContent';
-import ActionButtons from '@/components/poem-preview/ActionButtons';
-
-interface Poem {
-  id: string;
-  title: string;
-  content: string;
-  occasion: string;
-  content_type: string;
-  created_at: string;
-}
+import { usePoemSharing } from '@/hooks/sharing';
+import { ArrowLeft } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SinglePoemViewProps {
-  poem: Poem | null;
+  poem: any;
   goBack: () => void;
   getOccasionDisplay: (occasion: string) => string;
   getContentTypeDisplay: (contentType: string) => string;
@@ -29,44 +18,99 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
   getOccasionDisplay,
   getContentTypeDisplay
 }) => {
+  const isMobile = useIsMobile();
+  const { handleTextShare, handleImageShare, isCapturingImage } = usePoemSharing({
+    poem: poem?.content || '',
+    title: poem?.title || 'Gedicht',
+    onCompleted: () => {}
+  });
+
   if (!poem) {
-    return (
-      <div className="text-center py-10">
-        <div className="animate-pulse">Gedicht wird geladen...</div>
-      </div>
-    );
+    return <div className="text-center py-8">Gedicht nicht gefunden</div>;
   }
 
   return (
-    <div className="animate-fade-in">
+    <div>
       <Button 
         variant="ghost" 
-        onClick={goBack} 
-        className="mb-6"
+        className="mb-4 flex items-center gap-2"
+        onClick={goBack}
       >
-        <ChevronLeft size={16} className="mr-2" />
-        Zurück zu PoemsLand
+        <ArrowLeft size={16} />
+        <span>Zurück</span>
       </Button>
       
-      <div className="bg-white rounded-lg p-6 shadow-sm border">
-        <PoemTitle title={poem.title} />
-        <PoemContent poem={poem.content} isPaid={true} isInPoemsLand={true} />
-        
-        {/* Add sharing features */}
-        <ActionButtons poem={poem.content} title={poem.title} />
-        
-        <div className="flex justify-between items-center mt-6 text-sm text-muted-foreground">
-          <div className="flex gap-2">
+      <div className="max-w-xl mx-auto">
+        <div className="poem-container rounded-lg p-6 border shadow-sm">
+          <h1 className="text-2xl font-serif text-center mb-6 text-gray-800">{poem.title}</h1>
+          
+          <div className="whitespace-pre-wrap text-center font-serif text-lg leading-relaxed">
+            {poem.content}
+          </div>
+          
+          <div className="flex flex-wrap gap-2 mt-4 text-sm text-gray-500 justify-center">
             {poem.occasion && (
-              <Badge variant="secondary">{getOccasionDisplay(poem.occasion)}</Badge>
+              <span className="bg-gray-100 rounded-full px-3 py-1">
+                {getOccasionDisplay(poem.occasion)}
+              </span>
             )}
             {poem.content_type && (
-              <Badge variant="outline">{getContentTypeDisplay(poem.content_type)}</Badge>
+              <span className="bg-gray-100 rounded-full px-3 py-1">
+                {getContentTypeDisplay(poem.content_type)}
+              </span>
             )}
           </div>
-          <span>
-            {new Date(poem.created_at).toLocaleDateString('de-DE')}
-          </span>
+        </div>
+        
+        {/* Sharing Features */}
+        <div className="mt-6 border-t pt-4">
+          <h3 className="text-sm font-medium text-gray-500 mb-3 text-center">Teilen Sie dieses Gedicht</h3>
+          
+          <div className="flex flex-wrap gap-2 justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={() => handleTextShare('whatsapp')}
+              disabled={isCapturingImage}
+            >
+              <span className={isMobile ? "text-xs" : ""}>WhatsApp</span>
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={() => handleTextShare('email')}
+              disabled={isCapturingImage}
+            >
+              <span className={isMobile ? "text-xs" : ""}>E-Mail</span>
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={() => handleImageShare('download')}
+              disabled={isCapturingImage}
+            >
+              <span className={isMobile ? "text-xs" : ""}>Als Bild</span>
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={() => handleImageShare('whatsapp')}
+              disabled={isCapturingImage}
+            >
+              <span className={isMobile ? "text-xs" : ""}>Bild per WhatsApp</span>
+            </Button>
+          </div>
+        </div>
+        
+        <div className="text-center text-sm text-gray-400 mt-8">
+          <p>Erstellt mit Poetica - www.poetica.apvora.com</p>
         </div>
       </div>
     </div>

@@ -12,7 +12,6 @@ import {
 import { 
   convertToCSV, 
   convertToXLS,
-  convertToPDF,
   downloadData
 } from '@/utils/exportData';
 import { StatItem, StatsData } from '@/types/stats';
@@ -51,8 +50,6 @@ const DownloadButton = ({
         `${filename}.xls`,
         "application/vnd.ms-excel"
       );
-    } else if (format === "pdf") {
-      convertToPDF(dataToExport, dataTitle, filename);
     }
   };
 
@@ -65,7 +62,6 @@ const DownloadButton = ({
         <SelectContent>
           <SelectItem value="csv">CSV</SelectItem>
           <SelectItem value="xls">Excel</SelectItem>
-          <SelectItem value="pdf">PDF</SelectItem>
         </SelectContent>
       </Select>
       

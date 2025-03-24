@@ -158,14 +158,14 @@ serve(async (req) => {
           </div>
           
           <p style="margin-top: 24px; font-size: 0.9em; color: #718096;">
-            Dies ist eine automatisch generierte E-Mail von Poetica.
+            Dies ist eine automatisch generierte E-Mail von Poetica. Tagesstatistik für ${yesterdayFormatted}, generiert am ${new Date().toISOString()}.
           </p>
         </body>
       </html>
     `;
     
     // Update the recipient email
-    const recipientEmail = "matthiasvogel1973@gmail.com"; // Replace with the admin email
+    const recipientEmail = "matthiasvogel1973@gmail.com"; // Admin email
     
     console.log(`[daily-stats-email] Sending email to ${recipientEmail}`);
     
