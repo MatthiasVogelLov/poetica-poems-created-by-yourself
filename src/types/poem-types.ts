@@ -26,6 +26,12 @@ export interface PoemHookState {
   contentTypeFilter: string;
   poemSlugs: {[key: string]: string};
   slugToId: {[key: string]: string};
+  page: number;
+  totalCount: number;
+  hasMore: boolean;
+  poemsPerPage: number;
+  nextPage: () => void;
+  prevPage: () => void;
 }
 
 export interface PoemHookActions {

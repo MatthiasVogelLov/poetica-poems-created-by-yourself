@@ -7,7 +7,7 @@ import SinglePoemView from '@/components/poems-land/SinglePoemView';
 import { usePoems } from '@/hooks/use-poems';
 import { getOccasionDisplay, getContentTypeDisplay } from '@/utils/poem-display-helpers';
 import PoemSEO from '@/components/poems-land/PoemSEO';
-import PoemStructuredData, { getStructuredData } from '@/components/poems-land/PoemStructuredData';
+import PoemStructuredData from '@/components/poems-land/PoemStructuredData';
 import PoemsListView from '@/components/poems-land/PoemsListView';
 
 const PoemsLand = () => {
@@ -29,7 +29,13 @@ const PoemsLand = () => {
     getUniqueOccasions,
     getUniqueContentTypes,
     findPoemBySlug,
-    getSlugForPoemId
+    getSlugForPoemId,
+    page,
+    totalCount,
+    hasMore,
+    nextPage,
+    prevPage,
+    poemsPerPage
   } = usePoems();
 
   useEffect(() => {
@@ -73,18 +79,18 @@ const PoemsLand = () => {
     }
   };
 
-  const structuredDataString = JSON.stringify(getStructuredData(selectedPoem)).replace(/</g, '\\u003c');
+  // Host and URL for SEO
+  const host = window.location.origin;
+  const poemUrl = selectedPoem ? `${host}/poemsland/${getSlugForPoemId(selectedPoem.id) || selectedPoem.id}` : '';
 
   return (
     <div className="min-h-screen bg-white">
-      <PoemSEO 
-        selectedPoem={selectedPoem}
-        selectedPoemId={selectedPoemId}
-        getSlugForPoemId={getSlugForPoemId}
-        structuredDataString={structuredDataString}
-      />
-      
-      <PoemStructuredData structuredDataString={structuredDataString} />
+      {selectedPoem && (
+        <>
+          <PoemSEO poem={selectedPoem} isPreview={false} />
+          <PoemStructuredData poem={selectedPoem} host={host} poemUrl={poemUrl} />
+        </>
+      )}
       
       <Header />
       
@@ -93,9 +99,9 @@ const PoemsLand = () => {
           {selectedPoemId ? (
             <SinglePoemView 
               poem={selectedPoem}
-              goBack={handleGoBack}
-              getOccasionDisplay={getOccasionDisplay}
-              getContentTypeDisplay={getContentTypeDisplay}
+              isLoading={isLoading}
+              navigateBack={handleGoBack}
+              isPreview={false}
             />
           ) : (
             <PoemsListView 
@@ -113,6 +119,12 @@ const PoemsLand = () => {
               handleCreatePoem={handleCreatePoem}
               getOccasionDisplay={getOccasionDisplay}
               getContentTypeDisplay={getContentTypeDisplay}
+              page={page}
+              totalCount={totalCount}
+              hasMore={hasMore}
+              nextPage={nextPage}
+              prevPage={prevPage}
+              poemsPerPage={poemsPerPage}
             />
           )}
         </div>

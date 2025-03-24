@@ -16,7 +16,8 @@ describe('SinglePoemView Component', () => {
 
   const mockProps = {
     poem: mockPoem,
-    goBack: jest.fn(),
+    isLoading: false,
+    navigateBack: jest.fn(),
     getOccasionDisplay: jest.fn().mockReturnValue('Hochzeit'),
     getContentTypeDisplay: jest.fn().mockReturnValue('Liebe'),
   };
@@ -37,14 +38,14 @@ describe('SinglePoemView Component', () => {
   test('calls goBack when back button is clicked', () => {
     render(<SinglePoemView {...mockProps} />);
     
-    fireEvent.click(screen.getByText('Zurück zu PoemsLand'));
-    expect(mockProps.goBack).toHaveBeenCalled();
+    fireEvent.click(screen.getByText('Zurück zu allen Gedichten'));
+    expect(mockProps.navigateBack).toHaveBeenCalled();
   });
 
   test('shows loading state when poem is null', () => {
     render(<SinglePoemView {...mockProps} poem={null} />);
     
-    expect(screen.getByText('Gedicht wird geladen...')).toBeInTheDocument();
+    expect(screen.getByText('Gedicht nicht gefunden')).toBeInTheDocument();
   });
 
   test('renders multiline poem content correctly', () => {
