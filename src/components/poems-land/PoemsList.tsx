@@ -12,6 +12,7 @@ interface Poem {
   occasion: string;
   content_type: string;
   created_at: string;
+  audience?: string;
 }
 
 interface PoemsListProps {
@@ -21,6 +22,7 @@ interface PoemsListProps {
   setSelectedPoemId: (id: string) => void;
   getOccasionDisplay: (occasion: string) => string;
   getContentTypeDisplay: (contentType: string) => string;
+  getAudienceDisplay?: (audience: string) => string;
   page?: number;
   totalCount?: number;
   onNextPage?: () => void;
@@ -36,6 +38,7 @@ const PoemsList: React.FC<PoemsListProps> = ({
   setSelectedPoemId,
   getOccasionDisplay,
   getContentTypeDisplay,
+  getAudienceDisplay,
   page = 1,
   totalCount = 0,
   onNextPage,
@@ -80,6 +83,7 @@ const PoemsList: React.FC<PoemsListProps> = ({
             poem={poem}
             getOccasionDisplay={getOccasionDisplay}
             getContentTypeDisplay={getContentTypeDisplay}
+            getAudienceDisplay={getAudienceDisplay}
             onDelete={handleDeletePoem}
             onClick={() => setSelectedPoemId(poem.id)}
           />

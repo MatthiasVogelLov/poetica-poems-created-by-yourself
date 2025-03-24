@@ -10,16 +10,20 @@ interface PoemsListViewProps {
   isLoading: boolean;
   occasionFilter: string;
   contentTypeFilter: string;
+  audienceFilter?: string;
   setOccasionFilter: (filter: string) => void;
   setContentTypeFilter: (filter: string) => void;
+  setAudienceFilter?: (filter: string) => void;
   clearFilters: () => void;
   getUniqueOccasions: () => string[];
   getUniqueContentTypes: () => string[];
+  getUniqueAudiences?: () => string[];
   handleDeletePoem: (id: string, e: React.MouseEvent) => void;
   navigateToPoemDetail: (id: string) => void;
   handleCreatePoem: () => void;
   getOccasionDisplay: (occasion: string) => string;
   getContentTypeDisplay: (contentType: string) => string;
+  getAudienceDisplay?: (audience: string) => string;
   page?: number;
   totalCount?: number;
   hasMore?: boolean;
@@ -33,16 +37,20 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
   isLoading,
   occasionFilter,
   contentTypeFilter,
+  audienceFilter = 'all',
   setOccasionFilter,
   setContentTypeFilter,
+  setAudienceFilter,
   clearFilters,
   getUniqueOccasions,
   getUniqueContentTypes,
+  getUniqueAudiences,
   handleDeletePoem,
   navigateToPoemDetail,
   handleCreatePoem,
   getOccasionDisplay,
   getContentTypeDisplay,
+  getAudienceDisplay,
   page = 1,
   totalCount = 0,
   hasMore = false,
@@ -57,13 +65,17 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
       <PoemFilters 
         occasionFilter={occasionFilter}
         contentTypeFilter={contentTypeFilter}
+        audienceFilter={audienceFilter}
         setOccasionFilter={setOccasionFilter}
         setContentTypeFilter={setContentTypeFilter}
+        setAudienceFilter={setAudienceFilter}
         clearFilters={clearFilters}
         occasions={getUniqueOccasions()}
         contentTypes={getUniqueContentTypes()}
+        audiences={getUniqueAudiences ? getUniqueAudiences() : []}
         getOccasionDisplay={getOccasionDisplay}
         getContentTypeDisplay={getContentTypeDisplay}
+        getAudienceDisplay={getAudienceDisplay}
       />
       
       <PoemsList 
@@ -73,6 +85,7 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
         setSelectedPoemId={navigateToPoemDetail}
         getOccasionDisplay={getOccasionDisplay}
         getContentTypeDisplay={getContentTypeDisplay}
+        getAudienceDisplay={getAudienceDisplay}
         page={page}
         totalCount={totalCount}
         hasMore={hasMore}

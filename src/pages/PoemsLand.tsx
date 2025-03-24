@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import { useNavigate, useParams } from 'react-router-dom';
 import SinglePoemView from '@/components/poems-land/SinglePoemView';
 import { usePoems } from '@/hooks/use-poems';
-import { getOccasionDisplay, getContentTypeDisplay } from '@/utils/poem-display-helpers';
+import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay } from '@/utils/poem-display-helpers';
 import PoemSEO from '@/components/poems-land/PoemSEO';
 import PoemStructuredData from '@/components/poems-land/PoemStructuredData';
 import PoemsListView from '@/components/poems-land/PoemsListView';
@@ -21,13 +21,16 @@ const PoemsLand = () => {
     selectedPoem,
     occasionFilter,
     contentTypeFilter,
+    audienceFilter,
     setSelectedPoemId,
     setOccasionFilter,
     setContentTypeFilter,
+    setAudienceFilter,
     handleDeletePoem,
     clearFilters,
     getUniqueOccasions,
     getUniqueContentTypes,
+    getUniqueAudiences,
     findPoemBySlug,
     getSlugForPoemId,
     page,
@@ -109,16 +112,20 @@ const PoemsLand = () => {
               isLoading={isLoading}
               occasionFilter={occasionFilter}
               contentTypeFilter={contentTypeFilter}
+              audienceFilter={audienceFilter}
               setOccasionFilter={setOccasionFilter}
               setContentTypeFilter={setContentTypeFilter}
+              setAudienceFilter={setAudienceFilter}
               clearFilters={clearFilters}
               getUniqueOccasions={getUniqueOccasions}
               getUniqueContentTypes={getUniqueContentTypes}
+              getUniqueAudiences={getUniqueAudiences}
               handleDeletePoem={handleDeletePoem}
               navigateToPoemDetail={navigateToPoemDetail}
               handleCreatePoem={handleCreatePoem}
               getOccasionDisplay={getOccasionDisplay}
               getContentTypeDisplay={getContentTypeDisplay}
+              getAudienceDisplay={getAudienceDisplay}
               page={page}
               totalCount={totalCount}
               hasMore={hasMore}

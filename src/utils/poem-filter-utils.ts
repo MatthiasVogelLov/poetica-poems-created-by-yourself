@@ -1,11 +1,12 @@
 
 import { Poem } from '../types/poem-types';
 
-// Filter poems based on occasion and content type
+// Filter poems based on occasion, content type, and audience
 export const filterPoems = (
   poems: Poem[],
   occasionFilter: string,
-  contentTypeFilter: string
+  contentTypeFilter: string,
+  audienceFilter?: string
 ): Poem[] => {
   let result = [...poems];
   
@@ -15,6 +16,10 @@ export const filterPoems = (
   
   if (contentTypeFilter && contentTypeFilter !== 'all') {
     result = result.filter(poem => poem.content_type === contentTypeFilter);
+  }
+  
+  if (audienceFilter && audienceFilter !== 'all') {
+    result = result.filter(poem => poem.audience === audienceFilter);
   }
   
   return result;
