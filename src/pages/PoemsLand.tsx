@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -36,7 +35,6 @@ const PoemsLand = () => {
     getSlugForPoemId
   } = usePoems();
 
-  // Set the selectedPoemId from URL slug when the component mounts
   useEffect(() => {
     if (poemSlug) {
       console.log('Finding poem ID for slug:', poemSlug);
@@ -50,7 +48,6 @@ const PoemsLand = () => {
         navigate('/poemsland', { replace: true });
       }
     } else {
-      // Reset selected poem when on the main list page
       setSelectedPoemId(null);
     }
   }, [poemSlug, findPoemBySlug, setSelectedPoemId, navigate, slugToId]);
@@ -75,7 +72,6 @@ const PoemsLand = () => {
     ? `/poemsland/${getSlugForPoemId(selectedPoemId) || ''}` 
     : '/poemsland';
 
-  // Create structured data for the current view
   const getStructuredData = () => {
     if (!selectedPoem) {
       return {
@@ -101,18 +97,15 @@ const PoemsLand = () => {
     };
   };
 
-  // When going back from a single poem view, navigate to the poems list
   const handleGoBack = () => {
     setSelectedPoemId(null);
     navigate('/poemsland', { replace: true });
   };
 
-  // Navigate to the poem generator
   const handleCreatePoem = () => {
     navigate('/generator');
   };
 
-  // Navigate to a specific poem page using the slug
   const navigateToPoemDetail = (poemId: string) => {
     const slug = getSlugForPoemId(poemId);
     if (slug) {
@@ -120,7 +113,6 @@ const PoemsLand = () => {
     }
   };
 
-  // Serialize structured data to JSON string
   const structuredDataString = JSON.stringify(getStructuredData()).replace(/</g, '\\u003c');
 
   return (
@@ -143,7 +135,6 @@ const PoemsLand = () => {
         )}
       </Helmet>
       
-      {/* Move structured data outside of Helmet to fix the Symbol conversion error */}
       <script 
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -187,15 +178,13 @@ const PoemsLand = () => {
                 getContentTypeDisplay={getContentTypeDisplay}
               />
               
-              {/* Create Your Own Poem Button - only show on the poems list page */}
-              <div className="mt-12 text-center">
+              <div className="mt-8 text-center">
                 <Button 
                   onClick={handleCreatePoem}
-                  className="px-6 py-6 text-base flex items-center gap-2"
-                  size="lg"
+                  className="px-4 py-2 text-sm flex items-center gap-2 mx-auto"
                 >
-                  <PenLine className="w-5 h-5" />
-                  <span>Erstellen Sie Ihr eigenes Gedicht</span>
+                  <PenLine className="w-4 h-4" />
+                  <span>Erstelle Dein eigenes Gedicht</span>
                 </Button>
               </div>
             </>
