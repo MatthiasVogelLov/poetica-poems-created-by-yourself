@@ -11,9 +11,14 @@ import { de } from 'date-fns/locale';
 interface PoemTableRowProps {
   poem: any;
   onStatusChange?: (id: string, status: 'published' | 'deleted') => void;
+  onPreviewClick?: (id: string) => void;
 }
 
-const PoemTableRow: React.FC<PoemTableRowProps> = ({ poem, onStatusChange }) => {
+const PoemTableRow: React.FC<PoemTableRowProps> = ({ 
+  poem, 
+  onStatusChange, 
+  onPreviewClick 
+}) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'published':
@@ -57,7 +62,7 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({ poem, onStatusChange }) => 
             variant="outline" 
             size="icon" 
             title="Gedicht ansehen"
-            onClick={() => window.open(getPoemViewUrl(), '_blank')}
+            onClick={() => onPreviewClick && onPreviewClick(poem.id)}
           >
             <Eye size={16} />
           </Button>
