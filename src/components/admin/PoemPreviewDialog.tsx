@@ -23,6 +23,14 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
   const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
 
+  // Reset states when dialog opens with a new poem ID
+  useEffect(() => {
+    if (poemId) {
+      setPublishing(false);
+      setGenerating(false);
+    }
+  }, [poemId]);
+
   // Fetch the poem when the dialog opens
   useEffect(() => {
     const fetchPoem = async () => {
@@ -98,18 +106,23 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
     setPublishing(true);
     try {
       onPublish(poem.id);
-      // No need for a toast here as it will be shown by the parent component
+      // Close the dialog after publishing
       onClose();
     } catch (error) {
       console.error('Error publishing poem:', error);
       toast.error('Fehler beim Veröffentlichen des Gedichts');
       setPublishing(false);
     }
-    // We don't reset publishing state here since we're closing the dialog
   };
 
   return (
-    <Dialog open={!!poemId} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={!!poemId} onOpenChange={(open) => {
+      if (!open) {
+        // Reset publishing state when dialog is closed
+        setPublishing(false);
+        onClose();
+      }
+    }}>
       <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{poem?.title || 'Gedicht Vorschau'}</DialogTitle>

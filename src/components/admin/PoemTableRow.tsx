@@ -3,7 +3,7 @@ import React from 'react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Upload, X } from 'lucide-react';
+import { Eye, Upload, X, Loader2 } from 'lucide-react';
 import { getOccasionDisplay, getContentTypeDisplay } from '@/utils/poem-display-helpers';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -12,12 +12,14 @@ interface PoemTableRowProps {
   poem: any;
   onStatusChange?: (id: string, status: 'published' | 'deleted') => void;
   onPreviewClick?: (id: string) => void;
+  isPublishing?: boolean;
 }
 
 const PoemTableRow: React.FC<PoemTableRowProps> = ({ 
   poem, 
   onStatusChange, 
-  onPreviewClick 
+  onPreviewClick,
+  isPublishing = false
 }) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -63,6 +65,7 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
             size="icon" 
             title="Gedicht ansehen"
             onClick={() => onPreviewClick && onPreviewClick(poem.id)}
+            disabled={isPublishing}
           >
             <Eye size={16} />
           </Button>
@@ -75,8 +78,9 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
                 title="In PoemsLand veröffentlichen"
                 onClick={() => onStatusChange(poem.id, 'published')}
                 className="text-green-600 hover:text-green-800 hover:bg-green-50"
+                disabled={isPublishing}
               >
-                <Upload size={16} />
+                {isPublishing ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
               </Button>
               <Button 
                 variant="outline" 
@@ -84,6 +88,7 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
                 title="Gedicht löschen"
                 onClick={() => onStatusChange(poem.id, 'deleted')}
                 className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                disabled={isPublishing}
               >
                 <X size={16} />
               </Button>

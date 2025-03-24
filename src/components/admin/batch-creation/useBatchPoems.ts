@@ -42,11 +42,15 @@ export const useBatchPoems = () => {
       // Mark this poem as being published/deleted
       setPublishing(prev => ({ ...prev, [poemId]: true }));
       
-      const { error } = await supabase
-        .from('user_poems')
-        .update({ status: newStatus })
-        .eq('id', poemId);
-        
+      // Use the manage-poem edge function to update the poem status
+      const { error } = await supabase.functions.invoke('manage-poem', {
+        body: {
+          action: 'update',
+          poemId: poemId,
+          poemData: { status: newStatus }
+        }
+      });
+      
       if (error) throw error;
       
       // Update local state to reflect the change
@@ -70,6 +74,7 @@ export const useBatchPoems = () => {
     batchPoems,
     isLoading,
     fetchBatchPoems,
-    handleStatusChange
+    handleStatusChange,
+    publishing  // Export publishing state so we can use it in UI
   };
 };

@@ -10,13 +10,15 @@ interface BatchPoemsListProps {
   isLoading: boolean;
   onStatusChange: (id: string, status: 'published' | 'deleted') => void;
   onRefresh: () => void;
+  publishingState?: Record<string, boolean>;
 }
 
 const BatchPoemsList: React.FC<BatchPoemsListProps> = ({ 
   poems, 
   isLoading, 
   onStatusChange,
-  onRefresh
+  onRefresh,
+  publishingState = {}
 }) => {
   if (isLoading) {
     return <LoadingState />;
@@ -36,7 +38,8 @@ const BatchPoemsList: React.FC<BatchPoemsListProps> = ({
       
       <PoemsTable 
         poems={poems} 
-        onStatusChange={onStatusChange} 
+        onStatusChange={onStatusChange}
+        publishingState={publishingState}
       />
     </div>
   );

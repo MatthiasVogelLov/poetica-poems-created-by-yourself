@@ -14,9 +14,14 @@ import PoemPreviewDialog from './PoemPreviewDialog';
 interface PoemsTableProps {
   poems: any[];
   onStatusChange: (id: string, status: 'published' | 'deleted') => void;
+  publishingState?: Record<string, boolean>;
 }
 
-const PoemsTable: React.FC<PoemsTableProps> = ({ poems, onStatusChange }) => {
+const PoemsTable: React.FC<PoemsTableProps> = ({ 
+  poems, 
+  onStatusChange,
+  publishingState = {}
+}) => {
   const [previewPoemId, setPreviewPoemId] = useState<string | null>(null);
   
   // Only show drafts and published poems (filter out deleted)
@@ -55,6 +60,7 @@ const PoemsTable: React.FC<PoemsTableProps> = ({ poems, onStatusChange }) => {
                 poem={poem}
                 onStatusChange={onStatusChange}
                 onPreviewClick={handlePreviewClick}
+                isPublishing={!!publishingState[poem.id]}
               />
             ))}
 
@@ -64,6 +70,7 @@ const PoemsTable: React.FC<PoemsTableProps> = ({ poems, onStatusChange }) => {
                 poem={poem}
                 onStatusChange={onStatusChange}
                 onPreviewClick={handlePreviewClick}
+                isPublishing={!!publishingState[poem.id]}
               />
             ))}
             

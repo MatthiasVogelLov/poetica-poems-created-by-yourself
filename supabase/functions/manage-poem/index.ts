@@ -46,14 +46,17 @@ serve(async (req) => {
           return createResponse({ error: 'Missing poem ID or data' }, 400);
         }
 
+        console.log(`Updating poem with data:`, poemData);
+        
         const { data: updateData, error: updateError } = await supabase
           .from('user_poems')
           .update(poemData)
-          .eq('id', poemId);
+          .eq('id', poemId)
+          .select();
 
         if (updateError) {
           console.error('Error updating poem:', updateError);
-          return createResponse({ error: 'Failed to update poem' }, 500);
+          return createResponse({ error: 'Failed to update poem', details: updateError }, 500);
         }
 
         return createResponse({ success: true, data: updateData });
@@ -80,6 +83,6 @@ serve(async (req) => {
     }
   } catch (error) {
     console.error('Error processing request:', error);
-    return createResponse({ error: 'Internal server error' }, 500);
+    return createResponse({ error: 'Internal server error', details: error.message }, 500);
   }
 });

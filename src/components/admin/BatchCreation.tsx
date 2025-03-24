@@ -15,7 +15,8 @@ const BatchCreation = () => {
     batchPoems, 
     isLoading, 
     fetchBatchPoems, 
-    handleStatusChange 
+    handleStatusChange,
+    publishing 
   } = useBatchPoems();
 
   const {
@@ -73,6 +74,7 @@ const BatchCreation = () => {
           isLoading={isLoading} 
           onStatusChange={handleStatusChange} 
           onRefresh={fetchBatchPoems}
+          publishingState={publishing}
         />
       </BatchCreationErrorBoundary>
     </div>
