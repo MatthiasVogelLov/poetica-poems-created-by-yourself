@@ -3,7 +3,7 @@ import React from 'react';
 import PoemFilters from './PoemFilters';
 import PoemsList from './PoemsList';
 import CreatePoemButton from './CreatePoemButton';
-import { Poem } from '@/hooks/use-poems';
+import type { Poem } from '@/types/poem-types';
 
 interface PoemsListViewProps {
   filteredPoems: Poem[];

@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 import { usePoemsData } from './use-poems-data';
 import { usePoemFilters } from './use-poem-filters';
 import { usePoemActions } from './use-poem-actions';
-import type { Poem } from '@/types/poem-types';
+import type { Poem, PoemHookState } from '@/types/poem-types';
 
+// Re-export the Poem type to maintain backward compatibility
 export type { Poem } from '@/types/poem-types';
 export { createSlug } from '@/utils/poem-slug-utils';
 

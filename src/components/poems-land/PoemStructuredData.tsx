@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Poem } from '@/hooks/use-poems';
+import type { Poem } from '@/types/poem-types';
 
 interface PoemStructuredDataProps {
   structuredDataString: string;
