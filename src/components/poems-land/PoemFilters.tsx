@@ -7,17 +7,17 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 interface PoemFiltersProps {
   occasionFilter: string;
   contentTypeFilter: string;
-  audienceFilter?: string;
+  audienceFilter: string;
   setOccasionFilter: (value: string) => void;
   setContentTypeFilter: (value: string) => void;
-  setAudienceFilter?: (value: string) => void;
+  setAudienceFilter: (value: string) => void;
   clearFilters: () => void;
   occasions: string[];
   contentTypes: string[];
-  audiences?: string[];
+  audiences: string[];
   getOccasionDisplay: (occasion: string) => string;
   getContentTypeDisplay: (contentType: string) => string;
-  getAudienceDisplay?: (audience: string) => string;
+  getAudienceDisplay: (audience: string) => string;
 }
 
 const PoemFilters: React.FC<PoemFiltersProps> = ({
@@ -73,21 +73,19 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
           </SelectContent>
         </Select>
         
-        {setAudienceFilter && audiences.length > 0 && (
-          <Select value={audienceFilter} onValueChange={setAudienceFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Zielgruppe" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Alle Zielgruppen</SelectItem>
-              {audiences.map(audience => (
-                <SelectItem key={audience} value={audience}>
-                  {getAudienceDisplay ? getAudienceDisplay(audience) : audience}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        <Select value={audienceFilter} onValueChange={setAudienceFilter}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Zielgruppe" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle Zielgruppen</SelectItem>
+            {audiences.map(audience => (
+              <SelectItem key={audience} value={audience}>
+                {getAudienceDisplay(audience)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         
         {filtersActive && (
           <Button variant="ghost" size="sm" onClick={clearFilters}>

@@ -105,6 +105,7 @@ const PoemsLand = () => {
               isLoading={isLoading}
               navigateBack={handleGoBack}
               isPreview={false}
+              handleCreatePoem={handleCreatePoem}
             />
           ) : (
             <PoemsListView 

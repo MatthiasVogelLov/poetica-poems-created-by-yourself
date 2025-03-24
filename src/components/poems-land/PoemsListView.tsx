@@ -10,20 +10,20 @@ interface PoemsListViewProps {
   isLoading: boolean;
   occasionFilter: string;
   contentTypeFilter: string;
-  audienceFilter?: string;
+  audienceFilter: string;
   setOccasionFilter: (filter: string) => void;
   setContentTypeFilter: (filter: string) => void;
-  setAudienceFilter?: (filter: string) => void;
+  setAudienceFilter: (filter: string) => void;
   clearFilters: () => void;
   getUniqueOccasions: () => string[];
   getUniqueContentTypes: () => string[];
-  getUniqueAudiences?: () => string[];
+  getUniqueAudiences: () => string[];
   handleDeletePoem: (id: string, e: React.MouseEvent) => void;
   navigateToPoemDetail: (id: string) => void;
   handleCreatePoem: () => void;
   getOccasionDisplay: (occasion: string) => string;
   getContentTypeDisplay: (contentType: string) => string;
-  getAudienceDisplay?: (audience: string) => string;
+  getAudienceDisplay: (audience: string) => string;
   page?: number;
   totalCount?: number;
   hasMore?: boolean;
@@ -72,7 +72,7 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
         clearFilters={clearFilters}
         occasions={getUniqueOccasions()}
         contentTypes={getUniqueContentTypes()}
-        audiences={getUniqueAudiences ? getUniqueAudiences() : []}
+        audiences={getUniqueAudiences()}
         getOccasionDisplay={getOccasionDisplay}
         getContentTypeDisplay={getContentTypeDisplay}
         getAudienceDisplay={getAudienceDisplay}

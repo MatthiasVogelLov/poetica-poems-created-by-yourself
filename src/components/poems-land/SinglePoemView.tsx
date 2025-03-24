@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Circle } from 'lucide-react';
+import { ArrowLeft, Circle, PenLine } from 'lucide-react';
 import LoadingState from '@/components/admin/LoadingState';
 
 interface SinglePoemViewProps {
@@ -9,13 +9,15 @@ interface SinglePoemViewProps {
   isLoading: boolean;
   navigateBack: () => void;
   isPreview?: boolean;
+  handleCreatePoem?: () => void;
 }
 
 const SinglePoemView: React.FC<SinglePoemViewProps> = ({
   poem,
   isLoading,
   navigateBack,
-  isPreview = false
+  isPreview = false,
+  handleCreatePoem
 }) => {
   if (isLoading) {
     return <LoadingState />;
@@ -62,9 +64,22 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
           )}
         </div>
         
-        <div className="poem-content text-lg md:text-xl leading-relaxed mb-12 whitespace-pre-line font-serif">
+        <div className="poem-content text-lg md:text-xl leading-relaxed mb-12 whitespace-pre-line font-serif text-center">
           {formatContent(poem.content)}
         </div>
+        
+        {/* Create poem button */}
+        {handleCreatePoem && (
+          <div className="mt-8 text-center">
+            <Button 
+              onClick={handleCreatePoem}
+              className="px-4 py-2 text-sm flex items-center gap-2 mx-auto"
+            >
+              <PenLine className="w-4 h-4" />
+              <span>Erstelle Dein eigenes Gedicht</span>
+            </Button>
+          </div>
+        )}
         
         {/* Hidden div for SEO */}
         <div className="hidden" aria-hidden="true" data-seo-content>
