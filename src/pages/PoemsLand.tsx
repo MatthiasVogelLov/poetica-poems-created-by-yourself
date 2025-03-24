@@ -59,29 +59,23 @@ const PoemsLand = () => {
     ? `/poemsland/${selectedPoemId}` 
     : '/poemsland';
 
-  // Safe JSON strings for structured data
-  const safeJsonString = (obj) => {
-    try {
-      return JSON.stringify(obj).replace(/</g, '\\u003c');
-    } catch (error) {
-      console.error('Error creating JSON-LD:', error);
-      return '{}';
-    }
-  };
-
   // Create structured data objects
-  const poemStructuredData = selectedPoem ? {
-    "@context": "https://schema.org",
-    "@type": "Poem", 
-    "name": selectedPoem.title || '',
-    "author": {
-      "@type": "Organization",
-      "name": "PoemsLand"
-    },
-    "datePublished": selectedPoem.created_at || '',
-    "keywords": [selectedPoem.occasion, selectedPoem.content_type].filter(Boolean).join(', '),
-    "inLanguage": "de"
-  } : null;
+  const createPoemStructuredData = () => {
+    if (!selectedPoem) return null;
+    
+    return {
+      "@context": "https://schema.org",
+      "@type": "Poem", 
+      "name": selectedPoem.title || '',
+      "author": {
+        "@type": "Organization",
+        "name": "PoemsLand"
+      },
+      "datePublished": selectedPoem.created_at || '',
+      "keywords": [selectedPoem.occasion, selectedPoem.content_type].filter(Boolean).join(', '),
+      "inLanguage": "de"
+    };
+  };
 
   const collectionStructuredData = {
     "@context": "https://schema.org",
@@ -91,8 +85,9 @@ const PoemsLand = () => {
     "inLanguage": "de"
   };
 
-  // Choose the appropriate structured data
-  const structuredData = poemStructuredData || collectionStructuredData;
+  // Choose the appropriate structured data and convert to safe JSON string
+  const structuredData = createPoemStructuredData() || collectionStructuredData;
+  const jsonLdString = JSON.stringify(structuredData).replace(/</g, '\\u003c');
 
   // When going back from a single poem view, navigate to the poems list
   const handleGoBack = () => {
@@ -123,9 +118,7 @@ const PoemsLand = () => {
             <meta property="article:tag" content={getOccasionDisplay(selectedPoem.occasion || '')} />
           </>
         )}
-        <script type="application/ld+json">
-          {safeJsonString(structuredData)}
-        </script>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString }} />
       </Helmet>
       
       <Header />
