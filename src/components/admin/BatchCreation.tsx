@@ -9,7 +9,7 @@ import { PlusCircle, FileUp, Wand2 } from 'lucide-react';
 import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
 import BatchPoemsList from './BatchPoemsList';
 import { supabase } from '@/integrations/supabase/client';
-import SelectField from '@/components/poem/fields/SelectField';
+import BatchSelectField from './BatchSelectField';
 import { toast } from 'sonner';
 
 const BatchCreation = () => {
@@ -208,7 +208,7 @@ const BatchCreation = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <SelectField
+                <BatchSelectField
                   label="Zielgruppe"
                   options={[
                     { value: 'eltern', label: 'Eltern' },
@@ -223,7 +223,7 @@ const BatchCreation = () => {
                   onChange={(value) => handleTemplateChange('audience', value)}
                 />
                 
-                <SelectField
+                <BatchSelectField
                   label="Anlass"
                   options={[
                     { value: 'geburtstag', label: 'Geburtstag' },
@@ -238,7 +238,7 @@ const BatchCreation = () => {
                   onChange={(value) => handleTemplateChange('occasion', value)}
                 />
                 
-                <SelectField
+                <BatchSelectField
                   label="Thema"
                   options={[
                     { value: 'liebe', label: 'Liebe' },
@@ -255,7 +255,7 @@ const BatchCreation = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <SelectField
+                <BatchSelectField
                   label="Stil"
                   options={[
                     { value: 'klassisch', label: 'Klassisch' },
@@ -268,7 +268,7 @@ const BatchCreation = () => {
                   onChange={(value) => handleTemplateChange('style', value)}
                 />
                 
-                <SelectField
+                <BatchSelectField
                   label="Reimschema"
                   options={[
                     { value: 'frei', label: 'Frei' },
@@ -280,7 +280,7 @@ const BatchCreation = () => {
                   onChange={(value) => handleTemplateChange('verseType', value)}
                 />
                 
-                <SelectField
+                <BatchSelectField
                   label="Länge"
                   options={[
                     { value: 'mittel', label: 'Mittel' },
@@ -314,7 +314,7 @@ const BatchCreation = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <SelectField
+                <BatchSelectField
                   label="Anlass"
                   options={[
                     { value: 'geburtstag', label: 'Geburtstag' },
@@ -329,7 +329,7 @@ const BatchCreation = () => {
                   onChange={(value) => handleManualChange('occasion', value)}
                 />
                 
-                <SelectField
+                <BatchSelectField
                   label="Thema"
                   options={[
                     { value: 'liebe', label: 'Liebe' },
