@@ -51,7 +51,7 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
 
   // Generate a new poem via OpenAI API
   const handleRegeneratePoem = async () => {
-    if (!poem) return;
+    if (!poem || generating) return;
     
     setGenerating(true);
     try {
@@ -98,14 +98,14 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
     setPublishing(true);
     try {
       onPublish(poem.id);
-      toast.success('Gedicht wurde veröffentlicht');
+      // No need for a toast here as it will be shown by the parent component
       onClose();
     } catch (error) {
       console.error('Error publishing poem:', error);
       toast.error('Fehler beim Veröffentlichen des Gedichts');
-    } finally {
       setPublishing(false);
     }
+    // We don't reset publishing state here since we're closing the dialog
   };
 
   return (

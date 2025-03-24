@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -46,26 +47,40 @@ const PoemsLand = () => {
     ? `/poemsland/${selectedPoemId}` 
     : '/poemsland';
 
-  const structuredData = selectedPoem 
-    ? `{
-        "@context": "https://schema.org",
-        "@type": "Poem", 
-        "name": "${selectedPoem.title?.replace(/"/g, '\\"') || ''}",
-        "author": {
-          "@type": "Organization",
-          "name": "PoemsLand"
-        },
-        "datePublished": "${selectedPoem.created_at || ''}",
-        "keywords": "${[selectedPoem.occasion, selectedPoem.content_type].filter(Boolean).join(', ')}",
-        "inLanguage": "de"
-      }`
-    : `{
-        "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        "name": "PoemsLand - Gedichtsammlung",
-        "description": "Eine Sammlung personalisierter Gedichte für verschiedene Anlässe und Themen",
-        "inLanguage": "de"
-      }`;
+  // Safe JSON strings for structured data
+  const safeJsonString = (obj) => {
+    try {
+      return JSON.stringify(obj).replace(/</g, '\\u003c');
+    } catch (error) {
+      console.error('Error creating JSON-LD:', error);
+      return '{}';
+    }
+  };
+
+  // Create structured data objects
+  const poemStructuredData = selectedPoem ? {
+    "@context": "https://schema.org",
+    "@type": "Poem", 
+    "name": selectedPoem.title || '',
+    "author": {
+      "@type": "Organization",
+      "name": "PoemsLand"
+    },
+    "datePublished": selectedPoem.created_at || '',
+    "keywords": [selectedPoem.occasion, selectedPoem.content_type].filter(Boolean).join(', '),
+    "inLanguage": "de"
+  } : null;
+
+  const collectionStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "PoemsLand - Gedichtsammlung",
+    "description": "Eine Sammlung personalisierter Gedichte für verschiedene Anlässe und Themen",
+    "inLanguage": "de"
+  };
+
+  // Choose the appropriate structured data
+  const structuredData = poemStructuredData || collectionStructuredData;
 
   return (
     <div className="min-h-screen bg-white">
@@ -85,7 +100,9 @@ const PoemsLand = () => {
             <meta property="article:tag" content={getOccasionDisplay(selectedPoem.occasion || '')} />
           </>
         )}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: structuredData }} />
+        <script type="application/ld+json">
+          {safeJsonString(structuredData)}
+        </script>
       </Helmet>
       
       <Header />

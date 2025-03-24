@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 export const useBatchPoems = () => {
   const [batchPoems, setBatchPoems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [publishing, setPublishing] = useState<Record<string, boolean>>({});
 
   // Fetch batch poems on component mount
   useEffect(() => {
@@ -32,7 +33,15 @@ export const useBatchPoems = () => {
   };
 
   const handleStatusChange = async (poemId: string, newStatus: 'published' | 'deleted') => {
+    // Prevent multiple clicks by checking if we're already publishing this poem
+    if (publishing[poemId]) {
+      return;
+    }
+    
     try {
+      // Mark this poem as being published/deleted
+      setPublishing(prev => ({ ...prev, [poemId]: true }));
+      
       const { error } = await supabase
         .from('user_poems')
         .update({ status: newStatus })
@@ -51,6 +60,9 @@ export const useBatchPoems = () => {
     } catch (error) {
       console.error('Error updating poem status:', error);
       toast.error('Fehler beim Aktualisieren des Status');
+    } finally {
+      // Reset publishing state
+      setPublishing(prev => ({ ...prev, [poemId]: false }));
     }
   };
 
