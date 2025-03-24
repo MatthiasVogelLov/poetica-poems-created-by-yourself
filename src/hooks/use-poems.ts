@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import { usePoemsData } from './use-poems-data';
 import { usePoemFilters } from './use-poem-filters';
 import { usePoemActions } from './use-poem-actions';
-import { Poem } from '@/types/poem-types';
+import type { Poem } from '@/types/poem-types';
 
-export { Poem } from '@/types/poem-types';
+export type { Poem } from '@/types/poem-types';
 export { createSlug } from '@/utils/poem-slug-utils';
 
 export const usePoems = () => {
