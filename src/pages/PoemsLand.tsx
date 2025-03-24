@@ -35,6 +35,7 @@ const PoemsLand = () => {
   // Set the selectedPoemId from URL params when the component mounts
   useEffect(() => {
     if (poemId) {
+      console.log('Setting selected poem ID from URL params:', poemId);
       setSelectedPoemId(poemId);
     }
   }, [poemId, setSelectedPoemId]);
@@ -159,20 +160,20 @@ const PoemsLand = () => {
                 getOccasionDisplay={getOccasionDisplay}
                 getContentTypeDisplay={getContentTypeDisplay}
               />
+              
+              {/* Create Your Own Poem Button - only show on the poems list page */}
+              <div className="mt-12 text-center">
+                <Button 
+                  onClick={handleCreatePoem}
+                  className="px-6 py-6 text-base flex items-center gap-2"
+                  size="lg"
+                >
+                  <PenLine className="w-5 h-5" />
+                  <span>Erstellen Sie Ihr eigenes Gedicht</span>
+                </Button>
+              </div>
             </>
           )}
-          
-          {/* Create Your Own Poem Button */}
-          <div className="mt-12 text-center">
-            <Button 
-              onClick={handleCreatePoem}
-              className="px-6 py-6 text-base flex items-center gap-2"
-              size="lg"
-            >
-              <PenLine className="w-5 h-5" />
-              <span>Erstellen Sie Ihr eigenes Gedicht</span>
-            </Button>
-          </div>
         </div>
       </div>
       

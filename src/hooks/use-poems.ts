@@ -68,21 +68,30 @@ export const usePoems = () => {
   // Fetch a single poem when selected
   useEffect(() => {
     if (selectedPoemId) {
+      console.log('Fetching single poem with ID:', selectedPoemId);
+      
       const fetchSinglePoem = async () => {
+        setIsLoading(true);
         try {
           const { data, error } = await supabase
             .from('user_poems')
             .select('*')
             .eq('id', selectedPoemId)
-            .or('batch_created.is.null,and(batch_created.eq.true,status.eq.published)')
             .single();
           
-          if (error) throw error;
+          if (error) {
+            console.error('Error fetching single poem:', error);
+            throw error;
+          }
           
+          console.log('Poem data received:', data);
           setSelectedPoem(data);
         } catch (error) {
           console.error('Error fetching poem:', error);
           toast.error('Fehler beim Laden des Gedichts');
+          setSelectedPoem(null);
+        } finally {
+          setIsLoading(false);
         }
       };
 
