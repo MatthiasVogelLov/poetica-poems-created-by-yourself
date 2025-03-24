@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { PenLine } from 'lucide-react';
 
 const PoemsLand = () => {
-  const { poemId } = useParams();
+  const { poemSlug } = useParams();
   const navigate = useNavigate();
 
   const {
@@ -23,22 +23,37 @@ const PoemsLand = () => {
     selectedPoem,
     occasionFilter,
     contentTypeFilter,
+    poemSlugs,
+    slugToId,
     setSelectedPoemId,
     setOccasionFilter,
     setContentTypeFilter,
     handleDeletePoem,
     clearFilters,
     getUniqueOccasions,
-    getUniqueContentTypes
+    getUniqueContentTypes,
+    findPoemBySlug,
+    getSlugForPoemId
   } = usePoems();
 
-  // Set the selectedPoemId from URL params when the component mounts
+  // Set the selectedPoemId from URL slug when the component mounts
   useEffect(() => {
-    if (poemId) {
-      console.log('Setting selected poem ID from URL params:', poemId);
-      setSelectedPoemId(poemId);
+    if (poemSlug) {
+      console.log('Finding poem ID for slug:', poemSlug);
+      const poemId = findPoemBySlug(poemSlug);
+      
+      if (poemId) {
+        console.log('Setting selected poem ID from slug:', poemId);
+        setSelectedPoemId(poemId);
+      } else {
+        console.log('Poem not found for slug:', poemSlug);
+        navigate('/poemsland', { replace: true });
+      }
+    } else {
+      // Reset selected poem when on the main list page
+      setSelectedPoemId(null);
     }
-  }, [poemId, setSelectedPoemId]);
+  }, [poemSlug, findPoemBySlug, setSelectedPoemId, navigate, slugToId]);
 
   useEffect(() => {
     if (selectedPoem) {
@@ -56,8 +71,8 @@ const PoemsLand = () => {
     ? `Gedicht, ${selectedPoem.title}, ${getOccasionDisplay(selectedPoem.occasion || '')}, ${getContentTypeDisplay(selectedPoem.content_type || '')}, personalisiert, Poesie`
     : "Gedichte, personalisierte Gedichte, Gedichtsammlung, PoemsLand, Hochzeit, Geburtstag, Jubiläum, Poesie, Reimgedichte, Liebesgedichte";
 
-  const canonicalPath = selectedPoemId 
-    ? `/poemsland/${selectedPoemId}` 
+  const canonicalPath = selectedPoem && selectedPoemId
+    ? `/poemsland/${getSlugForPoemId(selectedPoemId) || ''}` 
     : '/poemsland';
 
   // Create structured data for the current view
@@ -95,6 +110,14 @@ const PoemsLand = () => {
   // Navigate to the poem generator
   const handleCreatePoem = () => {
     navigate('/generator');
+  };
+
+  // Navigate to a specific poem page using the slug
+  const navigateToPoemDetail = (poemId: string) => {
+    const slug = getSlugForPoemId(poemId);
+    if (slug) {
+      navigate(`/poemsland/${slug}`);
+    }
   };
 
   return (
@@ -156,7 +179,7 @@ const PoemsLand = () => {
                 poems={filteredPoems}
                 isLoading={isLoading}
                 handleDeletePoem={handleDeletePoem}
-                setSelectedPoemId={(id) => navigate(`/poemsland/${id}`)}
+                setSelectedPoemId={navigateToPoemDetail}
                 getOccasionDisplay={getOccasionDisplay}
                 getContentTypeDisplay={getContentTypeDisplay}
               />

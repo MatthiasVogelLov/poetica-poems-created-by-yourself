@@ -14,6 +14,33 @@ export interface Poem {
   batch_created?: boolean;
 }
 
+// Helper function to create a URL-friendly slug from a title
+export const createSlug = (title: string): string => {
+  // Convert to lowercase, replace spaces with dashes, remove special chars
+  return title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+};
+
+// Get a unique slug, adding numbers if needed to avoid duplicates
+const getUniqueSlug = (title: string, existingSlugs: string[]): string => {
+  let baseSlug = createSlug(title);
+  let slug = baseSlug;
+  let counter = 1;
+  
+  // Check if slug exists, if so add an incrementing number
+  while (existingSlugs.includes(slug)) {
+    slug = `${baseSlug}_${counter}`;
+    counter++;
+  }
+  
+  return slug;
+};
+
 export const usePoems = () => {
   const [poems, setPoems] = useState<Poem[]>([]);
   const [filteredPoems, setFilteredPoems] = useState<Poem[]>([]);
@@ -22,6 +49,8 @@ export const usePoems = () => {
   const [selectedPoem, setSelectedPoem] = useState<Poem | null>(null);
   const [occasionFilter, setOccasionFilter] = useState<string>('all');
   const [contentTypeFilter, setContentTypeFilter] = useState<string>('all');
+  const [poemSlugs, setPoemSlugs] = useState<{[key: string]: string}>({});
+  const [slugToId, setSlugToId] = useState<{[key: string]: string}>({});
 
   // Fetch the poems from Supabase
   useEffect(() => {
@@ -39,6 +68,21 @@ export const usePoems = () => {
         
         setPoems(data || []);
         setFilteredPoems(data || []);
+        
+        // Generate unique slugs for all poems
+        const existingSlugs: string[] = [];
+        const poemSlugsMap: {[key: string]: string} = {};
+        const slugToIdMap: {[key: string]: string} = {};
+        
+        data?.forEach(poem => {
+          const uniqueSlug = getUniqueSlug(poem.title, existingSlugs);
+          existingSlugs.push(uniqueSlug);
+          poemSlugsMap[poem.id] = uniqueSlug;
+          slugToIdMap[uniqueSlug] = poem.id;
+        });
+        
+        setPoemSlugs(poemSlugsMap);
+        setSlugToId(slugToIdMap);
       } catch (error) {
         console.error('Error fetching poems:', error);
         toast.error('Fehler beim Laden der Gedichte');
@@ -65,7 +109,7 @@ export const usePoems = () => {
     setFilteredPoems(result);
   }, [poems, occasionFilter, contentTypeFilter]);
 
-  // Fetch a single poem when selected
+  // Fetch a single poem when selected by ID
   useEffect(() => {
     if (selectedPoemId) {
       console.log('Fetching single poem with ID:', selectedPoemId);
@@ -100,6 +144,16 @@ export const usePoems = () => {
       setSelectedPoem(null);
     }
   }, [selectedPoemId]);
+
+  // Find poem by slug
+  const findPoemBySlug = (slug: string): string | null => {
+    return slugToId[slug] || null;
+  };
+
+  // Get slug for a poem ID
+  const getSlugForPoemId = (id: string): string | null => {
+    return poemSlugs[id] || null;
+  };
 
   const handleDeletePoem = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -151,12 +205,16 @@ export const usePoems = () => {
     selectedPoem,
     occasionFilter,
     contentTypeFilter,
+    poemSlugs,
+    slugToId,
     setSelectedPoemId,
     setOccasionFilter,
     setContentTypeFilter,
     handleDeletePoem,
     clearFilters,
     getUniqueOccasions,
-    getUniqueContentTypes
+    getUniqueContentTypes,
+    findPoemBySlug,
+    getSlugForPoemId
   };
 };
