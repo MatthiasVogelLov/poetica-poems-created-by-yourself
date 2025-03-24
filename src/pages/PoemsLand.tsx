@@ -38,12 +38,12 @@ const PoemsLand = () => {
 
   // Create a detailed meta description for better SEO
   const metaDescription = selectedPoem 
-    ? `Lesen Sie das Gedicht "${selectedPoem.title}" zum Thema ${getContentTypeDisplay(selectedPoem.content_type || '')} für ${getOccasionDisplay(selectedPoem.occasion || '')}. Ein ${selectedPoem.style || 'schönes'} Gedicht in PoemsLand.`
+    ? `Lesen Sie das Gedicht "${selectedPoem.title}" zum Thema ${getContentTypeDisplay(selectedPoem.content_type || '')} für ${getOccasionDisplay(selectedPoem.occasion || '')}. Ein schönes Gedicht in PoemsLand.`
     : "Entdecken Sie eine vielfältige Sammlung personalisierter Gedichte für jeden Anlass in PoemsLand - von Geburtstagen und Hochzeiten bis hin zu besonderen Jubiläen und Feiertagen.";
 
   // Create relevant keywords for SEO
   const keywords = selectedPoem
-    ? `Gedicht, ${selectedPoem.title}, ${getOccasionDisplay(selectedPoem.occasion || '')}, ${getContentTypeDisplay(selectedPoem.content_type || '')}, ${selectedPoem.style || ''}, personalisiert, Poesie`
+    ? `Gedicht, ${selectedPoem.title}, ${getOccasionDisplay(selectedPoem.occasion || '')}, ${getContentTypeDisplay(selectedPoem.content_type || '')}, personalisiert, Poesie`
     : "Gedichte, personalisierte Gedichte, Gedichtsammlung, PoemsLand, Hochzeit, Geburtstag, Jubiläum, Poesie, Reimgedichte, Liebesgedichte";
 
   // Create a clean URL path for canonical link
@@ -80,7 +80,7 @@ const PoemsLand = () => {
                 "name": "PoemsLand"
               },
               "datePublished": selectedPoem.created_at,
-              "keywords": [selectedPoem.occasion, selectedPoem.content_type, selectedPoem.style].filter(Boolean).join(", "),
+              "keywords": [selectedPoem.occasion, selectedPoem.content_type].filter(Boolean).join(", "),
               "inLanguage": "de"
             } : {
               "@context": "https://schema.org",
