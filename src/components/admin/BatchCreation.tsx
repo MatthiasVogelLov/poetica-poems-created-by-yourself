@@ -9,6 +9,7 @@ import TemplateForm from './batch-creation/TemplateForm';
 import ManualForm from './batch-creation/ManualForm';
 import BatchPoemsList from './BatchPoemsList';
 import { useBatchPoems } from './batch-creation/useBatchPoems';
+import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
 
 const BatchCreation = () => {
   const { toast: hookToast } = useToast();
@@ -17,12 +18,12 @@ const BatchCreation = () => {
   // Form state for template-based generation
   const [templateData, setTemplateData] = useState({
     count: 5,
-    audience: 'erwachsene',
-    occasion: 'geburtstag',
-    contentType: 'liebe',
-    style: 'klassisch',
-    verseType: 'kreuzreim',
-    length: 'mittel',
+    audience: 'erwachsene' as Audience,
+    occasion: 'geburtstag' as Occasion,
+    contentType: 'liebe' as ContentType,
+    style: 'klassisch' as Style,
+    verseType: 'kreuzreim' as VerseType,
+    length: 'mittel' as Length,
     keywords: ''
   });
 
@@ -30,8 +31,8 @@ const BatchCreation = () => {
   const [manualPoemData, setManualPoemData] = useState({
     title: '',
     content: '',
-    occasion: 'geburtstag',
-    contentType: 'liebe'
+    occasion: 'geburtstag' as Occasion,
+    contentType: 'liebe' as ContentType
   });
 
   const { 
@@ -111,8 +112,8 @@ const BatchCreation = () => {
       setManualPoemData({
         title: '',
         content: '',
-        occasion: 'geburtstag',
-        contentType: 'liebe'
+        occasion: 'geburtstag' as Occasion,
+        contentType: 'liebe' as ContentType
       });
       fetchBatchPoems();
     } catch (error) {
