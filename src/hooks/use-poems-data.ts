@@ -20,23 +20,39 @@ export const usePoemsData = (): [
   const [contentTypeFilter, setContentTypeFilter] = useState<string>('all');
   const [poemSlugs, setPoemSlugs] = useState<{[key: string]: string}>({});
   const [slugToId, setSlugToId] = useState<{[key: string]: string}>({});
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const poemsPerPage = 12;
 
   // Fetch poems from Supabase
   useEffect(() => {
     const fetchPoems = async () => {
       setIsLoading(true);
       try {
-        // Fetch both user-created poems and published batch poems
+        // First get the total count for pagination
+        const { count, error: countError } = await supabase
+          .from('user_poems')
+          .select('*', { count: 'exact', head: true })
+          .or('batch_created.is.null,and(batch_created.eq.true,status.eq.published)');
+        
+        if (countError) throw countError;
+        
+        setTotalCount(count || 0);
+        
+        // Then fetch the actual page of data
         const { data, error } = await supabase
           .from('user_poems')
           .select('*')
           .or('batch_created.is.null,and(batch_created.eq.true,status.eq.published)')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
         
         if (error) throw error;
         
         setPoems(data || []);
         setFilteredPoems(data || []);
+        setHasMore((page * poemsPerPage) < (count || 0));
         
         // Generate slugs for all poems
         const { poemSlugs, slugToId } = generatePoemSlugs(data || []);
@@ -51,7 +67,7 @@ export const usePoemsData = (): [
     };
 
     fetchPoems();
-  }, []);
+  }, [page]);
 
   // Fetch a single poem when selected by ID
   useEffect(() => {
@@ -89,6 +105,18 @@ export const usePoemsData = (): [
     }
   }, [selectedPoemId]);
 
+  const nextPage = () => {
+    if (hasMore) {
+      setPage(p => p + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (page > 1) {
+      setPage(p => p - 1);
+    }
+  };
+
   const state: PoemHookState = {
     poems,
     filteredPoems,
@@ -98,7 +126,13 @@ export const usePoemsData = (): [
     occasionFilter,
     contentTypeFilter,
     poemSlugs,
-    slugToId
+    slugToId,
+    page,
+    hasMore,
+    totalCount,
+    poemsPerPage,
+    nextPage,
+    prevPage
   };
 
   return [state, setPoems, setSelectedPoemId];

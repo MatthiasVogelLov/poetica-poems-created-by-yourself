@@ -16,7 +16,13 @@ const BatchCreation = () => {
     isLoading, 
     fetchBatchPoems, 
     handleStatusChange,
-    publishing 
+    publishing,
+    page,
+    totalCount,
+    hasMore,
+    nextPage,
+    prevPage,
+    poemsPerPage
   } = useBatchPoems();
 
   const {
@@ -75,6 +81,12 @@ const BatchCreation = () => {
           onStatusChange={handleStatusChange} 
           onRefresh={fetchBatchPoems}
           publishingState={publishing}
+          page={page}
+          totalCount={totalCount}
+          hasMore={hasMore}
+          onNextPage={nextPage}
+          onPrevPage={prevPage}
+          poemsPerPage={poemsPerPage}
         />
       </BatchCreationErrorBoundary>
     </div>

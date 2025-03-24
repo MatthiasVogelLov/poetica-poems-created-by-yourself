@@ -38,6 +38,12 @@ export const usePoems = () => {
     ...filters,
     setSelectedPoemId,
     ...filterActions,
-    ...poemActions
+    ...poemActions,
+    page: state.page,
+    totalCount: state.totalCount,
+    hasMore: state.hasMore,
+    nextPage: state.nextPage,
+    prevPage: state.prevPage,
+    poemsPerPage: state.poemsPerPage
   };
 };

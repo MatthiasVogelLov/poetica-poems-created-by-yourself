@@ -4,6 +4,8 @@ import BatchPoemsHeader from './BatchPoemsHeader';
 import PoemsTable from './PoemsTable';
 import EmptyPoemsList from './EmptyPoemsList';
 import LoadingState from './LoadingState';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BatchPoemsListProps {
   poems: any[];
@@ -11,6 +13,12 @@ interface BatchPoemsListProps {
   onStatusChange: (id: string, status: 'published' | 'deleted') => void;
   onRefresh: () => void;
   publishingState?: Record<string, boolean>;
+  page?: number;
+  totalCount?: number;
+  hasMore?: boolean;
+  onNextPage?: () => void;
+  onPrevPage?: () => void;
+  poemsPerPage?: number;
 }
 
 const BatchPoemsList: React.FC<BatchPoemsListProps> = ({ 
@@ -18,7 +26,13 @@ const BatchPoemsList: React.FC<BatchPoemsListProps> = ({
   isLoading, 
   onStatusChange,
   onRefresh,
-  publishingState = {}
+  publishingState = {},
+  page = 1,
+  totalCount = 0,
+  hasMore = false,
+  onNextPage,
+  onPrevPage,
+  poemsPerPage = 10
 }) => {
   if (isLoading) {
     return <LoadingState />;
@@ -28,10 +42,13 @@ const BatchPoemsList: React.FC<BatchPoemsListProps> = ({
     return <EmptyPoemsList />;
   }
 
+  const startRange = ((page - 1) * poemsPerPage) + 1;
+  const endRange = Math.min(page * poemsPerPage, totalCount);
+
   return (
     <div className="space-y-6">
       <BatchPoemsHeader 
-        poemsCount={poems.length} 
+        poemsCount={totalCount} 
         onRefresh={onRefresh} 
         poems={poems} 
       />
@@ -41,6 +58,34 @@ const BatchPoemsList: React.FC<BatchPoemsListProps> = ({
         onStatusChange={onStatusChange}
         publishingState={publishingState}
       />
+      
+      {totalCount > poemsPerPage && (
+        <div className="flex items-center justify-between px-2">
+          <div className="text-sm text-muted-foreground">
+            Zeige {startRange} bis {endRange} von {totalCount} Gedichten
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onPrevPage}
+              disabled={page === 1}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Zurück
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onNextPage}
+              disabled={!hasMore}
+            >
+              Weiter
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

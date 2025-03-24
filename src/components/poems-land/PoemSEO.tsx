@@ -1,54 +1,69 @@
 
 import React from 'react';
 import { Helmet } from 'react-helmet';
+import { Poem } from '@/types/poem-types';
 import { getOccasionDisplay, getContentTypeDisplay } from '@/utils/poem-display-helpers';
-import { Poem } from '@/hooks/use-poems';
 
 interface PoemSEOProps {
-  selectedPoem: Poem | null;
-  selectedPoemId: string | null;
-  getSlugForPoemId: (id: string) => string | null;
-  structuredDataString: string;
+  poem: Poem | null;
+  isPreview?: boolean;
 }
 
-const PoemSEO: React.FC<PoemSEOProps> = ({
-  selectedPoem,
-  selectedPoemId,
-  getSlugForPoemId,
-  structuredDataString
-}) => {
-  const metaDescription = selectedPoem 
-    ? `Lesen Sie das Gedicht "${selectedPoem.title}" zum Thema ${getContentTypeDisplay(selectedPoem.content_type || '')} für ${getOccasionDisplay(selectedPoem.occasion || '')}. Ein schönes Gedicht in PoemsLand.`
-    : "Entdecken Sie eine vielfältige Sammlung personalisierter Gedichte für jeden Anlass in PoemsLand - von Geburtstagen und Hochzeiten bis hin zu besonderen Jubiläen und Feiertagen.";
+const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
+  if (!poem) return null;
 
-  const keywords = selectedPoem
-    ? `Gedicht, ${selectedPoem.title}, ${getOccasionDisplay(selectedPoem.occasion || '')}, ${getContentTypeDisplay(selectedPoem.content_type || '')}, personalisiert, Poesie`
-    : "Gedichte, personalisierte Gedichte, Gedichtsammlung, PoemsLand, Hochzeit, Geburtstag, Jubiläum, Poesie, Reimgedichte, Liebesgedichte";
+  // Extract first 160 characters of the poem content for the description
+  const description = poem.content
+    ? `${poem.content.substring(0, 157).trim()}...`
+    : `Ein Gedicht zum Thema ${getOccasionDisplay(poem.occasion || '')} für PoemsLand.`;
 
-  const canonicalPath = selectedPoem && selectedPoemId
-    ? `/poemsland/${getSlugForPoemId(selectedPoemId) || ''}` 
-    : '/poemsland';
+  const keywords = [
+    'Gedicht', 
+    'Poem', 
+    'Lyrik', 
+    getOccasionDisplay(poem.occasion || ''),
+    getContentTypeDisplay(poem.content_type || '')
+  ].filter(Boolean).join(', ');
+
+  const title = isPreview 
+    ? `Vorschau: ${poem.title} | PoemsLand` 
+    : `${poem.title} | PoemsLand`;
+
+  const robots = isPreview ? 'noindex, nofollow' : 'index, follow';
+
+  // Include the full poem content in a pre-rendered div for SEO
+  const poemContentHtml = {
+    __html: poem.content.replace(/\n/g, '<br />')
+  };
 
   return (
-    <>
-      <Helmet>
-        <title>{selectedPoem ? `${selectedPoem.title} - PoemsLand` : "PoemsLand - Sammlung personalisierter Gedichte"}</title>
-        <meta name="description" content={metaDescription} />
-        <meta name="keywords" content={keywords} />
-        <meta property="og:title" content={selectedPoem ? `${selectedPoem.title} - PoemsLand` : "PoemsLand"} />
-        <meta property="og:description" content={metaDescription} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={`https://poetica.apvora.com${canonicalPath}`} />
-        <link rel="canonical" href={`https://poetica.apvora.com${canonicalPath}`} />
-        {selectedPoem && (
-          <>
-            <meta property="article:published_time" content={selectedPoem.created_at || ''} />
-            <meta property="article:section" content={getContentTypeDisplay(selectedPoem.content_type || '')} />
-            <meta property="article:tag" content={getOccasionDisplay(selectedPoem.occasion || '')} />
-          </>
-        )}
-      </Helmet>
-    </>
+    <Helmet>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta name="keywords" content={keywords} />
+      <meta name="robots" content={robots} />
+      
+      {/* OpenGraph tags for social sharing */}
+      <meta property="og:title" content={poem.title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:type" content="article" />
+      <meta property="og:site_name" content="PoemsLand" />
+      
+      {/* Twitter Card data */}
+      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:title" content={poem.title} />
+      <meta name="twitter:description" content={description} />
+
+      {/* Pre-rendered poem content for SEO (hidden from view but visible to crawlers) */}
+      {!isPreview && (
+        <noscript>
+          <div className="hidden-seo-content">
+            <h1>{poem.title}</h1>
+            <div dangerouslySetInnerHTML={poemContentHtml} />
+          </div>
+        </noscript>
+      )}
+    </Helmet>
   );
 };
 

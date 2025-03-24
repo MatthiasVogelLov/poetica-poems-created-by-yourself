@@ -20,6 +20,12 @@ interface PoemsListViewProps {
   handleCreatePoem: () => void;
   getOccasionDisplay: (occasion: string) => string;
   getContentTypeDisplay: (contentType: string) => string;
+  page?: number;
+  totalCount?: number;
+  hasMore?: boolean;
+  nextPage?: () => void;
+  prevPage?: () => void;
+  poemsPerPage?: number;
 }
 
 const PoemsListView: React.FC<PoemsListViewProps> = ({
@@ -37,6 +43,12 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
   handleCreatePoem,
   getOccasionDisplay,
   getContentTypeDisplay,
+  page = 1,
+  totalCount = 0,
+  hasMore = false,
+  nextPage,
+  prevPage,
+  poemsPerPage = 12,
 }) => {
   return (
     <>
@@ -61,6 +73,12 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
         setSelectedPoemId={navigateToPoemDetail}
         getOccasionDisplay={getOccasionDisplay}
         getContentTypeDisplay={getContentTypeDisplay}
+        page={page}
+        totalCount={totalCount}
+        hasMore={hasMore}
+        onNextPage={nextPage}
+        onPrevPage={prevPage}
+        poemsPerPage={poemsPerPage}
       />
       
       <CreatePoemButton onClick={handleCreatePoem} />

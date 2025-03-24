@@ -7,23 +7,41 @@ export const useBatchPoems = () => {
   const [batchPoems, setBatchPoems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [publishing, setPublishing] = useState<Record<string, boolean>>({});
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const poemsPerPage = 10;
 
   // Fetch batch poems on component mount
   useEffect(() => {
     fetchBatchPoems();
-  }, []);
+  }, [page]);
 
   const fetchBatchPoems = async () => {
     setIsLoading(true);
     try {
+      // First get the total count for pagination info
+      const { count, error: countError } = await supabase
+        .from('user_poems')
+        .select('*', { count: 'exact', head: true })
+        .eq('batch_created', true);
+      
+      if (countError) throw countError;
+      
+      setTotalCount(count || 0);
+      
+      // Then fetch the actual page of data
       const { data, error } = await supabase
         .from('user_poems')
         .select('*')
         .eq('batch_created', true)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
       
       if (error) throw error;
+      
       setBatchPoems(data || []);
+      setHasMore((page * poemsPerPage) < (count || 0));
     } catch (error) {
       console.error('Error fetching batch poems:', error);
       toast.error('Fehler beim Laden der Batch-Gedichte');
@@ -70,11 +88,29 @@ export const useBatchPoems = () => {
     }
   };
 
+  const nextPage = () => {
+    if (hasMore) {
+      setPage(p => p + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (page > 1) {
+      setPage(p => p - 1);
+    }
+  };
+
   return {
     batchPoems,
     isLoading,
     fetchBatchPoems,
     handleStatusChange,
-    publishing  // Export publishing state so we can use it in UI
+    publishing,
+    page,
+    totalCount,
+    hasMore,
+    nextPage,
+    prevPage,
+    poemsPerPage
   };
 };

@@ -1,132 +1,93 @@
 
 import React from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Poem } from '@/types/poem-types';
 import { Button } from '@/components/ui/button';
-import { usePoemSharing } from '@/hooks/sharing';
-import { ArrowLeft, PenLine } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useNavigate } from 'react-router-dom';
+import { getOccasionDisplay, getContentTypeDisplay } from '@/utils/poem-display-helpers';
+import { ArrowLeft } from 'lucide-react';
+import PoemSEO from './PoemSEO';
+import PoemStructuredData from './PoemStructuredData';
 
 interface SinglePoemViewProps {
-  poem: any;
-  goBack: () => void;
-  getOccasionDisplay: (occasion: string) => string;
-  getContentTypeDisplay: (contentType: string) => string;
+  poem: Poem | null;
+  isLoading: boolean;
+  navigateBack: () => void;
+  isPreview?: boolean;
 }
 
-const SinglePoemView: React.FC<SinglePoemViewProps> = ({
-  poem,
-  goBack,
-  getOccasionDisplay,
-  getContentTypeDisplay
+const SinglePoemView: React.FC<SinglePoemViewProps> = ({ 
+  poem, 
+  isLoading, 
+  navigateBack,
+  isPreview = false
 }) => {
-  const isMobile = useIsMobile();
-  const navigate = useNavigate();
-  const { handleTextShare, handleImageShare, isCapturingImage } = usePoemSharing({
-    poem: poem?.content || '',
-    title: poem?.title || 'Gedicht',
-    onCompleted: () => {}
-  });
-
-  if (!poem) {
-    return <div className="text-center py-8">Gedicht nicht gefunden</div>;
+  if (isLoading) {
+    return (
+      <div className="text-center py-10">
+        <div className="animate-pulse">Gedicht wird geladen...</div>
+      </div>
+    );
   }
 
-  return (
-    <div>
-      <Button 
-        variant="ghost" 
-        className="mb-4 flex items-center gap-2"
-        onClick={goBack}
-      >
-        <ArrowLeft size={16} />
-        <span>Zurück</span>
-      </Button>
-      
-      <div className="max-w-xl mx-auto">
-        <div className="poem-container rounded-lg p-6 border shadow-sm">
-          <h1 className="text-2xl font-serif text-center mb-6 text-gray-800">{poem.title}</h1>
-          
-          <div className="whitespace-pre-wrap text-center font-serif text-lg leading-relaxed">
-            {poem.content}
-          </div>
-          
-          <div className="flex flex-wrap gap-2 mt-4 text-sm text-gray-500 justify-center">
-            {poem.occasion && (
-              <span className="bg-gray-100 rounded-full px-3 py-1">
-                {getOccasionDisplay(poem.occasion)}
-              </span>
-            )}
-            {poem.content_type && (
-              <span className="bg-gray-100 rounded-full px-3 py-1">
-                {getContentTypeDisplay(poem.content_type)}
-              </span>
-            )}
-          </div>
-        </div>
-        
-        {/* Sharing Features */}
-        <div className="mt-6 border-t pt-4">
-          <h3 className="text-sm font-medium text-gray-500 mb-3 text-center">Teilen Sie dieses Gedicht</h3>
-          
-          <div className="flex flex-wrap gap-2 justify-center">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-              onClick={() => handleTextShare('whatsapp')}
-              disabled={isCapturingImage}
-            >
-              <span className={isMobile ? "text-xs" : ""}>WhatsApp</span>
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-              onClick={() => handleTextShare('email')}
-              disabled={isCapturingImage}
-            >
-              <span className={isMobile ? "text-xs" : ""}>E-Mail</span>
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-              onClick={() => handleImageShare('download')}
-              disabled={isCapturingImage}
-            >
-              <span className={isMobile ? "text-xs" : ""}>Als Bild</span>
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1"
-              onClick={() => handleImageShare('whatsapp')}
-              disabled={isCapturingImage}
-            >
-              <span className={isMobile ? "text-xs" : ""}>Bild per WhatsApp</span>
-            </Button>
-          </div>
-        </div>
-        
-        {/* Create Your Own Poem Button */}
-        <div className="mt-8 text-center">
-          <Button 
-            onClick={() => navigate('/generator')}
-            className="px-6 py-2 flex items-center gap-2 mx-auto"
-          >
-            <PenLine size={18} />
-            <span>Erstellen Sie Ihr eigenes Gedicht</span>
-          </Button>
-        </div>
-        
-        <div className="text-center text-sm text-gray-400 mt-8">
-          <p>Erstellt mit Poetica - www.poetica.apvora.com</p>
-        </div>
+  if (!poem) {
+    return (
+      <div className="text-center py-10 border rounded-lg bg-gray-50">
+        <p className="text-muted-foreground mb-4">Gedicht nicht gefunden</p>
+        <Button onClick={navigateBack}>
+          Zurück zu allen Gedichten
+        </Button>
       </div>
-    </div>
+    );
+  }
+
+  // Set up SEO metadata for the poem
+  const host = window.location.origin;
+  const poemUrl = `${host}/poemsland/${poem.id}`;
+
+  return (
+    <>
+      {/* Add SEO components */}
+      <PoemSEO poem={poem} isPreview={isPreview} />
+      <PoemStructuredData poem={poem} host={host} poemUrl={poemUrl} />
+      
+      <div className="space-y-6">
+        <Button 
+          variant="outline" 
+          onClick={navigateBack}
+          className="flex items-center"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Zurück zu allen Gedichten
+        </Button>
+
+        <Card className="max-w-3xl mx-auto shadow-md">
+          <CardContent className="pt-6">
+            <article>
+              <header>
+                <h1 className="text-2xl font-serif text-center mb-6">{poem.title}</h1>
+              </header>
+              
+              <div className="whitespace-pre-wrap text-center font-serif leading-relaxed mb-6">
+                {poem.content}
+              </div>
+              
+              <footer className="flex flex-wrap gap-2 mt-6 justify-center">
+                {poem.occasion && (
+                  <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                    {getOccasionDisplay(poem.occasion)}
+                  </span>
+                )}
+                {poem.content_type && (
+                  <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                    {getContentTypeDisplay(poem.content_type)}
+                  </span>
+                )}
+              </footer>
+            </article>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 };
 
