@@ -3,28 +3,26 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
-import BatchPoemsList from './BatchPoemsList';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import TemplateForm from './TemplateForm';
-import ManualForm from './ManualForm';
+import TemplateForm from './batch-creation/TemplateForm';
+import ManualForm from './batch-creation/ManualForm';
+import BatchPoemsList from './BatchPoemsList';
+import { useBatchPoems } from './batch-creation/useBatchPoems';
 
 const BatchCreation = () => {
   const { toast: hookToast } = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
-  const [batchPoems, setBatchPoems] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   
   // Form state for template-based generation
   const [templateData, setTemplateData] = useState({
     count: 5,
-    audience: 'erwachsene' as Audience,
-    occasion: 'geburtstag' as Occasion,
-    contentType: 'liebe' as ContentType,
-    style: 'klassisch' as Style,
-    verseType: 'kreuzreim' as VerseType,
-    length: 'mittel' as Length,
+    audience: 'erwachsene',
+    occasion: 'geburtstag',
+    contentType: 'liebe',
+    style: 'klassisch',
+    verseType: 'kreuzreim',
+    length: 'mittel',
     keywords: ''
   });
 
@@ -32,39 +30,22 @@ const BatchCreation = () => {
   const [manualPoemData, setManualPoemData] = useState({
     title: '',
     content: '',
-    occasion: 'geburtstag' as Occasion,
-    contentType: 'liebe' as ContentType
+    occasion: 'geburtstag',
+    contentType: 'liebe'
   });
 
-  // Fetch batch poems on component mount
-  useEffect(() => {
-    fetchBatchPoems();
-  }, []);
+  const { 
+    batchPoems, 
+    isLoading, 
+    fetchBatchPoems, 
+    handleStatusChange 
+  } = useBatchPoems();
 
-  const fetchBatchPoems = async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('user_poems')
-        .select('*')
-        .eq('batch_created', true)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      setBatchPoems(data || []);
-    } catch (error) {
-      console.error('Error fetching batch poems:', error);
-      toast.error('Fehler beim Laden der Batch-Gedichte');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleTemplateChange = (field: string, value: any) => {
+  const handleTemplateChange = (field, value) => {
     setTemplateData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleManualChange = (field: string, value: any) => {
+  const handleManualChange = (field, value) => {
     setManualPoemData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -137,29 +118,6 @@ const BatchCreation = () => {
     } catch (error) {
       console.error('Error creating poem:', error);
       toast.error('Fehler bei der Gedichterstellung');
-    }
-  };
-
-  const handleStatusChange = async (poemId: string, newStatus: 'published' | 'deleted') => {
-    try {
-      const { error } = await supabase
-        .from('user_poems')
-        .update({ status: newStatus })
-        .eq('id', poemId);
-        
-      if (error) throw error;
-      
-      // Update local state to reflect the change
-      setBatchPoems(prev => 
-        prev.map(poem => 
-          poem.id === poemId ? { ...poem, status: newStatus } : poem
-        )
-      );
-      
-      toast.success(`Gedicht ${newStatus === 'published' ? 'veröffentlicht' : 'gelöscht'}`);
-    } catch (error) {
-      console.error('Error updating poem status:', error);
-      toast.error('Fehler beim Aktualisieren des Status');
     }
   };
 
