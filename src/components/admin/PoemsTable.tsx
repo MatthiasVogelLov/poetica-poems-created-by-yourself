@@ -19,7 +19,7 @@ interface PoemsTableProps {
 const PoemsTable: React.FC<PoemsTableProps> = ({ poems, onStatusChange }) => {
   const [previewPoemId, setPreviewPoemId] = useState<string | null>(null);
   
-  // Filter out deleted poems
+  // Only show drafts and published poems (filter out deleted)
   const visiblePoems = poems.filter(poem => poem.status !== 'deleted');
   
   // Group remaining poems by status (draft first, then published)

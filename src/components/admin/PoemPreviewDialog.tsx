@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface PoemPreviewDialogProps {
   poemId: string | null;
@@ -109,7 +110,7 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
 
   return (
     <Dialog open={!!poemId} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{poem?.title || 'Gedicht Vorschau'}</DialogTitle>
           <DialogDescription>
@@ -123,33 +124,35 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
           </div>
         ) : (
           <>
-            <div className="poem-container rounded-lg p-6 border shadow-sm mt-4 max-h-[60vh] overflow-y-auto">
-              <h2 className="text-xl font-serif text-center mb-6">{poem?.title}</h2>
-              
-              <div className="whitespace-pre-wrap text-center font-serif leading-relaxed">
-                {poem?.content}
+            <ScrollArea className="flex-grow my-4">
+              <div className="poem-container rounded-lg p-6 border shadow-sm">
+                <h2 className="text-xl font-serif text-center mb-6">{poem?.title}</h2>
+                
+                <div className="whitespace-pre-wrap text-center font-serif leading-relaxed">
+                  {poem?.content}
+                </div>
+                
+                <div className="flex flex-wrap gap-2 mt-6 text-sm text-gray-500 justify-center">
+                  {poem?.occasion && (
+                    <span className="bg-gray-100 rounded-full px-3 py-1">
+                      {poem.occasion}
+                    </span>
+                  )}
+                  {poem?.content_type && (
+                    <span className="bg-gray-100 rounded-full px-3 py-1">
+                      {poem.content_type}
+                    </span>
+                  )}
+                  {poem?.style && (
+                    <span className="bg-gray-100 rounded-full px-3 py-1">
+                      {poem.style}
+                    </span>
+                  )}
+                </div>
               </div>
-              
-              <div className="flex flex-wrap gap-2 mt-4 text-sm text-gray-500 justify-center">
-                {poem?.occasion && (
-                  <span className="bg-gray-100 rounded-full px-3 py-1">
-                    {poem.occasion}
-                  </span>
-                )}
-                {poem?.content_type && (
-                  <span className="bg-gray-100 rounded-full px-3 py-1">
-                    {poem.content_type}
-                  </span>
-                )}
-                {poem?.style && (
-                  <span className="bg-gray-100 rounded-full px-3 py-1">
-                    {poem.style}
-                  </span>
-                )}
-              </div>
-            </div>
+            </ScrollArea>
             
-            <div className="flex justify-between mt-6">
+            <div className="flex justify-between mt-4 pt-4 border-t">
               <Button
                 variant="outline"
                 onClick={handleRegeneratePoem}
