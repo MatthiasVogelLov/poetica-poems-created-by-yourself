@@ -36,13 +36,20 @@ const PoemsLand = () => {
     }
   }, [selectedPoem]);
 
+  // Create a detailed meta description for better SEO
   const metaDescription = selectedPoem 
-    ? `Lesen Sie das personalisierte Gedicht "${selectedPoem.title}" in PoemsLand`
-    : "Entdecken Sie eine vielfältige Sammlung personalisierter Gedichte für jeden Anlass in PoemsLand";
+    ? `Lesen Sie das Gedicht "${selectedPoem.title}" zum Thema ${getContentTypeDisplay(selectedPoem.content_type || '')} für ${getOccasionDisplay(selectedPoem.occasion || '')}. Ein ${selectedPoem.style || 'schönes'} Gedicht in PoemsLand.`
+    : "Entdecken Sie eine vielfältige Sammlung personalisierter Gedichte für jeden Anlass in PoemsLand - von Geburtstagen und Hochzeiten bis hin zu besonderen Jubiläen und Feiertagen.";
 
+  // Create relevant keywords for SEO
   const keywords = selectedPoem
-    ? `Gedicht, ${selectedPoem.title}, ${selectedPoem.occasion || ''}, ${selectedPoem.content_type || ''}, personalisiert`
-    : "Gedichte, personalisierte Gedichte, Gedichtsammlung, PoemsLand, Hochzeit, Geburtstag, Jubiläum";
+    ? `Gedicht, ${selectedPoem.title}, ${getOccasionDisplay(selectedPoem.occasion || '')}, ${getContentTypeDisplay(selectedPoem.content_type || '')}, ${selectedPoem.style || ''}, personalisiert, Poesie`
+    : "Gedichte, personalisierte Gedichte, Gedichtsammlung, PoemsLand, Hochzeit, Geburtstag, Jubiläum, Poesie, Reimgedichte, Liebesgedichte";
+
+  // Create a clean URL path for canonical link
+  const canonicalPath = selectedPoemId 
+    ? `/poemsland/${selectedPoemId}` 
+    : '/poemsland';
 
   return (
     <div className="min-h-screen bg-white">
@@ -53,7 +60,37 @@ const PoemsLand = () => {
         <meta property="og:title" content={selectedPoem ? `${selectedPoem.title} - PoemsLand` : "PoemsLand"} />
         <meta property="og:description" content={metaDescription} />
         <meta property="og:type" content="website" />
-        <link rel="canonical" href={`https://poetica.apvora.com/poemsland${selectedPoemId ? `/${selectedPoemId}` : ''}`} />
+        <meta property="og:url" content={`https://poetica.apvora.com${canonicalPath}`} />
+        <link rel="canonical" href={`https://poetica.apvora.com${canonicalPath}`} />
+        {selectedPoem && (
+          <>
+            <meta property="article:published_time" content={selectedPoem.created_at} />
+            <meta property="article:section" content={getContentTypeDisplay(selectedPoem.content_type || '')} />
+            <meta property="article:tag" content={getOccasionDisplay(selectedPoem.occasion || '')} />
+          </>
+        )}
+        <script type="application/ld+json">
+          {JSON.stringify(
+            selectedPoem ? {
+              "@context": "https://schema.org",
+              "@type": "Poem", 
+              "name": selectedPoem.title,
+              "author": {
+                "@type": "Organization",
+                "name": "PoemsLand"
+              },
+              "datePublished": selectedPoem.created_at,
+              "keywords": [selectedPoem.occasion, selectedPoem.content_type, selectedPoem.style].filter(Boolean).join(", "),
+              "inLanguage": "de"
+            } : {
+              "@context": "https://schema.org",
+              "@type": "CollectionPage",
+              "name": "PoemsLand - Gedichtsammlung",
+              "description": "Eine Sammlung personalisierter Gedichte für verschiedene Anlässe und Themen",
+              "inLanguage": "de"
+            }
+          )}
+        </script>
       </Helmet>
       
       <Header />

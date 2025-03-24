@@ -124,7 +124,7 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
           </div>
         ) : (
           <>
-            <ScrollArea className="flex-grow my-4">
+            <ScrollArea className="flex-grow my-4 h-[50vh]">
               <div className="poem-container rounded-lg p-6 border shadow-sm">
                 <h2 className="text-xl font-serif text-center mb-6">{poem?.title}</h2>
                 
