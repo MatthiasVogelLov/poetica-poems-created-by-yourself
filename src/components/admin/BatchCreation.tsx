@@ -9,7 +9,7 @@ import { PlusCircle, FileUp, Wand2 } from 'lucide-react';
 import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
 import BatchPoemsList from './BatchPoemsList';
 import { supabase } from '@/integrations/supabase/client';
-import { SelectField } from '@/components/poem/fields/SelectField';
+import SelectField from '@/components/poem/fields/SelectField';
 import { toast } from 'sonner';
 
 const BatchCreation = () => {
