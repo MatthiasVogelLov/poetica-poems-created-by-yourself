@@ -1,75 +1,85 @@
 
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import { Poem } from '@/types/poem-types';
-import { getOccasionDisplay, getContentTypeDisplay } from '@/utils/poem-display-helpers';
+import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay } from '@/utils/poem-display-helpers';
 
 interface PoemSEOProps {
-  poem: Poem | null;
+  poem: any;
   isPreview?: boolean;
 }
 
 const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
-  if (!poem) return null;
+  // Don't add SEO for preview pages
+  if (isPreview) {
+    return null;
+  }
 
-  // Extract first 160 characters of the poem content for the description
-  const description = poem.content
-    ? `${poem.content.substring(0, 157).trim()}...`
-    : `Ein Gedicht zum Thema ${getOccasionDisplay(poem.occasion || '')} für PoemsLand.`;
+  const host = window.location.origin;
+  const poemUrl = `${host}/poemsland/${poem.id}`;
+  
+  // Generate meta description
+  const occasion = getOccasionDisplay(poem.occasion);
+  const contentType = getContentTypeDisplay(poem.content_type);
+  const audience = poem.audience ? getAudienceDisplay(poem.audience) : '';
+  
+  const metaDescription = `${poem.title} - Ein Gedicht zum Thema ${contentType}${occasion ? `, passend für ${occasion}` : ''}${audience ? `, für ${audience}` : ''}.`;
+  
+  // Get the first few lines for description if meta description is too short
+  const firstFewLines = poem.content
+    .split('\n')
+    .slice(0, 2)
+    .join(' ')
+    .substring(0, 120) + '...';
+  
+  const finalDescription = metaDescription.length > 80 ? metaDescription : `${metaDescription} ${firstFewLines}`;
+  
+  // Get content for the noscript tag
+  const noscriptContent = `
+    <h1>${poem.title}</h1>
+    <p>${poem.content.replace(/\n/g, '<br>')}</p>
+  `;
 
-  const keywords = [
-    'Gedicht', 
-    'Poem', 
-    'Lyrik', 
-    getOccasionDisplay(poem.occasion || ''),
-    getContentTypeDisplay(poem.content_type || '')
-  ].filter(Boolean).join(', ');
-
-  const title = isPreview 
-    ? `Vorschau: ${poem.title} | PoemsLand` 
-    : `${poem.title} | PoemsLand`;
-
-  const robots = isPreview ? 'noindex, nofollow' : 'index, follow';
-
-  // Make poem content SEO-friendly by directly adding it to the HTML source
-  // This ensures search engines can index the full content
   return (
     <Helmet>
-      <title>{title}</title>
-      <meta name="description" content={description} />
-      <meta name="keywords" content={keywords} />
-      <meta name="robots" content={robots} />
+      <title>{poem.title} - PoemsLand</title>
+      <meta name="description" content={finalDescription} />
       
-      {/* OpenGraph tags for social sharing */}
-      <meta property="og:title" content={poem.title} />
-      <meta property="og:description" content={description} />
+      {/* Open Graph */}
+      <meta property="og:title" content={`${poem.title} - PoemsLand`} />
+      <meta property="og:description" content={finalDescription} />
       <meta property="og:type" content="article" />
-      <meta property="og:site_name" content="PoemsLand" />
+      <meta property="og:url" content={poemUrl} />
       
-      {/* Twitter Card data */}
+      {/* Twitter Card */}
       <meta name="twitter:card" content="summary" />
-      <meta name="twitter:title" content={poem.title} />
-      <meta name="twitter:description" content={description} />
-
-      {/* Pre-rendered poem content for SEO (hidden from view but visible to crawlers) */}
-      {!isPreview && (
-        <>
-          {/* Add the poem content directly to the HTML for search engines */}
-          <script type="application/ld+json">
-            {JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "CreativeWork",
-              "name": poem.title,
-              "text": poem.content
-            })}
-          </script>
-          
-          {/* Add a hidden div with the poem content that will be rendered in the HTML source */}
-          <style>
-            {`.poem-seo-content { display: none; }`}
-          </style>
-        </>
-      )}
+      <meta name="twitter:title" content={`${poem.title} - PoemsLand`} />
+      <meta name="twitter:description" content={finalDescription} />
+      
+      {/* Schema.org markup for Google */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Article",
+          "headline": poem.title,
+          "description": metaDescription,
+          "articleBody": poem.content,
+          "keywords": [occasion, contentType, audience].filter(Boolean).join(', '),
+          "datePublished": poem.created_at,
+          "dateModified": poem.updated_at || poem.created_at,
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": poemUrl
+          }
+        })}
+      </script>
+      
+      {/* Provide content for noscript scenarios and improve SEO */}
+      <noscript>{`${noscriptContent}`}</noscript>
+      
+      {/* Additional meta tags for search engines */}
+      <meta name="robots" content="index, follow" />
+      <meta name="keywords" content={[occasion, contentType, audience, 'gedicht', 'poem', 'poemsland'].filter(Boolean).join(', ')} />
+      <link rel="canonical" href={poemUrl} />
     </Helmet>
   );
 };

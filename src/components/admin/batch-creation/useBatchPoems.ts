@@ -32,9 +32,17 @@ export const useBatchPoems = () => {
       
       // Check if we need to adjust the page (if we're on a page that no longer exists)
       const totalPages = Math.ceil((count || 0) / poemsPerPage);
-      if (page > totalPages && totalPages > 0) {
+      if (page > totalPages && totalPages > 0 && page !== 1) {
         setPage(totalPages);
         // The useEffect will trigger fetchBatchPoems again with the correct page
+        setIsLoading(false);
+        return;
+      }
+      
+      // Handle case when count is 0
+      if (count === 0) {
+        setBatchPoems([]);
+        setHasMore(false);
         setIsLoading(false);
         return;
       }
@@ -87,11 +95,8 @@ export const useBatchPoems = () => {
         )
       );
       
-      // Refresh count if we've deleted or changed status, especially if it might be the last item
-      if (newStatus === 'deleted' && batchPoems.length <= 1) {
-        // We need to refetch to update counts and navigate to previous page if needed
-        await fetchBatchPoems();
-      }
+      // Always refetch to ensure the count is updated correctly
+      await fetchBatchPoems();
       
       toast.success(`Gedicht ${newStatus === 'published' ? 'veröffentlicht' : 'gelöscht'}`);
     } catch (error) {
