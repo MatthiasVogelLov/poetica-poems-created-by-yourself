@@ -2,15 +2,20 @@
 import React, { useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import PoemFilters from '@/components/poems-land/PoemFilters';
 import PoemsList from '@/components/poems-land/PoemsList';
 import SinglePoemView from '@/components/poems-land/SinglePoemView';
 import { usePoems } from '@/hooks/use-poems';
 import { getOccasionDisplay, getContentTypeDisplay } from '@/utils/poem-display-helpers';
 import { Helmet } from 'react-helmet';
+import { Button } from '@/components/ui/button';
+import { PenLine } from 'lucide-react';
 
 const PoemsLand = () => {
+  const { poemId } = useParams();
+  const navigate = useNavigate();
+
   const {
     filteredPoems,
     isLoading,
@@ -26,6 +31,13 @@ const PoemsLand = () => {
     getUniqueOccasions,
     getUniqueContentTypes
   } = usePoems();
+
+  // Set the selectedPoemId from URL params when the component mounts
+  useEffect(() => {
+    if (poemId) {
+      setSelectedPoemId(poemId);
+    }
+  }, [poemId, setSelectedPoemId]);
 
   useEffect(() => {
     if (selectedPoem) {
@@ -82,6 +94,17 @@ const PoemsLand = () => {
   // Choose the appropriate structured data
   const structuredData = poemStructuredData || collectionStructuredData;
 
+  // When going back from a single poem view, navigate to the poems list
+  const handleGoBack = () => {
+    setSelectedPoemId(null);
+    navigate('/poemsland', { replace: true });
+  };
+
+  // Navigate to the poem generator
+  const handleCreatePoem = () => {
+    navigate('/generator');
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
@@ -112,7 +135,7 @@ const PoemsLand = () => {
           {selectedPoemId ? (
             <SinglePoemView 
               poem={selectedPoem}
-              goBack={() => setSelectedPoemId(null)}
+              goBack={handleGoBack}
               getOccasionDisplay={getOccasionDisplay}
               getContentTypeDisplay={getContentTypeDisplay}
             />
@@ -136,12 +159,24 @@ const PoemsLand = () => {
                 poems={filteredPoems}
                 isLoading={isLoading}
                 handleDeletePoem={handleDeletePoem}
-                setSelectedPoemId={setSelectedPoemId}
+                setSelectedPoemId={(id) => navigate(`/poemsland/${id}`)}
                 getOccasionDisplay={getOccasionDisplay}
                 getContentTypeDisplay={getContentTypeDisplay}
               />
             </>
           )}
+          
+          {/* Create Your Own Poem Button */}
+          <div className="mt-12 text-center">
+            <Button 
+              onClick={handleCreatePoem}
+              className="px-6 py-6 text-base flex items-center gap-2"
+              size="lg"
+            >
+              <PenLine className="w-5 h-5" />
+              <span>Erstellen Sie Ihr eigenes Gedicht</span>
+            </Button>
+          </div>
         </div>
       </div>
       

@@ -2,8 +2,9 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { usePoemSharing } from '@/hooks/sharing';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, PenLine } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 
 interface SinglePoemViewProps {
   poem: any;
@@ -19,6 +20,7 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
   getContentTypeDisplay
 }) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const { handleTextShare, handleImageShare, isCapturingImage } = usePoemSharing({
     poem: poem?.content || '',
     title: poem?.title || 'Gedicht',
@@ -107,6 +109,17 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
               <span className={isMobile ? "text-xs" : ""}>Bild per WhatsApp</span>
             </Button>
           </div>
+        </div>
+        
+        {/* Create Your Own Poem Button */}
+        <div className="mt-8 text-center">
+          <Button 
+            onClick={() => navigate('/generator')}
+            className="px-6 py-2 flex items-center gap-2 mx-auto"
+          >
+            <PenLine size={18} />
+            <span>Erstellen Sie Ihr eigenes Gedicht</span>
+          </Button>
         </div>
         
         <div className="text-center text-sm text-gray-400 mt-8">
