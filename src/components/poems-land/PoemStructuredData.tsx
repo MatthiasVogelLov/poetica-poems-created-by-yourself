@@ -18,6 +18,12 @@ const PoemStructuredData: React.FC<PoemStructuredDataProps> = ({ poem, host, poe
   const occasion = getOccasionDisplay(poem.occasion || '');
   const contentType = getContentTypeDisplay(poem.content_type || '');
   
+  // Format content for HTML
+  const contentHtml = poem.content
+    .split('\n')
+    .map(line => `<p>${line}</p>`)
+    .join('');
+  
   // Structured data for the poem (Schema.org CreativeWork with Poem extension)
   const structuredData = {
     "@context": "https://schema.org",
@@ -75,6 +81,22 @@ const PoemStructuredData: React.FC<PoemStructuredDataProps> = ({ poem, host, poe
       <script type="application/ld+json">
         {JSON.stringify(structuredData)}
       </script>
+
+      {/* Add actual HTML content for search engines */}
+      <noscript>
+        {`
+          <div itemscope itemtype="https://schema.org/Poem">
+            <h1 itemprop="name">${poem.title}</h1>
+            <div itemprop="text">${contentHtml}</div>
+            <div>
+              ${occasion ? `<p>Anlass: <span itemprop="keywords">${occasion}</span></p>` : ''}
+              ${contentType ? `<p>Thema: <span itemprop="genre">${contentType}</span></p>` : ''}
+              ${audience ? `<p>Zielgruppe: <span itemprop="audience">${audience}</span></p>` : ''}
+            </div>
+            <meta itemprop="datePublished" content="${formattedDate}">
+          </div>
+        `}
+      </noscript>
     </Helmet>
   );
 };

@@ -42,6 +42,12 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
     ));
   };
 
+  // Generate plain HTML version for search engines
+  const plainHtmlContent = poem.content
+    .split("\n")
+    .map(line => `<p>${line}</p>`)
+    .join("");
+
   return (
     <div>
       <Button 
@@ -54,6 +60,23 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
       </Button>
       
       <div className="max-w-2xl mx-auto">
+        {/* Hidden pre-rendered content for search engines */}
+        <div 
+          className="hidden" 
+          dangerouslySetInnerHTML={{ 
+            __html: `
+              <div itemscope itemtype="https://schema.org/Poem">
+                <h1 itemprop="name">${poem.title}</h1>
+                <div itemprop="text">${plainHtmlContent}</div>
+                ${poem.occasion ? `<meta itemprop="keywords" content="${poem.occasion}">` : ''}
+                ${poem.content_type ? `<meta itemprop="genre" content="${poem.content_type}">` : ''}
+                ${poem.audience ? `<meta itemprop="audience" content="${poem.audience}">` : ''}
+                <meta itemprop="datePublished" content="${new Date(poem.created_at || new Date()).toISOString()}">
+              </div>
+            `
+          }} 
+        />
+        
         <article 
           itemScope 
           itemType="https://schema.org/Poem"
@@ -106,7 +129,7 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
             data-nosnippet="false"
           >
             <h2>Vollständiger Gedichttext</h2>
-            <div>{poem.content}</div>
+            <div dangerouslySetInnerHTML={{ __html: plainHtmlContent }}></div>
             {poem.occasion && <p>Anlass: {poem.occasion}</p>}
             {poem.content_type && <p>Thema: {poem.content_type}</p>}
             {poem.audience && <p>Zielgruppe: {poem.audience}</p>}

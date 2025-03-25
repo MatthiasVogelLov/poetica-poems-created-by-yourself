@@ -79,7 +79,7 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
       <meta name="poem-content-type" content={contentType} />
       <meta name="poem-audience" content={audience} />
       
-      {/* Schema.org markup for Google */}
+      {/* Add the full HTML poem content in a json-ld script for search engines */}
       <script type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
@@ -106,6 +106,23 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
       <meta name="robots" content="index, follow" />
       <meta name="keywords" content={[occasion, contentType, audience, 'gedicht', 'poem', 'poemsland'].filter(Boolean).join(', ')} />
       <link rel="canonical" href={poemUrl} />
+      
+      {/* Directly add poem HTML content to the page */}
+      <style type="text/css">
+        {`
+          .seo-poem-content { 
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+          }
+        `}
+      </style>
     </Helmet>
   );
 };
