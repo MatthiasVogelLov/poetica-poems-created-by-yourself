@@ -7,7 +7,6 @@ import SinglePoemView from '@/components/poems-land/SinglePoemView';
 import { usePoems } from '@/hooks/use-poems';
 import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay } from '@/utils/poem-display-helpers';
 import PoemSEO from '@/components/poems-land/PoemSEO';
-import PoemStructuredData from '@/components/poems-land/PoemStructuredData';
 import PoemsListView from '@/components/poems-land/PoemsListView';
 
 const PoemsLand = () => {
@@ -61,8 +60,31 @@ const PoemsLand = () => {
   useEffect(() => {
     if (selectedPoem) {
       document.title = `${selectedPoem.title} - PoemsLand`;
+      
+      // Update the SEO placeholder in the static HTML with the poem content
+      // This ensures search engines can see the content even with client-side rendering
+      const seoPlaceholder = document.getElementById('poem-seo-placeholder');
+      if (seoPlaceholder) {
+        const formattedContent = selectedPoem.content.split('\n').map(line => `<p>${line}</p>`).join('');
+        seoPlaceholder.innerHTML = `
+          <div itemscope itemtype="https://schema.org/Poem">
+            <h1 itemprop="name">${selectedPoem.title}</h1>
+            <div itemprop="text">${formattedContent}</div>
+            <meta itemprop="datePublished" content="${selectedPoem.created_at ? new Date(selectedPoem.created_at).toISOString() : new Date().toISOString()}">
+            <meta itemprop="keywords" content="${selectedPoem.occasion || ''}">
+            <meta itemprop="genre" content="${selectedPoem.content_type || ''}">
+            ${selectedPoem.audience ? `<meta itemprop="audience" content="${selectedPoem.audience}">` : ''}
+          </div>
+        `;
+      }
     } else {
       document.title = "PoemsLand - Sammlung personalisierter Gedichte";
+      
+      // Clear the SEO placeholder when no poem is selected
+      const seoPlaceholder = document.getElementById('poem-seo-placeholder');
+      if (seoPlaceholder) {
+        seoPlaceholder.innerHTML = '';
+      }
     }
   }, [selectedPoem]);
 
@@ -88,31 +110,8 @@ const PoemsLand = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {selectedPoem && (
-        <>
-          {/* Add the poem content directly in the HTML - this is crucial for SEO */}
-          <div dangerouslySetInnerHTML={{
-            __html: `
-              <!-- PoemsLand SEO Content -->
-              <div id="poem-seo-content" style="display:none;">
-                <div itemscope itemtype="https://schema.org/Poem">
-                  <h1 itemprop="name">${selectedPoem.title}</h1>
-                  <div itemprop="text">
-                    ${selectedPoem.content.split('\n').map(line => `<p>${line}</p>`).join('')}
-                  </div>
-                  <meta itemprop="datePublished" content="${selectedPoem.created_at ? new Date(selectedPoem.created_at).toISOString() : new Date().toISOString()}">
-                  <meta itemprop="keywords" content="${selectedPoem.occasion || ''}">
-                  <meta itemprop="genre" content="${selectedPoem.content_type || ''}">
-                  ${selectedPoem.audience ? `<meta itemprop="audience" content="${selectedPoem.audience}">` : ''}
-                </div>
-              </div>
-            `
-          }} />
-
-          <PoemSEO poem={selectedPoem} isPreview={false} />
-          <PoemStructuredData poem={selectedPoem} host={host} poemUrl={poemUrl} />
-        </>
-      )}
+      {/* Add SEO component for the selected poem */}
+      {selectedPoem && <PoemSEO poem={selectedPoem} isPreview={false} host={host} />}
       
       <Header />
       

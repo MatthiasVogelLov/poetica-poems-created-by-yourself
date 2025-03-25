@@ -1,25 +1,27 @@
 
 import React from 'react';
 import { Helmet } from 'react-helmet';
+import { Poem } from '@/types/poem-types';
 import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay } from '@/utils/poem-display-helpers';
 
 interface PoemSEOProps {
-  poem: any;
+  poem: Poem;
   isPreview?: boolean;
+  host?: string;
 }
 
-const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
+const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
   // Don't add SEO for preview pages
-  if (isPreview) {
+  if (isPreview || !poem) {
     return null;
   }
 
-  const host = window.location.origin;
-  const poemUrl = `${host}/poemsland/${poem.id}`;
+  const siteHost = host || window.location.origin;
+  const poemUrl = `${siteHost}/poemsland/${poem.id}`;
   
   // Generate meta description
-  const occasion = getOccasionDisplay(poem.occasion);
-  const contentType = getContentTypeDisplay(poem.content_type);
+  const occasion = getOccasionDisplay(poem.occasion || '');
+  const contentType = getContentTypeDisplay(poem.content_type || '');
   const audience = poem.audience ? getAudienceDisplay(poem.audience) : '';
   
   const metaDescription = `${poem.title} - Ein Gedicht zum Thema ${contentType}${occasion ? `, passend für ${occasion}` : ''}${audience ? `, für ${audience}` : ''}.`;
@@ -39,11 +41,64 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
     .map(line => `<p>${line}</p>`)
     .join('');
 
+  const formattedDate = poem.created_at ? new Date(poem.created_at).toISOString() : new Date().toISOString();
+  
+  // Main structured data for the poem using Schema.org
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Poem",
+    "headline": poem.title,
+    "name": poem.title,
+    "text": poem.content,
+    "articleBody": poem.content,
+    "datePublished": formattedDate,
+    "genre": occasion,
+    "description": finalDescription,
+    "keywords": [
+      occasion,
+      contentType,
+      audience,
+      "Gedicht", "Poem", "PoemsLand"
+    ].filter(Boolean),
+    "url": poemUrl,
+    "isAccessibleForFree": true,
+    "audience": audience ? {
+      "@type": "Audience",
+      "audienceType": audience
+    } : undefined,
+    "publisher": {
+      "@type": "Organization",
+      "name": "PoemsLand",
+      "url": siteHost
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": poemUrl
+    },
+    "inLanguage": "de"
+  };
+
   return (
     <Helmet>
       <title>{poem.title} - PoemsLand</title>
       <meta name="description" content={finalDescription} />
       
+      {/* Static HTML version of the poem - This is crucial for SEO */}
+      <noscript>
+        {`
+          <div itemscope itemtype="https://schema.org/Poem">
+            <h1 itemprop="name">${poem.title}</h1>
+            <div itemprop="text">
+              ${formattedPoemContent}
+            </div>
+            <p>Anlass: <span itemprop="keywords">${occasion}</span></p>
+            <p>Thema: <span itemprop="genre">${contentType}</span></p>
+            ${audience ? `<p>Zielgruppe: <span itemprop="audience">${audience}</span></p>` : ''}
+            <meta itemprop="datePublished" content="${formattedDate}">
+          </div>
+        `}
+      </noscript>
+
       {/* Open Graph */}
       <meta property="og:title" content={`${poem.title} - PoemsLand`} />
       <meta property="og:description" content={finalDescription} />
@@ -55,56 +110,10 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
       <meta name="twitter:title" content={`${poem.title} - PoemsLand`} />
       <meta name="twitter:description" content={finalDescription} />
       
-      {/* Structured Data - JSON-LD format */}
+      {/* JSON-LD Structured Data - Most important for search engines */}
       <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Poem",
-          "name": poem.title,
-          "headline": poem.title,
-          "text": poem.content,
-          "articleBody": poem.content,
-          "description": metaDescription,
-          "keywords": [occasion, contentType, audience, "Gedicht", "Poem", "PoemsLand"].filter(Boolean).join(', '),
-          "datePublished": poem.created_at,
-          "genre": occasion,
-          "about": [
-            { "@type": "Thing", "name": occasion },
-            { "@type": "Thing", "name": contentType }
-          ],
-          "audience": audience ? {
-            "@type": "Audience",
-            "audienceType": audience
-          } : undefined,
-          "inLanguage": "de",
-          "isAccessibleForFree": true,
-          "publisher": {
-            "@type": "Organization",
-            "name": "PoemsLand",
-            "url": host
-          },
-          "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": poemUrl
-          }
-        })}
+        {JSON.stringify(structuredData)}
       </script>
-      
-      {/* Fallback content for search engines in noscript tag */}
-      <noscript>
-        {`
-          <div itemscope itemtype="https://schema.org/Poem">
-            <h1 itemprop="name">${poem.title}</h1>
-            <div itemprop="text">
-              ${formattedPoemContent}
-            </div>
-            <p>Anlass: <span itemprop="keywords">${occasion}</span></p>
-            <p>Thema: <span itemprop="genre">${contentType}</span></p>
-            ${audience ? `<p>Zielgruppe: <span itemprop="audience">${audience}</span></p>` : ''}
-            <meta itemprop="datePublished" content="${poem.created_at ? new Date(poem.created_at).toISOString() : new Date().toISOString()}">
-          </div>
-        `}
-      </noscript>
       
       {/* Additional SEO metadata */}
       <meta name="robots" content="index, follow" />
@@ -117,6 +126,11 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
       <meta property="poem:occasion" content={occasion} />
       <meta property="poem:content-type" content={contentType} />
       <meta property="poem:audience" content={audience} />
+      
+      {/* Hidden poem content for search engines */}
+      <script data-poem-content type="text/plain">
+        {poem.content}
+      </script>
     </Helmet>
   );
 };

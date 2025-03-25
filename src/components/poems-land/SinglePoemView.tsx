@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Circle, PenLine } from 'lucide-react';
 import LoadingState from '@/components/admin/LoadingState';
 import { Badge } from '@/components/ui/badge';
+import { Poem } from '@/types/poem-types';
 
 interface SinglePoemViewProps {
-  poem: any | null;
+  poem: Poem | null;
   isLoading: boolean;
   navigateBack: () => void;
   isPreview?: boolean;
@@ -43,6 +44,10 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
     ));
   };
 
+  // Pre-formatted content for SEO
+  const seoFormattedContent = poem.content.split('\n').map(line => `<p>${line}</p>`).join('');
+  const formattedDate = poem.created_at ? new Date(poem.created_at).toISOString() : new Date().toISOString();
+
   return (
     <div>
       <Button 
@@ -55,18 +60,18 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
       </Button>
       
       <div className="max-w-2xl mx-auto">
-        {/* Accessible to search engines but hidden from users */}
+        {/* Enhanced Poem Content for Search Engines - hidden from users but visible to crawlers */}
         <div 
           dangerouslySetInnerHTML={{ 
             __html: `
             <!-- Poem Content for Search Engines -->
-            <div class="poem-seo-content" style="display:none">
-              <div itemscope itemtype="https://schema.org/Poem">
+            <div class="poem-seo-content">
+              <div itemscope itemtype="https://schema.org/Poem" style="display:none">
                 <h1 itemprop="name">${poem.title}</h1>
                 <div itemprop="text">
-                  ${poem.content.split('\n').map(line => `<p>${line}</p>`).join('')}
+                  ${seoFormattedContent}
                 </div>
-                <meta itemprop="datePublished" content="${new Date(poem.created_at || new Date()).toISOString()}">
+                <meta itemprop="datePublished" content="${formattedDate}">
                 ${poem.occasion ? `<meta itemprop="keywords" content="${poem.occasion}">` : ''}
                 ${poem.content_type ? `<meta itemprop="genre" content="${poem.content_type}">` : ''}
                 ${poem.audience ? `<meta itemprop="audience" content="${poem.audience}">` : ''}
@@ -76,9 +81,10 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
           }}
         />
         
-        <article className="poem-article">
+        <article className="poem-article" itemScope itemType="https://schema.org/Poem">
           <div className="mb-8 text-center">
-            <h1 className="text-2xl md:text-3xl font-serif mb-2">{poem.title}</h1>
+            <h1 className="text-2xl md:text-3xl font-serif mb-2" itemProp="name">{poem.title}</h1>
+            <meta itemProp="datePublished" content={formattedDate} />
             
             {isPreview && (
               <div className="flex items-center justify-center text-sm text-amber-600 mb-4">
@@ -91,13 +97,13 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
             <div className="flex flex-wrap justify-center gap-2 mt-4">
               {poem.occasion && (
                 <Badge variant="secondary" className="transition-all duration-300 hover:bg-violet-100 hover:text-violet-700 hover:scale-105 hover:shadow-sm">
-                  {poem.occasion}
+                  <span itemProp="keywords">{poem.occasion}</span>
                 </Badge>
               )}
               
               {poem.content_type && (
                 <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 transition-all duration-300 hover:bg-blue-100 hover:text-blue-700 hover:scale-105 hover:shadow-sm">
-                  {poem.content_type}
+                  <span itemProp="genre">{poem.content_type}</span>
                 </Badge>
               )}
               
@@ -109,7 +115,7 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
             </div>
           </div>
           
-          <div className="poem-content text-lg md:text-xl leading-relaxed mb-12 whitespace-pre-line font-serif text-center">
+          <div className="poem-content text-lg md:text-xl leading-relaxed mb-12 whitespace-pre-line font-serif text-center" itemProp="text">
             {formatContent(poem.content)}
           </div>
         </article>
