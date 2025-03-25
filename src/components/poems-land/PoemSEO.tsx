@@ -33,20 +33,28 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
   
   const finalDescription = metaDescription.length > 80 ? metaDescription : `${metaDescription} ${firstFewLines}`;
   
-  // Format poem content for noscript tag
-  const formattedPoemContent = poem.content.replace(/\n/g, '<br>');
+  // Format poem content for noscript tag with proper HTML formatting
+  const formattedPoemContent = poem.content.split('\n').map(line => 
+    `<p>${line}</p>`
+  ).join('');
   
   // Get content for the noscript tag - improved for better indexing
   const noscriptContent = `
-    <article itemscope itemtype="https://schema.org/Poem">
-      <h1 itemprop="name">${poem.title}</h1>
-      <div itemprop="text">${formattedPoemContent}</div>
-      <p>Thema: ${contentType}</p>
-      <p>Anlass: ${occasion}</p>
-      <p>Zielgruppe: ${audience}</p>
-      <meta itemprop="keywords" content="${occasion}, ${contentType}, ${audience}, Gedicht, Poem">
-      <meta itemprop="datePublished" content="${poem.created_at ? new Date(poem.created_at).toISOString() : new Date().toISOString()}">
-    </article>
+    <div class="poem-container">
+      <article itemscope itemtype="https://schema.org/Poem">
+        <h1 itemprop="name">${poem.title}</h1>
+        <div itemprop="text" class="poem-text">
+          ${formattedPoemContent}
+        </div>
+        <div class="poem-metadata">
+          <p><strong>Thema:</strong> <span itemprop="genre">${contentType}</span></p>
+          <p><strong>Anlass:</strong> <span itemprop="keywords">${occasion}</span></p>
+          ${audience ? `<p><strong>Zielgruppe:</strong> <span itemprop="audience">${audience}</span></p>` : ''}
+          <p><strong>Veröffentlicht:</strong> <time itemprop="datePublished" datetime="${poem.created_at ? new Date(poem.created_at).toISOString() : new Date().toISOString()}">${poem.created_at ? new Date(poem.created_at).toLocaleDateString() : new Date().toLocaleDateString()}</time></p>
+        </div>
+        <meta itemprop="keywords" content="${occasion}, ${contentType}, ${audience}, Gedicht, Poem">
+      </article>
+    </div>
   `;
 
   return (
@@ -67,6 +75,9 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
       
       {/* Include the entire poem text to ensure search engines can index it */}
       <meta name="poem-full-text" content={poem.content} />
+      <meta name="poem-occasion" content={occasion} />
+      <meta name="poem-content-type" content={contentType} />
+      <meta name="poem-audience" content={audience} />
       
       {/* Schema.org markup for Google */}
       <script type="application/ld+json">

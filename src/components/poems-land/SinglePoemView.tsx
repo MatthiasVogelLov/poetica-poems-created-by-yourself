@@ -53,7 +53,12 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
       </Button>
       
       <div className="max-w-2xl mx-auto">
-        <article itemScope itemType="https://schema.org/Poem">
+        <article 
+          itemScope 
+          itemType="https://schema.org/Poem"
+          id="poem-content"
+          className="poem-article"
+        >
           <div className="mb-8 text-center">
             <h1 className="text-2xl md:text-3xl font-serif mb-2" itemProp="name">{poem.title}</h1>
             
@@ -72,11 +77,27 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
             {formatContent(poem.content)}
           </div>
           
+          {/* SEO Content - Visible to search engines but styled to look the same as the above content */}
+          <div 
+            className="sr-only" 
+            aria-hidden="true"
+            data-nosnippet="false"
+          >
+            <h2>Vollständiger Gedichttext</h2>
+            <div>{poem.content}</div>
+            {poem.occasion && <p>Anlass: {poem.occasion}</p>}
+            {poem.content_type && <p>Thema: {poem.content_type}</p>}
+            {poem.audience && <p>Zielgruppe: {poem.audience}</p>}
+          </div>
+          
           {/* Additional SEO metadata */}
           <meta itemProp="datePublished" content={new Date(poem.created_at || new Date()).toISOString()} />
           {poem.occasion && <meta itemProp="keywords" content={poem.occasion} />}
           {poem.content_type && <meta itemProp="keywords" content={poem.content_type} />}
           {poem.audience && <meta itemProp="audience" content={poem.audience} />}
+          
+          {/* Add the poem content directly as a hidden meta property for search engines */}
+          <meta itemProp="poemText" content={poem.content} />
         </article>
         
         {/* Create poem button */}

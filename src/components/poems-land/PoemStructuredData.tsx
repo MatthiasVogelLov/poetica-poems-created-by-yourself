@@ -48,7 +48,26 @@ const PoemStructuredData: React.FC<PoemStructuredDataProps> = ({ poem, host, poe
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": poemUrl
-    }
+    },
+    "potentialAction": {
+      "@type": "ReadAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": poemUrl
+      }
+    },
+    "position": 1,
+    "about": [
+      {
+        "@type": "Thing",
+        "name": occasion
+      },
+      {
+        "@type": "Thing",
+        "name": contentType
+      }
+    ],
+    "inLanguage": "de"
   };
 
   return (
