@@ -15,6 +15,7 @@ interface BatchPoemsListProps {
   publishingState?: Record<string, boolean>;
   page?: number;
   totalCount?: number;
+  visibleCount?: number;
   hasMore?: boolean;
   onNextPage?: () => void;
   onPrevPage?: () => void;
@@ -29,6 +30,7 @@ const BatchPoemsList: React.FC<BatchPoemsListProps> = ({
   publishingState = {},
   page = 1,
   totalCount = 0,
+  visibleCount = 0,
   hasMore = false,
   onNextPage,
   onPrevPage,
@@ -43,12 +45,13 @@ const BatchPoemsList: React.FC<BatchPoemsListProps> = ({
   }
 
   const startRange = ((page - 1) * poemsPerPage) + 1;
-  const endRange = Math.min(page * poemsPerPage, totalCount);
+  const endRange = Math.min(page * poemsPerPage, visibleCount);
 
   return (
     <div className="space-y-6">
       <BatchPoemsHeader 
         poemsCount={totalCount} 
+        visibleCount={visibleCount}
         onRefresh={onRefresh} 
         poems={poems} 
       />
@@ -59,10 +62,10 @@ const BatchPoemsList: React.FC<BatchPoemsListProps> = ({
         publishingState={publishingState}
       />
       
-      {totalCount > poemsPerPage && (
+      {visibleCount > poemsPerPage && (
         <div className="flex items-center justify-between px-2">
           <div className="text-sm text-muted-foreground">
-            Zeige {startRange} bis {endRange} von {totalCount} Gedichten
+            Zeige {startRange} bis {endRange} von {visibleCount} sichtbaren Gedichten
           </div>
           <div className="flex gap-2">
             <Button 

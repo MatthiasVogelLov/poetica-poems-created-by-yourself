@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.0';
 
@@ -63,24 +64,23 @@ serve(async (req) => {
             return createResponse({ error: 'Failed to get poem info', details: poemInfoError }, 500);
           }
           
-          // If the poem is published, just mark it as deleted but don't affect PoemsLand visibility
-          if (poemInfo.status === 'published') {
-            const { data: updateData, error: updateError } = await supabase
-              .from('user_poems')
-              .update({...poemData})
-              .eq('id', poemId)
-              .select();
+          // For all poems, just update the status to 'deleted' but don't remove them
+          // This preserves them in PoemsLand if they were published
+          const { data: updateData, error: updateError } = await supabase
+            .from('user_poems')
+            .update({ status: 'deleted' })
+            .eq('id', poemId)
+            .select();
 
-            if (updateError) {
-              console.error('Error updating poem:', updateError);
-              return createResponse({ error: 'Failed to update poem', details: updateError }, 500);
-            }
-
-            return createResponse({ success: true, data: updateData });
+          if (updateError) {
+            console.error('Error updating poem:', updateError);
+            return createResponse({ error: 'Failed to update poem', details: updateError }, 500);
           }
+
+          return createResponse({ success: true, data: updateData });
         }
         
-        // For all other status changes or non-published poems
+        // For all other status changes
         const { data: updateData, error: updateError } = await supabase
           .from('user_poems')
           .update(poemData)
@@ -99,14 +99,40 @@ serve(async (req) => {
           return createResponse({ error: 'Missing poem ID' }, 400);
         }
 
-        const { error: deleteError } = await supabase
+        // Check if the poem is published before actually deleting it
+        const { data: poemToDelete, error: checkError } = await supabase
           .from('user_poems')
-          .delete()
-          .eq('id', poemId);
+          .select('status')
+          .eq('id', poemId)
+          .single();
+          
+        if (checkError) {
+          console.error('Error checking poem status:', checkError);
+          return createResponse({ error: 'Failed to check poem status' }, 500);
+        }
+        
+        // If published, just mark as deleted instead of removing
+        if (poemToDelete && poemToDelete.status === 'published') {
+          const { error: updateError } = await supabase
+            .from('user_poems')
+            .update({ status: 'deleted' })
+            .eq('id', poemId);
+            
+          if (updateError) {
+            console.error('Error updating poem status:', updateError);
+            return createResponse({ error: 'Failed to update poem status' }, 500);
+          }
+        } else {
+          // If not published, we can safely delete it
+          const { error: deleteError } = await supabase
+            .from('user_poems')
+            .delete()
+            .eq('id', poemId);
 
-        if (deleteError) {
-          console.error('Error deleting poem:', deleteError);
-          return createResponse({ error: 'Failed to delete poem' }, 500);
+          if (deleteError) {
+            console.error('Error deleting poem:', deleteError);
+            return createResponse({ error: 'Failed to delete poem' }, 500);
+          }
         }
 
         return createResponse({ success: true });

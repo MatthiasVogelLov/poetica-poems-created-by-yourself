@@ -81,11 +81,23 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
           </div>
         )}
         
-        {/* Hidden but indexable content for SEO */}
+        {/* Hidden but indexable content for SEO - now fully visible to search engines */}
         <div className="sr-only" aria-hidden="false" data-nosnippet="false">
           <article itemScope itemType="https://schema.org/Poem">
             <h2 itemProp="name">{poem.title}</h2>
             <div itemProp="text">{poem.content}</div>
+            {poem.occasion && (
+              <meta itemProp="keywords" content={poem.occasion} />
+            )}
+            {poem.content_type && (
+              <meta itemProp="keywords" content={poem.content_type} />
+            )}
+            {poem.audience && (
+              <meta itemProp="audience" content={poem.audience} />
+            )}
+            {poem.created_at && (
+              <meta itemProp="datePublished" content={new Date(poem.created_at).toISOString()} />
+            )}
           </article>
         </div>
       </div>

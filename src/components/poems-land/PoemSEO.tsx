@@ -36,10 +36,14 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
   // Format poem content for structured data and noscript tag
   const formattedPoemContent = poem.content.replace(/\n/g, '<br>');
   
-  // Get content for the noscript tag
+  // Get content for the noscript tag - improved for better indexing
   const noscriptContent = `
-    <h1>${poem.title}</h1>
-    <p>${formattedPoemContent}</p>
+    <article itemscope itemtype="https://schema.org/Poem">
+      <h1 itemprop="name">${poem.title}</h1>
+      <div itemprop="text">${formattedPoemContent}</div>
+      <meta itemprop="keywords" content="${occasion}, ${contentType}, ${audience}, Gedicht, Poem">
+      <meta itemprop="datePublished" content="${poem.created_at ? new Date(poem.created_at).toISOString() : new Date().toISOString()}">
+    </article>
   `;
 
   return (
@@ -58,15 +62,20 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
       <meta name="twitter:title" content={`${poem.title} - PoemsLand`} />
       <meta name="twitter:description" content={finalDescription} />
       
+      {/* Include the entire poem text to ensure search engines can index it */}
+      <meta name="poem-full-text" content={poem.content} />
+      
       {/* Schema.org markup for Google */}
       <script type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "Article",
+          "@type": "Poem",
           "headline": poem.title,
+          "name": poem.title,
           "description": metaDescription,
+          "text": poem.content,
           "articleBody": poem.content,
-          "keywords": [occasion, contentType, audience].filter(Boolean).join(', '),
+          "keywords": [occasion, contentType, audience, "Gedicht", "Poem", "PoemsLand"].filter(Boolean).join(', '),
           "datePublished": poem.created_at,
           "dateModified": poem.updated_at || poem.created_at,
           "mainEntityOfPage": {

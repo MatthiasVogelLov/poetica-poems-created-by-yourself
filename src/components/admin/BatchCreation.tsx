@@ -19,6 +19,7 @@ const BatchCreation = () => {
     publishing,
     page,
     totalCount,
+    visibleCount,
     hasMore,
     nextPage,
     prevPage,
@@ -83,6 +84,7 @@ const BatchCreation = () => {
           publishingState={publishing}
           page={page}
           totalCount={totalCount}
+          visibleCount={visibleCount}
           hasMore={hasMore}
           onNextPage={nextPage}
           onPrevPage={prevPage}

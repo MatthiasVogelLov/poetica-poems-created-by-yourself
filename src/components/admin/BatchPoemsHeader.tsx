@@ -7,18 +7,22 @@ import { getOccasionDisplay, getContentTypeDisplay } from '@/utils/poem-display-
 
 interface BatchPoemsHeaderProps {
   poemsCount: number;
+  visibleCount: number;
   onRefresh: () => void;
   poems: any[];
 }
 
 const BatchPoemsHeader: React.FC<BatchPoemsHeaderProps> = ({ 
   poemsCount, 
+  visibleCount,
   onRefresh, 
   poems 
 }) => {
   return (
     <div className="flex justify-between items-center">
-      <h2 className="text-xl font-medium">Batch-Gedichte ({poemsCount})</h2>
+      <h2 className="text-xl font-medium">
+        Batch-Gedichte ({visibleCount} sichtbar von {poemsCount} insgesamt)
+      </h2>
       <div className="flex gap-2">
         <Button variant="outline" onClick={onRefresh} size="sm">
           <RefreshCw size={16} className="mr-2" />
