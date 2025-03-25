@@ -33,29 +33,11 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
   
   const finalDescription = metaDescription.length > 80 ? metaDescription : `${metaDescription} ${firstFewLines}`;
   
-  // Format poem content for noscript tag with proper HTML formatting
-  const formattedPoemContent = poem.content.split('\n').map(line => 
-    `<p>${line}</p>`
-  ).join('');
-  
-  // Get content for the noscript tag - improved for better indexing
-  const noscriptContent = `
-    <div class="poem-container">
-      <article itemscope itemtype="https://schema.org/Poem">
-        <h1 itemprop="name">${poem.title}</h1>
-        <div itemprop="text" class="poem-text">
-          ${formattedPoemContent}
-        </div>
-        <div class="poem-metadata">
-          <p><strong>Thema:</strong> <span itemprop="genre">${contentType}</span></p>
-          <p><strong>Anlass:</strong> <span itemprop="keywords">${occasion}</span></p>
-          ${audience ? `<p><strong>Zielgruppe:</strong> <span itemprop="audience">${audience}</span></p>` : ''}
-          <p><strong>Veröffentlicht:</strong> <time itemprop="datePublished" datetime="${poem.created_at ? new Date(poem.created_at).toISOString() : new Date().toISOString()}">${poem.created_at ? new Date(poem.created_at).toLocaleDateString() : new Date().toLocaleDateString()}</time></p>
-        </div>
-        <meta itemprop="keywords" content="${occasion}, ${contentType}, ${audience}, Gedicht, Poem">
-      </article>
-    </div>
-  `;
+  // Format poem content for HTML output
+  const formattedPoemContent = poem.content
+    .split('\n')
+    .map(line => `<p>${line}</p>`)
+    .join('');
 
   return (
     <Helmet>
@@ -73,25 +55,34 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
       <meta name="twitter:title" content={`${poem.title} - PoemsLand`} />
       <meta name="twitter:description" content={finalDescription} />
       
-      {/* Include the entire poem text to ensure search engines can index it */}
-      <meta name="poem-full-text" content={poem.content} />
-      <meta name="poem-occasion" content={occasion} />
-      <meta name="poem-content-type" content={contentType} />
-      <meta name="poem-audience" content={audience} />
-      
-      {/* Add the full HTML poem content in a json-ld script for search engines */}
+      {/* Structured Data - JSON-LD format */}
       <script type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Poem",
-          "headline": poem.title,
           "name": poem.title,
-          "description": metaDescription,
+          "headline": poem.title,
           "text": poem.content,
           "articleBody": poem.content,
+          "description": metaDescription,
           "keywords": [occasion, contentType, audience, "Gedicht", "Poem", "PoemsLand"].filter(Boolean).join(', '),
           "datePublished": poem.created_at,
-          "dateModified": poem.updated_at || poem.created_at,
+          "genre": occasion,
+          "about": [
+            { "@type": "Thing", "name": occasion },
+            { "@type": "Thing", "name": contentType }
+          ],
+          "audience": audience ? {
+            "@type": "Audience",
+            "audienceType": audience
+          } : undefined,
+          "inLanguage": "de",
+          "isAccessibleForFree": true,
+          "publisher": {
+            "@type": "Organization",
+            "name": "PoemsLand",
+            "url": host
+          },
           "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": poemUrl
@@ -99,30 +90,33 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
         })}
       </script>
       
-      {/* Provide actual content for search engines and noscript scenarios */}
-      <noscript dangerouslySetInnerHTML={{ __html: noscriptContent }} />
+      {/* Fallback content for search engines in noscript tag */}
+      <noscript>
+        {`
+          <div itemscope itemtype="https://schema.org/Poem">
+            <h1 itemprop="name">${poem.title}</h1>
+            <div itemprop="text">
+              ${formattedPoemContent}
+            </div>
+            <p>Anlass: <span itemprop="keywords">${occasion}</span></p>
+            <p>Thema: <span itemprop="genre">${contentType}</span></p>
+            ${audience ? `<p>Zielgruppe: <span itemprop="audience">${audience}</span></p>` : ''}
+            <meta itemprop="datePublished" content="${poem.created_at ? new Date(poem.created_at).toISOString() : new Date().toISOString()}">
+          </div>
+        `}
+      </noscript>
       
-      {/* Additional meta tags for search engines */}
+      {/* Additional SEO metadata */}
       <meta name="robots" content="index, follow" />
       <meta name="keywords" content={[occasion, contentType, audience, 'gedicht', 'poem', 'poemsland'].filter(Boolean).join(', ')} />
       <link rel="canonical" href={poemUrl} />
       
-      {/* Directly add poem HTML content to the page */}
-      <style type="text/css">
-        {`
-          .seo-poem-content { 
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
-          }
-        `}
-      </style>
+      {/* Direct embedding of poem content in meta tags for search engines */}
+      <meta property="poem:content" content={poem.content} />
+      <meta property="poem:title" content={poem.title} />
+      <meta property="poem:occasion" content={occasion} />
+      <meta property="poem:content-type" content={contentType} />
+      <meta property="poem:audience" content={audience} />
     </Helmet>
   );
 };

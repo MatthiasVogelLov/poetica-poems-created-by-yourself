@@ -90,6 +90,25 @@ const PoemsLand = () => {
     <div className="min-h-screen bg-white">
       {selectedPoem && (
         <>
+          {/* Add the poem content directly in the HTML - this is crucial for SEO */}
+          <div dangerouslySetInnerHTML={{
+            __html: `
+              <!-- PoemsLand SEO Content -->
+              <div id="poem-seo-content" style="display:none;">
+                <div itemscope itemtype="https://schema.org/Poem">
+                  <h1 itemprop="name">${selectedPoem.title}</h1>
+                  <div itemprop="text">
+                    ${selectedPoem.content.split('\n').map(line => `<p>${line}</p>`).join('')}
+                  </div>
+                  <meta itemprop="datePublished" content="${selectedPoem.created_at ? new Date(selectedPoem.created_at).toISOString() : new Date().toISOString()}">
+                  <meta itemprop="keywords" content="${selectedPoem.occasion || ''}">
+                  <meta itemprop="genre" content="${selectedPoem.content_type || ''}">
+                  ${selectedPoem.audience ? `<meta itemprop="audience" content="${selectedPoem.audience}">` : ''}
+                </div>
+              </div>
+            `
+          }} />
+
           <PoemSEO poem={selectedPoem} isPreview={false} />
           <PoemStructuredData poem={selectedPoem} host={host} poemUrl={poemUrl} />
         </>

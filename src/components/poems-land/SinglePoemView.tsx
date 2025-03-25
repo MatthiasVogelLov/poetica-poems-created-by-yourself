@@ -33,6 +33,7 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
     );
   }
 
+  // Format content for visual display
   const formatContent = (content: string) => {
     return content.split("\n").map((line, index) => (
       <React.Fragment key={index}>
@@ -41,12 +42,6 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
       </React.Fragment>
     ));
   };
-
-  // Generate plain HTML version for search engines
-  const plainHtmlContent = poem.content
-    .split("\n")
-    .map(line => `<p>${line}</p>`)
-    .join("");
 
   return (
     <div>
@@ -60,31 +55,30 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
       </Button>
       
       <div className="max-w-2xl mx-auto">
-        {/* Hidden pre-rendered content for search engines */}
+        {/* Accessible to search engines but hidden from users */}
         <div 
-          className="hidden" 
           dangerouslySetInnerHTML={{ 
             __html: `
+            <!-- Poem Content for Search Engines -->
+            <div class="poem-seo-content" style="display:none">
               <div itemscope itemtype="https://schema.org/Poem">
                 <h1 itemprop="name">${poem.title}</h1>
-                <div itemprop="text">${plainHtmlContent}</div>
+                <div itemprop="text">
+                  ${poem.content.split('\n').map(line => `<p>${line}</p>`).join('')}
+                </div>
+                <meta itemprop="datePublished" content="${new Date(poem.created_at || new Date()).toISOString()}">
                 ${poem.occasion ? `<meta itemprop="keywords" content="${poem.occasion}">` : ''}
                 ${poem.content_type ? `<meta itemprop="genre" content="${poem.content_type}">` : ''}
                 ${poem.audience ? `<meta itemprop="audience" content="${poem.audience}">` : ''}
-                <meta itemprop="datePublished" content="${new Date(poem.created_at || new Date()).toISOString()}">
               </div>
+            </div>
             `
-          }} 
+          }}
         />
         
-        <article 
-          itemScope 
-          itemType="https://schema.org/Poem"
-          id="poem-content"
-          className="poem-article"
-        >
+        <article className="poem-article">
           <div className="mb-8 text-center">
-            <h1 className="text-2xl md:text-3xl font-serif mb-2" itemProp="name">{poem.title}</h1>
+            <h1 className="text-2xl md:text-3xl font-serif mb-2">{poem.title}</h1>
             
             {isPreview && (
               <div className="flex items-center justify-center text-sm text-amber-600 mb-4">
@@ -115,34 +109,9 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
             </div>
           </div>
           
-          <div 
-            className="poem-content text-lg md:text-xl leading-relaxed mb-12 whitespace-pre-line font-serif text-center"
-            itemProp="text"
-          >
+          <div className="poem-content text-lg md:text-xl leading-relaxed mb-12 whitespace-pre-line font-serif text-center">
             {formatContent(poem.content)}
           </div>
-          
-          {/* SEO Content - Visible to search engines but styled to look the same as the above content */}
-          <div 
-            className="sr-only" 
-            aria-hidden="true"
-            data-nosnippet="false"
-          >
-            <h2>Vollständiger Gedichttext</h2>
-            <div dangerouslySetInnerHTML={{ __html: plainHtmlContent }}></div>
-            {poem.occasion && <p>Anlass: {poem.occasion}</p>}
-            {poem.content_type && <p>Thema: {poem.content_type}</p>}
-            {poem.audience && <p>Zielgruppe: {poem.audience}</p>}
-          </div>
-          
-          {/* Additional SEO metadata */}
-          <meta itemProp="datePublished" content={new Date(poem.created_at || new Date()).toISOString()} />
-          {poem.occasion && <meta itemProp="keywords" content={poem.occasion} />}
-          {poem.content_type && <meta itemProp="keywords" content={poem.content_type} />}
-          {poem.audience && <meta itemProp="audience" content={poem.audience} />}
-          
-          {/* Add the poem content directly as a hidden meta property for search engines */}
-          <meta itemProp="poemText" content={poem.content} />
         </article>
         
         {/* Create poem button */}

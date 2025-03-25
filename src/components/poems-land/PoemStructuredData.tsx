@@ -18,13 +18,13 @@ const PoemStructuredData: React.FC<PoemStructuredDataProps> = ({ poem, host, poe
   const occasion = getOccasionDisplay(poem.occasion || '');
   const contentType = getContentTypeDisplay(poem.content_type || '');
   
-  // Format content for HTML
+  // Format poem content for HTML output
   const contentHtml = poem.content
     .split('\n')
     .map(line => `<p>${line}</p>`)
     .join('');
   
-  // Structured data for the poem (Schema.org CreativeWork with Poem extension)
+  // Main structured data for the poem using Schema.org
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Poem",
@@ -55,48 +55,19 @@ const PoemStructuredData: React.FC<PoemStructuredDataProps> = ({ poem, host, poe
       "@type": "WebPage",
       "@id": poemUrl
     },
-    "potentialAction": {
-      "@type": "ReadAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": poemUrl
-      }
-    },
-    "position": 1,
-    "about": [
-      {
-        "@type": "Thing",
-        "name": occasion
-      },
-      {
-        "@type": "Thing",
-        "name": contentType
-      }
-    ],
     "inLanguage": "de"
   };
 
   return (
     <Helmet>
+      {/* Static HTML version of the poem - This is crucial for SEO */}
+      <script data-poem-content type="text/plain">
+        {poem.content}
+      </script>
+      
       <script type="application/ld+json">
         {JSON.stringify(structuredData)}
       </script>
-
-      {/* Add actual HTML content for search engines */}
-      <noscript>
-        {`
-          <div itemscope itemtype="https://schema.org/Poem">
-            <h1 itemprop="name">${poem.title}</h1>
-            <div itemprop="text">${contentHtml}</div>
-            <div>
-              ${occasion ? `<p>Anlass: <span itemprop="keywords">${occasion}</span></p>` : ''}
-              ${contentType ? `<p>Thema: <span itemprop="genre">${contentType}</span></p>` : ''}
-              ${audience ? `<p>Zielgruppe: <span itemprop="audience">${audience}</span></p>` : ''}
-            </div>
-            <meta itemprop="datePublished" content="${formattedDate}">
-          </div>
-        `}
-      </noscript>
     </Helmet>
   );
 };
