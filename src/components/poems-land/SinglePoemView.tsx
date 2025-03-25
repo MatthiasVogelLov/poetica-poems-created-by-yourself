@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Circle, PenLine } from 'lucide-react';
 import LoadingState from '@/components/admin/LoadingState';
+import { Badge } from '@/components/ui/badge';
 
 interface SinglePoemViewProps {
   poem: any | null;
@@ -68,6 +69,27 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
                 Vorschau-Modus
               </div>
             )}
+            
+            {/* Poem metadata badges */}
+            <div className="flex flex-wrap justify-center gap-2 mt-4">
+              {poem.occasion && (
+                <Badge variant="secondary" className="transition-all duration-300 hover:bg-violet-100 hover:text-violet-700 hover:scale-105 hover:shadow-sm">
+                  {poem.occasion}
+                </Badge>
+              )}
+              
+              {poem.content_type && (
+                <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 transition-all duration-300 hover:bg-blue-100 hover:text-blue-700 hover:scale-105 hover:shadow-sm">
+                  {poem.content_type}
+                </Badge>
+              )}
+              
+              {poem.audience && (
+                <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200 transition-all duration-300 hover:bg-amber-100 hover:text-amber-700 hover:scale-105 hover:shadow-sm">
+                  {poem.audience}
+                </Badge>
+              )}
+            </div>
           </div>
           
           <div 
@@ -105,7 +127,7 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
           <div className="mt-8 text-center">
             <Button 
               onClick={handleCreatePoem}
-              className="px-4 py-2 text-sm flex items-center gap-2 mx-auto"
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 px-4 py-2 text-sm flex items-center gap-2 mx-auto hover:shadow-md hover:scale-105"
             >
               <PenLine className="w-4 h-4" />
               <span>Erstelle Dein eigenes Gedicht</span>
