@@ -20,9 +20,16 @@ serve(async (req) => {
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Missing Supabase configuration (URL or service role key)");
+    }
+    
+    console.log("[daily-stats-cron] Supabase URL and key are configured");
     const supabase = createClient(supabaseUrl, supabaseKey);
     
-    // Setup the cron job - make sure it runs daily at 6am (5am UTC assuming CET/CEST)
+    // Setup the cron job to run daily at 1am UTC
+    // This should be around 2-3am in Europe depending on daylight savings
     const { data, error } = await supabase.rpc('create_daily_stats_cron');
     
     if (error) {
@@ -44,8 +51,17 @@ serve(async (req) => {
         body: JSON.stringify({ test: true })
       });
       
-      const testResponse = await testResult.json();
-      console.log("[daily-stats-cron] Test email execution result:", testResponse);
+      const testStatus = testResult.status;
+      console.log("[daily-stats-cron] Test API call status:", testStatus);
+      
+      let testResponse;
+      try {
+        testResponse = await testResult.json();
+        console.log("[daily-stats-cron] Test email execution result:", testResponse);
+      } catch (parseError) {
+        const textResponse = await testResult.text();
+        console.error("[daily-stats-cron] Failed to parse JSON response:", textResponse);
+      }
     } catch (testError) {
       console.error("[daily-stats-cron] Error testing email function:", testError);
     }
@@ -62,7 +78,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Error setting up cron job:", error);
+    console.error("Error setting up cron job:", error.message, error.stack);
     
     return new Response(
       JSON.stringify({ 

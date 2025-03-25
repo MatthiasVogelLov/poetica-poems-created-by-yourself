@@ -24,10 +24,11 @@ serve(async (req) => {
     
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     if (!resendApiKey) {
+      console.error('[daily-stats-email] RESEND_API_KEY is not set');
       throw new Error('RESEND_API_KEY is not set');
     }
     
-    console.log("[daily-stats-email] Connected to Supabase, Resend API key found");
+    console.log("[daily-stats-email] Connected to Supabase, Resend API key found, length:", resendApiKey.length);
     const resend = new Resend(resendApiKey);
     
     // Get yesterday's date (UTC)
@@ -52,6 +53,7 @@ serve(async (req) => {
       .lte('created_at', yesterdayEnd.toISOString());
       
     if (poemError) {
+      console.error('[daily-stats-email] Error fetching poem stats:', poemError.message);
       throw new Error(`Error fetching poem stats: ${poemError.message}`);
     }
     
@@ -66,6 +68,7 @@ serve(async (req) => {
       .lte('created_at', yesterdayEnd.toISOString());
       
     if (keywordError) {
+      console.error('[daily-stats-email] Error fetching keyword stats:', keywordError.message);
       throw new Error(`Error fetching keyword stats: ${keywordError.message}`);
     }
     
@@ -77,6 +80,7 @@ serve(async (req) => {
       .select('*');
       
     if (audienceError) {
+      console.error('[daily-stats-email] Error fetching audience stats:', audienceError.message);
       throw new Error(`Error fetching audience stats: ${audienceError.message}`);
     }
     
@@ -88,6 +92,7 @@ serve(async (req) => {
       .select('*');
       
     if (occasionError) {
+      console.error('[daily-stats-email] Error fetching occasion stats:', occasionError.message);
       throw new Error(`Error fetching occasion stats: ${occasionError.message}`);
     }
     
@@ -164,30 +169,42 @@ serve(async (req) => {
       </html>
     `;
     
-    // Update the recipient email
+    // Update the email details with more reliable configuration
     const recipientEmail = "matthiasvogel1973@gmail.com"; // Admin email
     
-    console.log(`[daily-stats-email] Sending email to ${recipientEmail}`);
+    console.log(`[daily-stats-email] About to send email to ${recipientEmail}`);
     
-    // Send email
-    const emailData = await resend.emails.send({
-      from: "Poetica <onboarding@resend.dev>",  // Change this to your verified domain when in production
-      to: [recipientEmail],
-      subject: `Poetica Tagesstatistik: ${yesterdayFormatted}`,
-      html: emailHtml,
-    });
-    
-    console.log('[daily-stats-email] Stats email sent:', emailData);
-
-    return new Response(
-      JSON.stringify({ success: true, data: emailData }),
-      { 
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200 
+    // Send email with proper from address and additional debugging
+    try {
+      const emailData = await resend.emails.send({
+        from: "Poetica <onboarding@resend.dev>",  // Make sure this domain is verified in Resend
+        to: [recipientEmail],
+        subject: `Poetica Tagesstatistik: ${yesterdayFormatted}`,
+        html: emailHtml,
+      });
+      
+      console.log('[daily-stats-email] Email sent response:', JSON.stringify(emailData));
+      
+      if (!emailData || emailData.error) {
+        console.error('[daily-stats-email] Error response from Resend:', emailData?.error);
+        throw new Error(`Failed to send email: ${emailData?.error || 'Unknown error'}`);
       }
-    );
+      
+      console.log('[daily-stats-email] Stats email sent successfully:', emailData?.id);
+
+      return new Response(
+        JSON.stringify({ success: true, data: emailData }),
+        { 
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200 
+        }
+      );
+    } catch (emailError) {
+      console.error('[daily-stats-email] Exception sending email via Resend:', emailError);
+      throw emailError;
+    }
   } catch (error) {
-    console.error("Error sending daily stats email:", error);
+    console.error("Error sending daily stats email:", error.message, error.stack);
     
     return new Response(
       JSON.stringify({ 

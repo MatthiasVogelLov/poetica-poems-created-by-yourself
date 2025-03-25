@@ -47,7 +47,7 @@ export async function sendPoemNotification(
 
   // Send email notification
   const emailPayload = {
-    from: 'Poetica <notification@poetica.apvora.com>',
+    from: 'Poetica <onboarding@resend.dev>', // Changed to use verified Resend domain
     to: config.recipientEmail,
     subject: `Neues Gedicht: ${poemTitle}`,
     html: `
