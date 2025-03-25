@@ -15,6 +15,8 @@ const PoemStructuredData: React.FC<PoemStructuredDataProps> = ({ poem, host, poe
 
   const formattedDate = poem.created_at ? new Date(poem.created_at).toISOString() : new Date().toISOString();
   const audience = poem.audience ? getAudienceDisplay(poem.audience) : '';
+  const occasion = getOccasionDisplay(poem.occasion || '');
+  const contentType = getContentTypeDisplay(poem.content_type || '');
   
   // Structured data for the poem (Schema.org CreativeWork with Poem extension)
   const structuredData = {
@@ -23,11 +25,12 @@ const PoemStructuredData: React.FC<PoemStructuredDataProps> = ({ poem, host, poe
     "headline": poem.title,
     "name": poem.title,
     "text": poem.content,
+    "articleBody": poem.content,
     "datePublished": formattedDate,
-    "genre": getOccasionDisplay(poem.occasion || ''),
+    "genre": occasion,
     "keywords": [
-      getOccasionDisplay(poem.occasion || ''),
-      getContentTypeDisplay(poem.content_type || ''),
+      occasion,
+      contentType,
       audience,
       "Gedicht", "Poem", "PoemsLand"
     ].filter(Boolean),
@@ -41,6 +44,10 @@ const PoemStructuredData: React.FC<PoemStructuredDataProps> = ({ poem, host, poe
       "@type": "Organization",
       "name": "PoemsLand",
       "url": host
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": poemUrl
     }
   };
 

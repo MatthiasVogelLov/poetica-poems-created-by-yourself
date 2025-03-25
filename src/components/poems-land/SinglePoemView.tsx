@@ -53,20 +53,31 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
       </Button>
       
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl md:text-3xl font-serif mb-2">{poem.title}</h1>
+        <article itemScope itemType="https://schema.org/Poem">
+          <div className="mb-8 text-center">
+            <h1 className="text-2xl md:text-3xl font-serif mb-2" itemProp="name">{poem.title}</h1>
+            
+            {isPreview && (
+              <div className="flex items-center justify-center text-sm text-amber-600 mb-4">
+                <Circle className="h-3 w-3 fill-current mr-1" />
+                Vorschau-Modus
+              </div>
+            )}
+          </div>
           
-          {isPreview && (
-            <div className="flex items-center justify-center text-sm text-amber-600 mb-4">
-              <Circle className="h-3 w-3 fill-current mr-1" />
-              Vorschau-Modus
-            </div>
-          )}
-        </div>
-        
-        <div className="poem-content text-lg md:text-xl leading-relaxed mb-12 whitespace-pre-line font-serif text-center">
-          {formatContent(poem.content)}
-        </div>
+          <div 
+            className="poem-content text-lg md:text-xl leading-relaxed mb-12 whitespace-pre-line font-serif text-center"
+            itemProp="text"
+          >
+            {formatContent(poem.content)}
+          </div>
+          
+          {/* Additional SEO metadata */}
+          <meta itemProp="datePublished" content={new Date(poem.created_at || new Date()).toISOString()} />
+          {poem.occasion && <meta itemProp="keywords" content={poem.occasion} />}
+          {poem.content_type && <meta itemProp="keywords" content={poem.content_type} />}
+          {poem.audience && <meta itemProp="audience" content={poem.audience} />}
+        </article>
         
         {/* Create poem button */}
         {handleCreatePoem && (
@@ -80,26 +91,6 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
             </Button>
           </div>
         )}
-        
-        {/* Hidden but indexable content for SEO - now fully visible to search engines */}
-        <div className="sr-only" aria-hidden="false" data-nosnippet="false">
-          <article itemScope itemType="https://schema.org/Poem">
-            <h2 itemProp="name">{poem.title}</h2>
-            <div itemProp="text">{poem.content}</div>
-            {poem.occasion && (
-              <meta itemProp="keywords" content={poem.occasion} />
-            )}
-            {poem.content_type && (
-              <meta itemProp="keywords" content={poem.content_type} />
-            )}
-            {poem.audience && (
-              <meta itemProp="audience" content={poem.audience} />
-            )}
-            {poem.created_at && (
-              <meta itemProp="datePublished" content={new Date(poem.created_at).toISOString()} />
-            )}
-          </article>
-        </div>
       </div>
     </div>
   );

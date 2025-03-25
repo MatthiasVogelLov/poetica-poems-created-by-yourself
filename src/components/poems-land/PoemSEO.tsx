@@ -33,7 +33,7 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
   
   const finalDescription = metaDescription.length > 80 ? metaDescription : `${metaDescription} ${firstFewLines}`;
   
-  // Format poem content for structured data and noscript tag
+  // Format poem content for noscript tag
   const formattedPoemContent = poem.content.replace(/\n/g, '<br>');
   
   // Get content for the noscript tag - improved for better indexing
@@ -41,6 +41,9 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
     <article itemscope itemtype="https://schema.org/Poem">
       <h1 itemprop="name">${poem.title}</h1>
       <div itemprop="text">${formattedPoemContent}</div>
+      <p>Thema: ${contentType}</p>
+      <p>Anlass: ${occasion}</p>
+      <p>Zielgruppe: ${audience}</p>
       <meta itemprop="keywords" content="${occasion}, ${contentType}, ${audience}, Gedicht, Poem">
       <meta itemprop="datePublished" content="${poem.created_at ? new Date(poem.created_at).toISOString() : new Date().toISOString()}">
     </article>
