@@ -81,10 +81,12 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
           </div>
         )}
         
-        {/* Hidden div for SEO */}
-        <div className="hidden" aria-hidden="true" data-seo-content>
-          <h2>{poem.title}</h2>
-          <p>{poem.content}</p>
+        {/* Hidden but indexable content for SEO */}
+        <div className="sr-only" aria-hidden="false" data-nosnippet="false">
+          <article itemScope itemType="https://schema.org/Poem">
+            <h2 itemProp="name">{poem.title}</h2>
+            <div itemProp="text">{poem.content}</div>
+          </article>
         </div>
       </div>
     </div>

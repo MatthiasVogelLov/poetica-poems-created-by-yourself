@@ -33,10 +33,13 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
   
   const finalDescription = metaDescription.length > 80 ? metaDescription : `${metaDescription} ${firstFewLines}`;
   
+  // Format poem content for structured data and noscript tag
+  const formattedPoemContent = poem.content.replace(/\n/g, '<br>');
+  
   // Get content for the noscript tag
   const noscriptContent = `
     <h1>${poem.title}</h1>
-    <p>${poem.content.replace(/\n/g, '<br>')}</p>
+    <p>${formattedPoemContent}</p>
   `;
 
   return (
@@ -73,8 +76,8 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false }) => {
         })}
       </script>
       
-      {/* Provide content for noscript scenarios and improve SEO */}
-      <noscript>{`${noscriptContent}`}</noscript>
+      {/* Provide actual content for search engines and noscript scenarios */}
+      <noscript dangerouslySetInnerHTML={{ __html: noscriptContent }} />
       
       {/* Additional meta tags for search engines */}
       <meta name="robots" content="index, follow" />
