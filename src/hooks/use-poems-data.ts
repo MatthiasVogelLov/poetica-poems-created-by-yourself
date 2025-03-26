@@ -18,7 +18,9 @@ export const usePoemsData = (): [
   const [selectedPoem, setSelectedPoem] = useState<Poem | null>(null);
   const [occasionFilter, setOccasionFilter] = useState<string>('all');
   const [contentTypeFilter, setContentTypeFilter] = useState<string>('all');
+  const [styleFilter, setStyleFilter] = useState<string>('all');
   const [audienceFilter, setAudienceFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [poemSlugs, setPoemSlugs] = useState<{[key: string]: string}>({});
   const [slugToId, setSlugToId] = useState<{[key: string]: string}>({});
   const [page, setPage] = useState<number>(1);
@@ -126,7 +128,9 @@ export const usePoemsData = (): [
     selectedPoem,
     occasionFilter,
     contentTypeFilter,
+    styleFilter,
     audienceFilter,
+    searchQuery,
     poemSlugs,
     slugToId,
     page,

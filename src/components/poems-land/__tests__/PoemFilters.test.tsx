@@ -8,13 +8,18 @@ describe('PoemFilters Component', () => {
   const mockProps = {
     occasionFilter: 'all',
     contentTypeFilter: 'all',
+    styleFilter: 'all',
     audienceFilter: 'all',
+    searchQuery: '',
     setOccasionFilter: jest.fn(),
     setContentTypeFilter: jest.fn(),
+    setStyleFilter: jest.fn(),
     setAudienceFilter: jest.fn(),
+    setSearchQuery: jest.fn(),
     clearFilters: jest.fn(),
     occasions: ['hochzeit', 'geburtstag'],
     contentTypes: ['liebe', 'freundschaft'],
+    styles: ['klassisch', 'modern'],
     audiences: ['erwachsene', 'kinder'],
     getOccasionDisplay: jest.fn(occasion => {
       const map = {
@@ -29,6 +34,13 @@ describe('PoemFilters Component', () => {
         'freundschaft': 'Freundschaft'
       };
       return map[contentType] || contentType;
+    }),
+    getStyleDisplay: jest.fn(style => {
+      const map = {
+        'klassisch': 'Klassisch',
+        'modern': 'Modern'
+      };
+      return map[style] || style;
     }),
     getAudienceDisplay: jest.fn(audience => {
       const map = {
