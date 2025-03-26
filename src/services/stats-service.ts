@@ -66,6 +66,19 @@ export const fetchKeywordsTodayStats = async (todayISOString: string) => {
 };
 
 /**
+ * Fetch count of unpaid poems
+ */
+export const fetchUnpaidPoemsCount = async () => {
+  const { count, error } = await supabase
+    .from('poem_stats')
+    .select('*', { count: 'exact', head: true })
+    .eq('payment_status', 'unpaid');
+  
+  if (error) throw new Error(error.message);
+  return count || 0;
+};
+
+/**
  * Fetch audience statistics
  */
 export const fetchAudienceStats = async () => {

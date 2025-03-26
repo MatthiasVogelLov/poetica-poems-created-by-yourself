@@ -16,8 +16,9 @@ export interface StatsData {
   styleData: StatItem[];
   lengthData: StatItem[];
   featureData: StatItem[];
-  subscribersCount?: number;
-  subscribersTodayCount?: number;
+  subscribersCount: number;
+  subscribersTodayCount: number;
+  unpaidPoems?: number; // Added unpaid poems count
 }
 
 export interface UseStatsDataProps {

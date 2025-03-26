@@ -1,84 +1,75 @@
 
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import * as statsService from '@/services/stats-service';
+import { UseStatsDataProps } from '@/types/stats';
+import {
+  fetchTotalPoems,
+  fetchTodayPoems,
+  fetchKeywordsStats,
+  fetchKeywordsTodayStats,
+  fetchUnpaidPoemsCount
+} from '@/services/stats-service';
 
-interface UsePoemCountsProps {
-  startDate?: Date;
-  endDate?: Date;
-}
-
-export const usePoemCounts = ({ startDate, endDate }: UsePoemCountsProps = {}) => {
+export function usePoemCounts({ startDate, endDate }: UseStatsDataProps = {}) {
   const [totalPoems, setTotalPoems] = useState<number>(0);
   const [todayPoems, setTodayPoems] = useState<number>(0);
   const [keywordsUsed, setKeywordsUsed] = useState<number>(0);
   const [keywordsTodayUsed, setKeywordsTodayUsed] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
+  const [unpaidPoems, setUnpaidPoems] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
-  
-  const fetchStats = async () => {
-    try {
-      setLoading(true);
-      
-      // Prepare date filters
-      const today = new Date(new Date().setHours(0, 0, 0, 0));
-      const todayISOString = today.toISOString();
-      
-      // For filtered queries
-      let startDateFilter = startDate ? startDate.toISOString() : null;
-      let endDateFilter = endDate ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString() : null;
-      
-      // Fetch all stats in parallel
-      const [
-        totalPoemsCount,
-        todayPoemsCount,
-        keywordsUsedCount,
-        keywordsTodayUsedCount
-      ] = await Promise.all([
-        statsService.fetchTotalPoems(startDateFilter, endDateFilter),
-        statsService.fetchTodayPoems(todayISOString),
-        statsService.fetchKeywordsStats(startDateFilter, endDateFilter),
-        statsService.fetchKeywordsTodayStats(todayISOString)
-      ]);
-
-      setTotalPoems(totalPoemsCount);
-      setTodayPoems(todayPoemsCount);
-      setKeywordsUsed(keywordsUsedCount);
-      setKeywordsTodayUsed(keywordsTodayUsedCount);
-      
-      setLoading(false);
-    } catch (err: any) {
-      console.error("Failed to fetch poem counts:", err);
-      setError(err.message);
-      setLoading(false);
-      
-      toast({
-        title: "Fehler beim Laden der Gedicht-Zahlen",
-        description: err.message,
-        variant: "destructive",
-      });
-    }
-  };
 
   useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Convert dates to ISO strings for API calls
+        const startDateStr = startDate ? startDate.toISOString() : null;
+        const endDateStr = endDate ? endDate.toISOString() : null;
+        
+        // Get today's date at midnight
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayISOString = today.toISOString();
+        
+        // Fetch stats in parallel
+        const [
+          totalPoemsData,
+          todayPoemsData,
+          keywordsUsedData,
+          keywordsTodayUsedData,
+          unpaidPoemsData
+        ] = await Promise.all([
+          fetchTotalPoems(startDateStr, endDateStr),
+          fetchTodayPoems(todayISOString),
+          fetchKeywordsStats(startDateStr, endDateStr),
+          fetchKeywordsTodayStats(todayISOString),
+          fetchUnpaidPoemsCount()
+        ]);
+        
+        setTotalPoems(totalPoemsData);
+        setTodayPoems(todayPoemsData);
+        setKeywordsUsed(keywordsUsedData);
+        setKeywordsTodayUsed(keywordsTodayUsedData);
+        setUnpaidPoems(unpaidPoemsData);
+      } catch (err) {
+        console.error('Error fetching poem counts:', err);
+        setError('Error fetching poem counts: ' + (err instanceof Error ? err.message : String(err)));
+      } finally {
+        setLoading(false);
+      }
+    };
+    
     fetchStats();
-    
-    // Set polling interval
-    const interval = setInterval(() => {
-      fetchStats();
-    }, 5 * 60 * 1000);
-    
-    return () => clearInterval(interval);
   }, [startDate, endDate]);
 
-  return { 
-    totalPoems, 
-    todayPoems, 
-    keywordsUsed, 
-    keywordsTodayUsed, 
-    loading, 
-    error, 
-    refreshStats: fetchStats 
+  return {
+    totalPoems,
+    todayPoems,
+    keywordsUsed,
+    keywordsTodayUsed,
+    unpaidPoems,
+    loading,
+    error
   };
-};
+}

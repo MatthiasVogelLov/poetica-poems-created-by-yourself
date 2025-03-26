@@ -21,6 +21,7 @@ const emptyStatsData: StatsData = {
   featureData: [],
   subscribersCount: 0,
   subscribersTodayCount: 0,
+  unpaidPoems: 0,
 };
 
 export const useCombinedStats = ({ startDate, endDate }: UseStatsDataProps = {}) => {
@@ -35,6 +36,7 @@ export const useCombinedStats = ({ startDate, endDate }: UseStatsDataProps = {})
     todayPoems, 
     keywordsUsed, 
     keywordsTodayUsed, 
+    unpaidPoems,
     loading: poemCountsLoading, 
     error: poemCountsError 
   } = usePoemCounts({ startDate, endDate });
@@ -62,7 +64,8 @@ export const useCombinedStats = ({ startDate, endDate }: UseStatsDataProps = {})
       lengthData,
       featureData,
       subscribersCount,
-      subscribersTodayCount
+      subscribersTodayCount,
+      unpaidPoems
     });
     
     // Check if all data is loaded
@@ -99,6 +102,7 @@ export const useCombinedStats = ({ startDate, endDate }: UseStatsDataProps = {})
     todayPoems, 
     keywordsUsed, 
     keywordsTodayUsed,
+    unpaidPoems,
     audienceData, 
     occasionData, 
     styleData, 

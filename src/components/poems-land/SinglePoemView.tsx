@@ -5,6 +5,7 @@ import { ArrowLeft, Circle, PenLine } from 'lucide-react';
 import LoadingState from '@/components/admin/LoadingState';
 import { Badge } from '@/components/ui/badge';
 import { Poem } from '@/types/poem-types';
+import ActionButtons from '@/components/poem-preview/ActionButtons';
 
 interface SinglePoemViewProps {
   poem: Poem | null;
@@ -117,6 +118,11 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
           
           <div className="poem-content text-lg md:text-xl leading-relaxed mb-12 whitespace-pre-line font-serif text-center" itemProp="text">
             {formatContent(poem.content)}
+          </div>
+          
+          {/* Sharing functionality */}
+          <div className="mb-12">
+            <ActionButtons poem={poem.content} title={poem.title} />
           </div>
         </article>
         

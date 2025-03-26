@@ -1,82 +1,61 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { BookOpen, Key, Users } from 'lucide-react';
+import StatCard from './StatCard';
+import KeywordsCard from './KeywordsCard';
+import FeatureUsageCard from './FeatureUsageCard';
 
 interface StatsOverviewProps {
   totalPoems: number;
   todayPoems: number;
   keywordsUsed: number;
-  subscribersCount?: number;
-  subscribersTodayCount?: number;
+  subscribersCount: number;
+  subscribersTodayCount: number;
+  unpaidPoems?: number;
 }
 
 const StatsOverview: React.FC<StatsOverviewProps> = ({
   totalPoems,
   todayPoems,
   keywordsUsed,
-  subscribersCount = 0,
-  subscribersTodayCount = 0
+  subscribersCount,
+  subscribersTodayCount,
+  unpaidPoems = 0
 }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
       <StatCard 
-        icon={<BookOpen size={20} />} 
-        title="Gedichte gesamt" 
-        value={totalPoems.toLocaleString()} 
-        subValue={`+${todayPoems} heute`}
+        title="Erstellte Gedichte"
+        count={totalPoems}
+        subtitle={`Heute: ${todayPoems}`}
+        bgClass="bg-violet-50"
+        textClass="text-violet-500"
+        iconClass="text-violet-400"
+      />
+      
+      <KeywordsCard 
+        keywordsUsed={keywordsUsed} 
+        totalPoems={totalPoems} 
       />
 
-      <StatCard 
-        icon={<Key size={20} />} 
-        title="Mit Schlüsselwörtern" 
-        value={keywordsUsed.toLocaleString()} 
-        subValue="individuelle Texte"
+      <FeatureUsageCard
+        title="Abonnenten"
+        count={subscribersCount}
+        subtitle={`Heute: ${subscribersTodayCount}`}
+        bgClass="bg-emerald-50"
+        textClass="text-emerald-600"
+        iconClass="text-emerald-400"
       />
       
       <StatCard 
-        icon={<Users size={20} />} 
-        title="Abonnenten gesamt" 
-        value={subscribersCount.toLocaleString()} 
-        subValue={`+${subscribersTodayCount} heute`}
-      />
-
-      <StatCard 
-        icon={<Users size={20} />} 
-        title="Newsletter-Quote" 
-        value={totalPoems > 0 ? `${((subscribersCount / totalPoems) * 100).toFixed(1)}%` : "0%"} 
-        subValue="der Nutzer"
+        title="Unvollständige Gedichte"
+        count={unpaidPoems}
+        subtitle="Nicht vollständig angezeigt/bezahlt"
+        bgClass="bg-amber-50"
+        textClass="text-amber-600"
+        iconClass="text-amber-400"
       />
     </div>
-  );
-};
-
-const StatCard = ({ 
-  icon, 
-  title, 
-  value, 
-  subValue 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  value: string; 
-  subValue: string; 
-}) => {
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center space-x-2 mb-2">
-          <div className="bg-primary/10 p-2 rounded-full">
-            {icon}
-          </div>
-          <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
-        </div>
-        <div className="space-y-1">
-          <p className="text-2xl font-bold">{value}</p>
-          <p className="text-sm text-muted-foreground">{subValue}</p>
-        </div>
-      </CardContent>
-    </Card>
   );
 };
 
