@@ -55,8 +55,10 @@ const StatsGrid = () => {
         totalPoems={stats.totalPoems} 
         todayPoems={stats.todayPoems} 
         keywordsUsed={stats.keywordsUsed}
+        keywordsTodayUsed={stats.keywordsTodayUsed}
         subscribersCount={stats.subscribersCount || 0}
         subscribersTodayCount={stats.subscribersTodayCount || 0}
+        unpaidPoems={stats.unpaidPoems || 0}
       />
 
       <Card className="mb-6">

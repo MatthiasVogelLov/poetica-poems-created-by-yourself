@@ -9,6 +9,7 @@ interface StatsOverviewProps {
   totalPoems: number;
   todayPoems: number;
   keywordsUsed: number;
+  keywordsTodayUsed?: number;
   subscribersCount: number;
   subscribersTodayCount: number;
   unpaidPoems?: number;
@@ -18,6 +19,7 @@ const StatsOverview: React.FC<StatsOverviewProps> = ({
   totalPoems,
   todayPoems,
   keywordsUsed,
+  keywordsTodayUsed = 0,
   subscribersCount,
   subscribersTodayCount,
   unpaidPoems = 0
@@ -26,34 +28,29 @@ const StatsOverview: React.FC<StatsOverviewProps> = ({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
       <StatCard 
         title="Erstellte Gedichte"
-        count={totalPoems}
-        subtitle={`Heute: ${todayPoems}`}
-        bgClass="bg-violet-50"
-        textClass="text-violet-500"
-        iconClass="text-violet-400"
+        value={totalPoems}
+        description={`Heute: ${todayPoems}`}
       />
       
       <KeywordsCard 
         keywordsUsed={keywordsUsed} 
-        totalPoems={totalPoems} 
+        keywordsTodayUsed={keywordsTodayUsed} 
       />
 
-      <FeatureUsageCard
-        title="Abonnenten"
-        count={subscribersCount}
-        subtitle={`Heute: ${subscribersTodayCount}`}
-        bgClass="bg-emerald-50"
-        textClass="text-emerald-600"
-        iconClass="text-emerald-400"
+      <FeatureUsageCard 
+        featureData={[
+          { 
+            name: 'Abonnenten', 
+            value: subscribersCount, 
+            todayValue: subscribersTodayCount 
+          }
+        ]}
       />
       
       <StatCard 
         title="Unvollständige Gedichte"
-        count={unpaidPoems}
-        subtitle="Nicht vollständig angezeigt/bezahlt"
-        bgClass="bg-amber-50"
-        textClass="text-amber-600"
-        iconClass="text-amber-400"
+        value={unpaidPoems}
+        description="Nicht vollständig angezeigt/bezahlt"
       />
     </div>
   );
