@@ -1,7 +1,10 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.21.0';
-import { Resend } from "https://esm.sh/resend@2.0.0";
+import { fetchPoemStats, fetchKeywordStats, fetchAudienceData, fetchOccasionData } from './data-utils.ts';
+import { generateEmailHtml, formatAudienceRows, formatOccasionRows } from './email-template.ts';
+import { sendDailyStatsEmail } from './email-service.ts';
+import { createPgExtensions } from '../_shared/db-utils.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,7 +33,9 @@ serve(async (req) => {
     }
     
     console.log("[daily-stats-email] Connected to Supabase, Resend API key found, length:", resendApiKey.length);
-    const resend = new Resend(resendApiKey);
+    
+    // Ensure PostgreSQL extensions are enabled
+    await createPgExtensions(supabase);
     
     // Get yesterday's date (UTC)
     const yesterday = new Date();
@@ -46,168 +51,55 @@ serve(async (req) => {
     console.log(`[daily-stats-email] Generating stats email for ${yesterdayFormatted}`);
     console.log(`[daily-stats-email] Date range: ${yesterday.toISOString()} to ${yesterdayEnd.toISOString()}`);
     
-    // Query total poems created yesterday
-    const { data: poemStats, error: poemError } = await supabase
-      .from('poem_stats')
-      .select('count')
-      .gte('created_at', yesterday.toISOString())
-      .lte('created_at', yesterdayEnd.toISOString());
-      
-    if (poemError) {
-      console.error('[daily-stats-email] Error fetching poem stats:', poemError.message);
-      throw new Error(`Error fetching poem stats: ${poemError.message}`);
-    }
+    // Fetch all required data
+    const { data: poemStats } = await fetchPoemStats(supabase, yesterday.toISOString(), yesterdayEnd.toISOString());
+    const { data: keywordStats } = await fetchKeywordStats(supabase, yesterday.toISOString(), yesterdayEnd.toISOString());
+    const { data: audienceData } = await fetchAudienceData(supabase);
+    const { data: occasionData } = await fetchOccasionData(supabase);
     
-    console.log("[daily-stats-email] Poem stats fetched:", poemStats);
-    
-    // Query poems with keywords
-    const { data: keywordStats, error: keywordError } = await supabase
-      .from('poem_stats')
-      .select('count')
-      .eq('has_keywords', true)
-      .gte('created_at', yesterday.toISOString())
-      .lte('created_at', yesterdayEnd.toISOString());
-      
-    if (keywordError) {
-      console.error('[daily-stats-email] Error fetching keyword stats:', keywordError.message);
-      throw new Error(`Error fetching keyword stats: ${keywordError.message}`);
-    }
-    
-    console.log("[daily-stats-email] Keyword stats fetched:", keywordStats);
-    
-    // Get audience breakdown
-    const { data: audienceData, error: audienceError } = await supabase
-      .from('audience_stats')
-      .select('*');
-      
-    if (audienceError) {
-      console.error('[daily-stats-email] Error fetching audience stats:', audienceError.message);
-      throw new Error(`Error fetching audience stats: ${audienceError.message}`);
-    }
-    
-    console.log("[daily-stats-email] Audience data fetched, count:", audienceData?.length);
-    
-    // Get occasion breakdown
-    const { data: occasionData, error: occasionError } = await supabase
-      .from('occasion_stats')
-      .select('*');
-      
-    if (occasionError) {
-      console.error('[daily-stats-email] Error fetching occasion stats:', occasionError.message);
-      throw new Error(`Error fetching occasion stats: ${occasionError.message}`);
-    }
-    
-    console.log("[daily-stats-email] Occasion data fetched, count:", occasionData?.length);
+    console.log("[daily-stats-email] All data fetched successfully");
     
     // Parse count results
     const totalPoems = Number(poemStats?.[0]?.count || 0);
     const keywordsUsed = Number(keywordStats?.[0]?.count || 0);
     
-    // Format audience data for email
-    const audienceRows = audienceData
-      .map(item => `<tr>
-        <td style="padding: 8px; border: 1px solid #ddd;">${item.audience || 'Unbekannt'}</td>
-        <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${item.today || 0}</td>
-      </tr>`)
-      .join('');
-      
-    // Format occasion data for email
-    const occasionRows = occasionData
-      .map(item => `<tr>
-        <td style="padding: 8px; border: 1px solid #ddd;">${item.occasion || 'Unbekannt'}</td>
-        <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${item.today || 0}</td>
-      </tr>`)
-      .join('');
+    // Format data for email
+    const audienceRows = formatAudienceRows(audienceData || []);
+    const occasionRows = formatOccasionRows(occasionData || []);
     
-    // Build email HTML
-    const emailHtml = `
-      <html>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #4a5568; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Poetica Tagesstatistik</h1>
-          
-          <p>Hier ist die Statistik für <strong>${yesterdayFormatted}</strong>:</p>
-          
-          <div style="background-color: #f8fafc; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-            <h2 style="color: #4a5568; margin-top: 0;">Übersicht</h2>
-            <p><strong>Erstellte Gedichte:</strong> ${totalPoems}</p>
-            <p><strong>Mit Schlüsselwörtern:</strong> ${keywordsUsed} (${totalPoems > 0 ? Math.round((keywordsUsed / totalPoems) * 100) : 0}%)</p>
-          </div>
-          
-          <div style="margin-bottom: 24px;">
-            <h2 style="color: #4a5568;">Zielgruppen</h2>
-            <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
-              <thead>
-                <tr style="background-color: #f8fafc;">
-                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Zielgruppe</th>
-                  <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Anzahl</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${audienceRows}
-              </tbody>
-            </table>
-          </div>
-          
-          <div>
-            <h2 style="color: #4a5568;">Anlässe</h2>
-            <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
-              <thead>
-                <tr style="background-color: #f8fafc;">
-                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Anlass</th>
-                  <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Anzahl</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${occasionRows}
-              </tbody>
-            </table>
-          </div>
-          
-          <p style="margin-top: 24px; font-size: 0.9em; color: #718096;">
-            Dies ist eine automatisch generierte E-Mail von Poetica. Tagesstatistik für ${yesterdayFormatted}, generiert am ${new Date().toISOString()}.
-          </p>
-        </body>
-      </html>
-    `;
+    // Generate email HTML
+    const emailHtml = generateEmailHtml(
+      yesterdayFormatted,
+      totalPoems,
+      keywordsUsed,
+      audienceRows,
+      occasionRows
+    );
     
     // Update the email details with more reliable configuration
     const recipientEmail = "matthiasvogel1973@gmail.com"; // Admin email
     
     console.log(`[daily-stats-email] About to send email to ${recipientEmail}`);
     
-    // Send email with proper from address and additional debugging
-    try {
-      const emailData = await resend.emails.send({
-        from: "Poetica <poem@poetica.apvora.com>",  // Using verified domain
-        to: [recipientEmail],
-        subject: `Poetica Tagesstatistik: ${yesterdayFormatted}`,
-        html: emailHtml,
-      });
-      
-      console.log('[daily-stats-email] Email sent response:', JSON.stringify(emailData));
-      
-      if (!emailData || emailData.error) {
-        console.error('[daily-stats-email] Error response from Resend:', emailData?.error);
-        throw new Error(`Failed to send email: ${emailData?.error || 'Unknown error'}`);
+    // Send the email
+    const emailResult = await sendDailyStatsEmail(
+      resendApiKey,
+      recipientEmail,
+      `Poetica Tagesstatistik: ${yesterdayFormatted}`,
+      emailHtml
+    );
+
+    const endTime = new Date();
+    const executionTime = endTime.getTime() - startTime.getTime();
+    console.log(`[daily-stats-email] Function completed in ${executionTime}ms`);
+
+    return new Response(
+      JSON.stringify({ success: true, data: emailResult.data }),
+      { 
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200 
       }
-      
-      console.log('[daily-stats-email] Stats email sent successfully:', emailData?.id);
-
-      const endTime = new Date();
-      const executionTime = endTime.getTime() - startTime.getTime();
-      console.log(`[daily-stats-email] Function completed in ${executionTime}ms`);
-
-      return new Response(
-        JSON.stringify({ success: true, data: emailData }),
-        { 
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200 
-        }
-      );
-    } catch (emailError) {
-      console.error('[daily-stats-email] Exception sending email via Resend:', emailError);
-      throw emailError;
-    }
+    );
   } catch (error) {
     console.error("Error sending daily stats email:", error.message, error.stack);
     
