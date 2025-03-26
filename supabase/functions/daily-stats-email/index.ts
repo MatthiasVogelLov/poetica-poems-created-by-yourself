@@ -15,7 +15,8 @@ serve(async (req) => {
   }
 
   try {
-    console.log("[daily-stats-email] Function started at:", new Date().toISOString());
+    const startTime = new Date();
+    console.log("[daily-stats-email] Function started at:", startTime.toISOString());
     
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
@@ -177,7 +178,7 @@ serve(async (req) => {
     // Send email with proper from address and additional debugging
     try {
       const emailData = await resend.emails.send({
-        from: "Poetica <onboarding@resend.dev>",  // Make sure this domain is verified in Resend
+        from: "Poetica <poem@poetica.apvora.com>",  // Using verified domain
         to: [recipientEmail],
         subject: `Poetica Tagesstatistik: ${yesterdayFormatted}`,
         html: emailHtml,
@@ -191,6 +192,10 @@ serve(async (req) => {
       }
       
       console.log('[daily-stats-email] Stats email sent successfully:', emailData?.id);
+
+      const endTime = new Date();
+      const executionTime = endTime.getTime() - startTime.getTime();
+      console.log(`[daily-stats-email] Function completed in ${executionTime}ms`);
 
       return new Response(
         JSON.stringify({ success: true, data: emailData }),

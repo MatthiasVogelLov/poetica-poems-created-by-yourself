@@ -2,20 +2,19 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.21.0';
 
-// This function is used to set up the cron job in Supabase
-serve(async (req) => {
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  };
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log("[daily-stats-cron] Setting up cron job at:", new Date().toISOString());
+    console.log("[daily-stats-cron] Starting setup at:", new Date().toISOString());
     
     // Create Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
@@ -28,9 +27,21 @@ serve(async (req) => {
     console.log("[daily-stats-cron] Supabase URL and key are configured");
     const supabase = createClient(supabaseUrl, supabaseKey);
     
+    // First, ensure the necessary extensions are enabled
+    const { error: extError } = await supabase.rpc('create_pg_extensions');
+    
+    if (extError) {
+      console.error("[daily-stats-cron] Error enabling extensions:", extError);
+      // Continue anyway, as they might already be enabled
+    } else {
+      console.log("[daily-stats-cron] PostgreSQL extensions enabled or already active");
+    }
+    
     // Setup the cron job to run daily at 1am UTC
-    // This should be around 2-3am in Europe depending on daylight savings
-    const { data, error } = await supabase.rpc('create_daily_stats_cron');
+    const { data, error } = await supabase.rpc('create_daily_stats_cron', {
+      supabase_url: supabaseUrl,
+      anon_key: supabaseKey
+    });
     
     if (error) {
       console.error("[daily-stats-cron] Error setting up cron job:", error);
