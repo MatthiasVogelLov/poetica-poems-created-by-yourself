@@ -10,19 +10,25 @@ interface PoemsListViewProps {
   isLoading: boolean;
   occasionFilter: string;
   contentTypeFilter: string;
+  styleFilter: string;
   audienceFilter: string;
+  searchQuery: string;
   setOccasionFilter: (filter: string) => void;
   setContentTypeFilter: (filter: string) => void;
+  setStyleFilter: (filter: string) => void;
   setAudienceFilter: (filter: string) => void;
+  setSearchQuery: (query: string) => void;
   clearFilters: () => void;
   getUniqueOccasions: () => string[];
   getUniqueContentTypes: () => string[];
+  getUniqueStyles: () => string[];
   getUniqueAudiences: () => string[];
   handleDeletePoem: (id: string, e: React.MouseEvent) => void;
   navigateToPoemDetail: (id: string) => void;
   handleCreatePoem: () => void;
   getOccasionDisplay: (occasion: string) => string;
   getContentTypeDisplay: (contentType: string) => string;
+  getStyleDisplay: (style: string) => string;
   getAudienceDisplay: (audience: string) => string;
   page?: number;
   totalCount?: number;
@@ -37,19 +43,25 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
   isLoading,
   occasionFilter,
   contentTypeFilter,
+  styleFilter = 'all',
   audienceFilter = 'all',
+  searchQuery = '',
   setOccasionFilter,
   setContentTypeFilter,
+  setStyleFilter,
   setAudienceFilter,
+  setSearchQuery,
   clearFilters,
   getUniqueOccasions,
   getUniqueContentTypes,
+  getUniqueStyles,
   getUniqueAudiences,
   handleDeletePoem,
   navigateToPoemDetail,
   handleCreatePoem,
   getOccasionDisplay,
   getContentTypeDisplay,
+  getStyleDisplay,
   getAudienceDisplay,
   page = 1,
   totalCount = 0,
@@ -65,16 +77,22 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
       <PoemFilters 
         occasionFilter={occasionFilter}
         contentTypeFilter={contentTypeFilter}
+        styleFilter={styleFilter}
         audienceFilter={audienceFilter}
+        searchQuery={searchQuery}
         setOccasionFilter={setOccasionFilter}
         setContentTypeFilter={setContentTypeFilter}
+        setStyleFilter={setStyleFilter}
         setAudienceFilter={setAudienceFilter}
+        setSearchQuery={setSearchQuery}
         clearFilters={clearFilters}
         occasions={getUniqueOccasions()}
         contentTypes={getUniqueContentTypes()}
+        styles={getUniqueStyles()}
         audiences={getUniqueAudiences()}
         getOccasionDisplay={getOccasionDisplay}
         getContentTypeDisplay={getContentTypeDisplay}
+        getStyleDisplay={getStyleDisplay}
         getAudienceDisplay={getAudienceDisplay}
       />
       
@@ -85,6 +103,7 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
         setSelectedPoemId={navigateToPoemDetail}
         getOccasionDisplay={getOccasionDisplay}
         getContentTypeDisplay={getContentTypeDisplay}
+        getStyleDisplay={getStyleDisplay}
         getAudienceDisplay={getAudienceDisplay}
         page={page}
         totalCount={totalCount}

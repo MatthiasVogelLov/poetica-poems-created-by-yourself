@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import { useNavigate, useParams } from 'react-router-dom';
 import SinglePoemView from '@/components/poems-land/SinglePoemView';
 import { usePoems } from '@/hooks/use-poems';
-import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay } from '@/utils/poem-display-helpers';
+import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay, getStyleDisplay } from '@/utils/poem-display-helpers';
 import PoemSEO from '@/components/poems-land/PoemSEO';
 import PoemsListView from '@/components/poems-land/PoemsListView';
 
@@ -20,15 +20,20 @@ const PoemsLand = () => {
     selectedPoem,
     occasionFilter,
     contentTypeFilter,
+    styleFilter,
     audienceFilter,
+    searchQuery,
     setSelectedPoemId,
     setOccasionFilter,
     setContentTypeFilter,
+    setStyleFilter,
     setAudienceFilter,
+    setSearchQuery,
     handleDeletePoem,
     clearFilters,
     getUniqueOccasions,
     getUniqueContentTypes,
+    getUniqueStyles,
     getUniqueAudiences,
     findPoemBySlug,
     getSlugForPoemId,
@@ -131,19 +136,25 @@ const PoemsLand = () => {
               isLoading={isLoading}
               occasionFilter={occasionFilter}
               contentTypeFilter={contentTypeFilter}
+              styleFilter={styleFilter}
               audienceFilter={audienceFilter}
+              searchQuery={searchQuery}
               setOccasionFilter={setOccasionFilter}
               setContentTypeFilter={setContentTypeFilter}
+              setStyleFilter={setStyleFilter}
               setAudienceFilter={setAudienceFilter}
+              setSearchQuery={setSearchQuery}
               clearFilters={clearFilters}
               getUniqueOccasions={getUniqueOccasions}
               getUniqueContentTypes={getUniqueContentTypes}
+              getUniqueStyles={getUniqueStyles}
               getUniqueAudiences={getUniqueAudiences}
               handleDeletePoem={handleDeletePoem}
               navigateToPoemDetail={navigateToPoemDetail}
               handleCreatePoem={handleCreatePoem}
               getOccasionDisplay={getOccasionDisplay}
               getContentTypeDisplay={getContentTypeDisplay}
+              getStyleDisplay={getStyleDisplay}
               getAudienceDisplay={getAudienceDisplay}
               page={page}
               totalCount={totalCount}

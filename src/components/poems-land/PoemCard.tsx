@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '@/hooks/use-admin-auth';
+import { getFirstThreeLines } from '@/utils/poem-filter-utils';
 
 interface Poem {
   id: string;
@@ -12,6 +13,7 @@ interface Poem {
   content: string;
   occasion: string;
   content_type: string;
+  style?: string;
   created_at: string;
   audience?: string;
 }
@@ -20,6 +22,7 @@ interface PoemCardProps {
   poem: Poem;
   getOccasionDisplay: (occasion: string) => string;
   getContentTypeDisplay: (contentType: string) => string;
+  getStyleDisplay?: (style: string) => string;
   getAudienceDisplay?: (audience: string) => string;
   onDelete: (id: string, e: React.MouseEvent) => void;
   onClick: () => void;
@@ -29,18 +32,20 @@ const PoemCard: React.FC<PoemCardProps> = ({
   poem,
   getOccasionDisplay,
   getContentTypeDisplay,
+  getStyleDisplay,
   getAudienceDisplay,
   onDelete,
   onClick
 }) => {
   const { isAuthenticated } = useAdminAuth();
+  const poemPreview = getFirstThreeLines(poem.content);
 
   return (
     <Card 
       className="relative cursor-pointer hover:shadow-md transition-shadow"
       onClick={onClick}
     >
-      <CardContent className="pt-6 h-40 flex flex-col">
+      <CardContent className="pt-6 flex flex-col h-full">
         <div className="absolute top-4 left-4">
           <Heart size={18} className="text-muted-foreground hover:text-primary transition-colors" />
         </div>
@@ -55,9 +60,13 @@ const PoemCard: React.FC<PoemCardProps> = ({
           </div>
         )}
         
-        <h3 className="font-medium font-serif text-center mt-4 flex-1 line-clamp-2">
+        <h3 className="font-medium font-serif text-center mt-4 line-clamp-2">
           {poem.title}
         </h3>
+        
+        <div className="mt-3 text-sm text-center italic text-gray-600 line-clamp-3 flex-1">
+          {poemPreview}
+        </div>
         
         <div className="flex justify-between items-center mt-4 text-xs">
           <div className="flex gap-2 flex-wrap">
@@ -69,6 +78,11 @@ const PoemCard: React.FC<PoemCardProps> = ({
             {poem.content_type && (
               <Badge variant="outline" className="text-xs">
                 {getContentTypeDisplay(poem.content_type)}
+              </Badge>
+            )}
+            {poem.style && getStyleDisplay && (
+              <Badge variant="info" className="text-xs">
+                {getStyleDisplay(poem.style)}
               </Badge>
             )}
             {poem.audience && getAudienceDisplay && (

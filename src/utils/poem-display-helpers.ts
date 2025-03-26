@@ -1,4 +1,3 @@
-
 export const getOccasionDisplay = (occasion: string): string => {
   const occasionMap: Record<string, string> = {
     'geburtstag': 'Geburtstag',
@@ -56,4 +55,17 @@ export const getAudienceDisplay = (audience: string): string => {
   };
   
   return audienceMap[audience] || (audience ? audience.charAt(0).toUpperCase() + audience.slice(1) : '');
+};
+
+// Get display name for style
+export const getStyleDisplay = (style: string) => {
+  const styleMap: Record<string, string> = {
+    klassisch: 'Klassisch',
+    modern: 'Modern',
+    romantisch: 'Romantisch',
+    humorvoll: 'Humorvoll',
+    experimentell: 'Experimentell'
+  };
+  
+  return styleMap[style] || style;
 };
