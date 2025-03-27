@@ -37,7 +37,7 @@ export const useBatchPoems = () => {
         .from('user_poems')
         .select('*', { count: 'exact', head: true })
         .eq('batch_created', true)
-        .not('status', 'in', '("deleted","hidden_from_admin")');
+        .not('status', 'in', '("deleted","hidden")');
       
       if (visibleCountError) throw visibleCountError;
       
@@ -65,7 +65,7 @@ export const useBatchPoems = () => {
         .from('user_poems')
         .select('*')
         .eq('batch_created', true)
-        .not('status', 'in', '("deleted","hidden_from_admin")')
+        .not('status', 'in', '("deleted","hidden")')
         .order('created_at', { ascending: false })
         .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
       
@@ -81,7 +81,7 @@ export const useBatchPoems = () => {
     }
   };
 
-  const handleStatusChange = async (poemId: string, newStatus: 'published' | 'hidden_from_admin' | 'deleted') => {
+  const handleStatusChange = async (poemId: string, newStatus: 'published' | 'hidden' | 'deleted') => {
     // Prevent multiple clicks by checking if we're already processing this poem
     if (publishing[poemId] || hiding[poemId]) {
       return;
@@ -89,7 +89,7 @@ export const useBatchPoems = () => {
     
     try {
       // Mark this poem as being published/hidden
-      if (newStatus === 'hidden_from_admin') {
+      if (newStatus === 'hidden') {
         setHiding(prev => ({ ...prev, [poemId]: true }));
       } else {
         setPublishing(prev => ({ ...prev, [poemId]: true }));
@@ -107,12 +107,12 @@ export const useBatchPoems = () => {
       if (error) throw error;
       
       // For hidden or deleted status, remove the poem from local state
-      if (newStatus === 'hidden_from_admin' || newStatus === 'deleted') {
+      if (newStatus === 'hidden' || newStatus === 'deleted') {
         setBatchPoems(prev => prev.filter(poem => poem.id !== poemId));
         // Update visible count
         setVisibleCount(prev => prev - 1);
         
-        const actionText = newStatus === 'hidden_from_admin' ? 'ausgeblendet' : 'gelöscht';
+        const actionText = newStatus === 'hidden' ? 'ausgeblendet' : 'gelöscht';
         toast.success(`Gedicht ${actionText}`);
       } else {
         // For published status, update the poem in local state
@@ -128,7 +128,7 @@ export const useBatchPoems = () => {
       toast.error('Fehler beim Aktualisieren des Status');
     } finally {
       // Reset processing states
-      if (newStatus === 'hidden_from_admin') {
+      if (newStatus === 'hidden') {
         setHiding(prev => ({ ...prev, [poemId]: false }));
       } else {
         setPublishing(prev => ({ ...prev, [poemId]: false }));

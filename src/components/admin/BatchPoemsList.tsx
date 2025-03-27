@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 interface BatchPoemsListProps {
   poems: any[];
   isLoading: boolean;
-  onStatusChange: (id: string, status: 'published' | 'deleted' | 'hidden_from_admin') => void;
+  onStatusChange: (id: string, status: 'published' | 'deleted' | 'hidden') => void;
   onRefresh: () => void;
   publishingState?: Record<string, boolean>;
   hidingState?: Record<string, boolean>;

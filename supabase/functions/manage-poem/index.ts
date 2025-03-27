@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.0';
 
@@ -47,9 +48,8 @@ serve(async (req) => {
 
         console.log(`Updating poem with data:`, poemData);
         
-        // For published poems, when setting status to 'deleted' or 'hidden_from_admin',
-        // we keep the poem with the appropriate status
-        if (poemData.status === 'deleted' || poemData.status === 'hidden_from_admin') {
+        // For poems when setting status to 'deleted', we check if it's published first
+        if (poemData.status === 'deleted') {
           // First check if the poem is published or not
           const { data: poemInfo, error: poemInfoError } = await supabase
             .from('user_poems')
@@ -62,20 +62,26 @@ serve(async (req) => {
             return createResponse({ error: 'Failed to get poem info', details: poemInfoError }, 500);
           }
           
-          // For all poems, just update the status
-          // This preserves them in PoemsLand if they were published
-          const { data: updateData, error: updateError } = await supabase
-            .from('user_poems')
-            .update({ status: poemData.status })
-            .eq('id', poemId)
-            .select();
+          // If the poem is published and we're trying to delete it, change the status to hidden instead
+          if (poemInfo && poemInfo.status === 'published') {
+            const { data: updateData, error: updateError } = await supabase
+              .from('user_poems')
+              .update({ status: 'hidden' })  // Use 'hidden' instead of 'hidden_from_admin'
+              .eq('id', poemId)
+              .select();
 
-          if (updateError) {
-            console.error('Error updating poem:', updateError);
-            return createResponse({ error: 'Failed to update poem', details: updateError }, 500);
+            if (updateError) {
+              console.error('Error updating poem:', updateError);
+              return createResponse({ error: 'Failed to update poem', details: updateError }, 500);
+            }
+
+            return createResponse({ success: true, data: updateData });
           }
-
-          return createResponse({ success: true, data: updateData });
+        }
+        
+        // For 'hidden_from_admin' status, we'll use 'hidden' since that's what our table allows
+        if (poemData.status === 'hidden_from_admin') {
+          poemData.status = 'hidden';  // Change to 'hidden' to match allowed values
         }
         
         // For all other status changes
@@ -113,7 +119,7 @@ serve(async (req) => {
         if (poemToDelete && poemToDelete.status === 'published') {
           const { error: updateError } = await supabase
             .from('user_poems')
-            .update({ status: 'hidden_from_admin' })
+            .update({ status: 'hidden' })  // Use 'hidden' instead of 'hidden_from_admin'
             .eq('id', poemId);
             
           if (updateError) {

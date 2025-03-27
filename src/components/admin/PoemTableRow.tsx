@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 interface PoemTableRowProps {
   poem: any;
-  onStatusChange?: (id: string, status: 'published' | 'deleted' | 'hidden_from_admin') => void;
+  onStatusChange?: (id: string, status: 'published' | 'deleted' | 'hidden') => void;
   onPreviewClick?: (id: string) => void;
   isPublishing?: boolean;
   isHiding?: boolean;
@@ -30,7 +30,7 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
         return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Veröffentlicht</Badge>;
       case 'deleted':
         return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Gelöscht</Badge>;
-      case 'hidden_from_admin':
+      case 'hidden':
         return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Ausgeblendet</Badge>;
       default:
         return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Entwurf</Badge>;
@@ -43,7 +43,7 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
         return "bg-green-50/20";
       case 'deleted':
         return "bg-red-50/10";
-      case 'hidden_from_admin':
+      case 'hidden':
         return "bg-purple-50/10";
       default:
         return "";
@@ -51,7 +51,7 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
   };
 
   const getPoemViewUrl = () => {
-    return poem.status === 'published' 
+    return poem.status === 'published' || poem.status === 'hidden'
       ? `/poemsland/${poem.id}` 
       : `/poemsland?preview=${poem.id}`;
   };
@@ -122,7 +122,7 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
                   <Button 
                     variant="outline" 
                     size="icon" 
-                    onClick={() => onStatusChange(poem.id, 'hidden_from_admin')}
+                    onClick={() => onStatusChange(poem.id, 'hidden')}
                     className="text-purple-600 hover:text-purple-800 hover:bg-purple-50"
                     disabled={isPublishing || isHiding}
                   >

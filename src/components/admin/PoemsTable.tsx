@@ -13,7 +13,7 @@ import PoemPreviewDialog from './PoemPreviewDialog';
 
 interface PoemsTableProps {
   poems: any[];
-  onStatusChange: (id: string, status: 'published' | 'deleted' | 'hidden_from_admin') => void;
+  onStatusChange: (id: string, status: 'published' | 'deleted' | 'hidden') => void;
   publishingState?: Record<string, boolean>;
   hidingState?: Record<string, boolean>;
 }
@@ -28,7 +28,7 @@ const PoemsTable: React.FC<PoemsTableProps> = ({
   
   // Only show visible poems (filter out deleted and hidden)
   const visiblePoems = poems.filter(poem => 
-    poem.status !== 'deleted' && poem.status !== 'hidden_from_admin'
+    poem.status !== 'deleted' && poem.status !== 'hidden'
   );
   
   // Group remaining poems by status (draft first, then published)
