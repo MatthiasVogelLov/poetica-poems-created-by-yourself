@@ -8,6 +8,19 @@ interface PoemContentProps {
 const PoemContent: React.FC<PoemContentProps> = ({ poem }) => {
   if (!poem) return null;
   
+  // Format keywords to capitalize nouns (German convention)
+  const formatKeywords = (keywords: string) => {
+    if (!keywords) return '';
+    
+    return keywords.split(',')
+      .map(word => {
+        const trimmedWord = word.trim();
+        // In German, nouns are capitalized
+        return trimmedWord.charAt(0).toUpperCase() + trimmedWord.slice(1);
+      })
+      .join(', ');
+  };
+  
   return (
     <div className="poem-container rounded-lg p-6 border shadow-sm">
       <h2 className="text-xl font-serif text-center mb-6">{poem.title}</h2>
@@ -37,7 +50,7 @@ const PoemContent: React.FC<PoemContentProps> = ({ poem }) => {
       {poem.keywords && (
         <div className="mt-4 pt-4 border-t text-sm text-gray-500">
           <p className="font-medium">Schlüsselwörter:</p>
-          <p>{poem.keywords}</p>
+          <p>{formatKeywords(poem.keywords)}</p>
         </div>
       )}
     </div>

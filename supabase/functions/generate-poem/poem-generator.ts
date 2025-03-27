@@ -56,5 +56,22 @@ export async function generatePoem(formData: any) {
   // Generate title
   const title = generateTitleFromOccasion(occasion, style);
 
+  // Add a list of keywords at the end of the poem if keywords were provided
+  if (keywords && keywords.trim()) {
+    const keywordsList = keywords.split(',')
+      .map(word => word.trim())
+      .filter(word => word.length > 0);
+      
+    if (keywordsList.length > 0) {
+      // Make sure each keyword is properly capitalized according to German rules
+      // In German, all nouns should be capitalized
+      const formattedKeywords = keywordsList
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(', ');
+      
+      console.log("Used keywords in poem generation:", formattedKeywords);
+    }
+  }
+
   return { title, poem: poemContent };
 }

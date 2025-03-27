@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -39,6 +38,9 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
   const generatePoemContent = async () => {
     setIsGenerating(true);
     try {
+      // Format keywords - retain original input for database storage
+      const keywords = manualPoemData.keywords?.trim() || '';
+      
       // Call the generate-poem edge function to create content
       const { data: generationResult, error: generationError } = await supabase.functions.invoke('generate-poem', {
         body: {
@@ -48,7 +50,7 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
           style: manualPoemData.style,
           verseType: manualPoemData.verseType,
           length: manualPoemData.length,
-          keywords: manualPoemData.keywords
+          keywords: keywords // Pass the keywords to the generator
         }
       });
       
@@ -103,6 +105,10 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
         return;
       }
 
+      // Format keywords before storage: ensure we keep original casing for poem generation
+      // but format them properly for display
+      const keywords = manualPoemData.keywords?.trim() || null;
+
       const { error } = await supabase
         .from('user_poems')
         .insert({
@@ -116,7 +122,7 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
           length: manualPoemData.length,
           batch_created: true,
           status: 'draft',
-          keywords: manualPoemData.keywords || null
+          keywords: keywords
         });
         
       if (error) throw error;

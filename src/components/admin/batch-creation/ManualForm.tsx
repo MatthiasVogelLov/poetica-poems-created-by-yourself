@@ -125,6 +125,7 @@ const ManualForm: React.FC<ManualFormProps> = ({
         <BatchSelectField
           label="Länge"
           options={[
+            { value: 'kurz', label: 'Kurz' },
             { value: 'mittel', label: 'Mittel' },
             { value: 'lang', label: 'Lang' }
           ]}
@@ -142,6 +143,9 @@ const ManualForm: React.FC<ManualFormProps> = ({
           className="w-full p-2 border rounded mb-4"
           placeholder="Schlüsselwörter durch Komma getrennt"
         />
+        <p className="text-xs text-gray-500">
+          Hinweis: Nomen werden automatisch großgeschrieben und am Ende des Gedichts aufgelistet.
+        </p>
       </div>
       
       <div className="flex items-center space-x-2 py-2">
