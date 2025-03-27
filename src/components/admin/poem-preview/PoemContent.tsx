@@ -1,0 +1,47 @@
+
+import React from 'react';
+
+interface PoemContentProps {
+  poem: any;
+}
+
+const PoemContent: React.FC<PoemContentProps> = ({ poem }) => {
+  if (!poem) return null;
+  
+  return (
+    <div className="poem-container rounded-lg p-6 border shadow-sm">
+      <h2 className="text-xl font-serif text-center mb-6">{poem.title}</h2>
+      
+      <div className="whitespace-pre-wrap text-center font-serif leading-relaxed">
+        {poem.content}
+      </div>
+      
+      <div className="flex flex-wrap gap-2 mt-6 text-sm text-gray-500 justify-center">
+        {poem.occasion && (
+          <span className="bg-gray-100 rounded-full px-3 py-1">
+            {poem.occasion}
+          </span>
+        )}
+        {poem.content_type && (
+          <span className="bg-gray-100 rounded-full px-3 py-1">
+            {poem.content_type}
+          </span>
+        )}
+        {poem.style && (
+          <span className="bg-gray-100 rounded-full px-3 py-1">
+            {poem.style}
+          </span>
+        )}
+      </div>
+      
+      {poem.keywords && (
+        <div className="mt-4 pt-4 border-t text-sm text-gray-500">
+          <p className="font-medium">Schlüsselwörter:</p>
+          <p>{poem.keywords}</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PoemContent;
