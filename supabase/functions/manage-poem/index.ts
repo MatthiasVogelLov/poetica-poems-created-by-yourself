@@ -66,7 +66,7 @@ serve(async (req) => {
           if (poemInfo && poemInfo.status === 'published') {
             const { data: updateData, error: updateError } = await supabase
               .from('user_poems')
-              .update({ status: 'hidden' })  // Use 'hidden' instead of 'hidden_from_admin'
+              .update({ status: 'hidden' })
               .eq('id', poemId)
               .select();
 
@@ -79,9 +79,9 @@ serve(async (req) => {
           }
         }
         
-        // For 'hidden_from_admin' status, we'll use 'hidden' since that's what our table allows
+        // If the requested status is 'hidden_from_admin', change it to 'hidden'
         if (poemData.status === 'hidden_from_admin') {
-          poemData.status = 'hidden';  // Change to 'hidden' to match allowed values
+          poemData.status = 'hidden';  // Use 'hidden' which is an allowed value
         }
         
         // For all other status changes
@@ -119,7 +119,7 @@ serve(async (req) => {
         if (poemToDelete && poemToDelete.status === 'published') {
           const { error: updateError } = await supabase
             .from('user_poems')
-            .update({ status: 'hidden' })  // Use 'hidden' instead of 'hidden_from_admin'
+            .update({ status: 'hidden' })
             .eq('id', poemId);
             
           if (updateError) {
