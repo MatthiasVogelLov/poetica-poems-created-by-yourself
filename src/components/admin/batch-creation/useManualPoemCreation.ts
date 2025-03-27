@@ -13,6 +13,7 @@ interface ManualPoemData {
   style: Style;
   verseType: VerseType;
   length: Length;
+  keywords?: string;
 }
 
 export const useManualPoemCreation = (onSuccess: () => void) => {
@@ -25,6 +26,7 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
     style: 'klassisch',
     verseType: 'kreuzreim',
     length: 'mittel',
+    keywords: '',
   });
 
   const handleManualChange = (field: string, value: any) => {
@@ -43,13 +45,15 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
         .insert({
           title: manualPoemData.title,
           content: manualPoemData.content,
+          audience: manualPoemData.audience,
           occasion: manualPoemData.occasion,
           content_type: manualPoemData.contentType,
           style: manualPoemData.style,
           verse_type: manualPoemData.verseType,
           length: manualPoemData.length,
           batch_created: true,
-          status: 'draft'
+          status: 'draft',
+          keywords: manualPoemData.keywords || null
         });
         
       if (error) throw error;
@@ -64,6 +68,7 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
         style: 'klassisch',
         verseType: 'kreuzreim',
         length: 'mittel',
+        keywords: '',
       });
       onSuccess();
     } catch (error) {

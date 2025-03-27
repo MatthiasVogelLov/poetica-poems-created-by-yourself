@@ -15,6 +15,7 @@ interface ManualPoemData {
   style: Style;
   verseType: VerseType;
   length: Length;
+  keywords?: string;
 }
 
 interface ManualFormProps {
@@ -122,6 +123,17 @@ const ManualForm: React.FC<ManualFormProps> = ({
           ]}
           value={poemData.length}
           onChange={(value) => onFieldChange('length', value)}
+        />
+      </div>
+      
+      <div>
+        <label className="text-sm font-medium mb-2 block">Schlüsselwörter (optional)</label>
+        <input
+          type="text"
+          value={poemData.keywords || ''}
+          onChange={(e) => onFieldChange('keywords', e.target.value)}
+          className="w-full p-2 border rounded mb-4"
+          placeholder="Schlüsselwörter durch Komma getrennt"
         />
       </div>
       

@@ -43,6 +43,8 @@ const PoemsTable: React.FC<PoemsTableProps> = ({
     setPreviewPoemId(null);
   };
 
+  console.log('Poems data in PoemsTable:', visiblePoems);
+
   return (
     <>
       <div className="border rounded-lg overflow-hidden">
