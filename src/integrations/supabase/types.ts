@@ -99,6 +99,7 @@ export type Database = {
           content_type: string | null
           created_at: string | null
           id: string
+          keywords: string | null
           length: string | null
           occasion: string | null
           status: string | null
@@ -113,6 +114,7 @@ export type Database = {
           content_type?: string | null
           created_at?: string | null
           id?: string
+          keywords?: string | null
           length?: string | null
           occasion?: string | null
           status?: string | null
@@ -127,6 +129,7 @@ export type Database = {
           content_type?: string | null
           created_at?: string | null
           id?: string
+          keywords?: string | null
           length?: string | null
           occasion?: string | null
           status?: string | null

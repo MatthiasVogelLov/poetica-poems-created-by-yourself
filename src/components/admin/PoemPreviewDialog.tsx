@@ -162,6 +162,13 @@ const PoemPreviewDialog: React.FC<PoemPreviewDialogProps> = ({
                     </span>
                   )}
                 </div>
+                
+                {poem?.keywords && (
+                  <div className="mt-4 pt-4 border-t text-sm text-gray-500">
+                    <p className="font-medium">Schlüsselwörter:</p>
+                    <p>{poem.keywords}</p>
+                  </div>
+                )}
               </div>
             </ScrollArea>
             
