@@ -2,9 +2,11 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Wand2 } from 'lucide-react';
 import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
 import BatchSelectField from '../BatchSelectField';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface ManualPoemData {
   title: string;
@@ -16,18 +18,23 @@ interface ManualPoemData {
   verseType: VerseType;
   length: Length;
   keywords?: string;
+  generateContent?: boolean;
 }
 
 interface ManualFormProps {
   poemData: ManualPoemData;
   onFieldChange: (field: string, value: any) => void;
   onSubmit: () => void;
+  onGenerateContent?: () => void;
+  isGenerating?: boolean;
 }
 
 const ManualForm: React.FC<ManualFormProps> = ({
   poemData,
   onFieldChange,
-  onSubmit
+  onSubmit,
+  onGenerateContent,
+  isGenerating = false
 }) => {
   return (
     <div className="space-y-4">
@@ -137,22 +144,52 @@ const ManualForm: React.FC<ManualFormProps> = ({
         />
       </div>
       
+      <div className="flex items-center space-x-2 py-2">
+        <Switch
+          id="generate-content"
+          checked={poemData.generateContent}
+          onCheckedChange={(value) => onFieldChange('generateContent', value)}
+        />
+        <Label htmlFor="generate-content" className="font-medium">
+          Inhalt automatisch generieren
+        </Label>
+      </div>
+      
       <div>
-        <label className="text-sm font-medium mb-2 block">Gedichtinhalt</label>
+        <div className="flex justify-between items-center mb-2">
+          <label className="text-sm font-medium">Gedichtinhalt</label>
+          
+          {onGenerateContent && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onGenerateContent}
+              disabled={isGenerating}
+            >
+              <Wand2 className="mr-1 h-4 w-4" />
+              {isGenerating ? 'Generiere...' : 'Jetzt generieren'}
+            </Button>
+          )}
+        </div>
+        
         <Textarea
           value={poemData.content}
           onChange={(e) => onFieldChange('content', e.target.value)}
           className="min-h-[200px]"
-          placeholder="Geben Sie hier den Inhalt des Gedichts ein..."
+          placeholder={poemData.generateContent 
+            ? "Inhalt wird beim Speichern automatisch generiert..." 
+            : "Geben Sie hier den Inhalt des Gedichts ein..."}
+          disabled={isGenerating}
         />
       </div>
       
       <Button 
         onClick={onSubmit}
         className="w-full mt-6"
+        disabled={isGenerating}
       >
         <PlusCircle className="mr-2 h-4 w-4" />
-        Gedicht erstellen
+        {isGenerating ? 'Generiere Gedicht...' : 'Gedicht erstellen'}
       </Button>
     </div>
   );

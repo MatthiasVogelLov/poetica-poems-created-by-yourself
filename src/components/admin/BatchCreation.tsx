@@ -29,7 +29,7 @@ const BatchCreation = () => {
 
   const {
     templateData,
-    isGenerating,
+    isGenerating: isGeneratingTemplate,
     handleTemplateChange,
     generateTemplatePoems
   } = useTemplateGeneration(fetchBatchPoems);
@@ -37,7 +37,9 @@ const BatchCreation = () => {
   const {
     manualPoemData,
     handleManualChange,
-    createManualPoem
+    createManualPoem,
+    generatePoemContent,
+    isGenerating: isGeneratingManual
   } = useManualPoemCreation(fetchBatchPoems);
 
   return (
@@ -62,7 +64,7 @@ const BatchCreation = () => {
                   templateData={templateData}
                   onFieldChange={handleTemplateChange}
                   onGenerate={generateTemplatePoems}
-                  isGenerating={isGenerating}
+                  isGenerating={isGeneratingTemplate}
                 />
               </TabsContent>
               
@@ -71,6 +73,8 @@ const BatchCreation = () => {
                   poemData={manualPoemData}
                   onFieldChange={handleManualChange}
                   onSubmit={createManualPoem}
+                  onGenerateContent={generatePoemContent}
+                  isGenerating={isGeneratingManual}
                 />
               </TabsContent>
             </Tabs>
