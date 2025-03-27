@@ -7,6 +7,7 @@ export const useBatchPoems = () => {
   const [batchPoems, setBatchPoems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [publishing, setPublishing] = useState<Record<string, boolean>>({});
+  const [hiding, setHiding] = useState<Record<string, boolean>>({});
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [visibleCount, setVisibleCount] = useState(0);
@@ -31,12 +32,12 @@ export const useBatchPoems = () => {
       
       setTotalCount(totalCountResult || 0);
       
-      // Get count of visible poems (not deleted)
+      // Get count of visible poems (not deleted and not hidden)
       const { count: visibleCountResult, error: visibleCountError } = await supabase
         .from('user_poems')
         .select('*', { count: 'exact', head: true })
         .eq('batch_created', true)
-        .neq('status', 'deleted');
+        .not('status', 'in', '("deleted","hidden_from_admin")');
       
       if (visibleCountError) throw visibleCountError;
       
@@ -59,12 +60,12 @@ export const useBatchPoems = () => {
         return;
       }
       
-      // Then fetch the actual page of data, excluding deleted poems
+      // Then fetch the actual page of data, excluding deleted and hidden poems
       const { data, error } = await supabase
         .from('user_poems')
         .select('*')
         .eq('batch_created', true)
-        .neq('status', 'deleted')
+        .not('status', 'in', '("deleted","hidden_from_admin")')
         .order('created_at', { ascending: false })
         .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
       
@@ -80,15 +81,19 @@ export const useBatchPoems = () => {
     }
   };
 
-  const handleStatusChange = async (poemId: string, newStatus: 'published' | 'deleted') => {
-    // Prevent multiple clicks by checking if we're already publishing this poem
-    if (publishing[poemId]) {
+  const handleStatusChange = async (poemId: string, newStatus: 'published' | 'hidden_from_admin' | 'deleted') => {
+    // Prevent multiple clicks by checking if we're already processing this poem
+    if (publishing[poemId] || hiding[poemId]) {
       return;
     }
     
     try {
-      // Mark this poem as being published/deleted
-      setPublishing(prev => ({ ...prev, [poemId]: true }));
+      // Mark this poem as being published/hidden
+      if (newStatus === 'hidden_from_admin') {
+        setHiding(prev => ({ ...prev, [poemId]: true }));
+      } else {
+        setPublishing(prev => ({ ...prev, [poemId]: true }));
+      }
       
       // Use the manage-poem edge function to update the poem status
       const { error } = await supabase.functions.invoke('manage-poem', {
@@ -101,11 +106,14 @@ export const useBatchPoems = () => {
       
       if (error) throw error;
       
-      // For deleted status, remove the poem from local state
-      if (newStatus === 'deleted') {
+      // For hidden or deleted status, remove the poem from local state
+      if (newStatus === 'hidden_from_admin' || newStatus === 'deleted') {
         setBatchPoems(prev => prev.filter(poem => poem.id !== poemId));
         // Update visible count
         setVisibleCount(prev => prev - 1);
+        
+        const actionText = newStatus === 'hidden_from_admin' ? 'ausgeblendet' : 'gelöscht';
+        toast.success(`Gedicht ${actionText}`);
       } else {
         // For published status, update the poem in local state
         setBatchPoems(prev => 
@@ -113,15 +121,18 @@ export const useBatchPoems = () => {
             poem.id === poemId ? { ...poem, status: newStatus } : poem
           )
         );
+        toast.success(`Gedicht veröffentlicht`);
       }
-      
-      toast.success(`Gedicht ${newStatus === 'published' ? 'veröffentlicht' : 'versteckt'}`);
     } catch (error) {
       console.error('Error updating poem status:', error);
       toast.error('Fehler beim Aktualisieren des Status');
     } finally {
-      // Reset publishing state
-      setPublishing(prev => ({ ...prev, [poemId]: false }));
+      // Reset processing states
+      if (newStatus === 'hidden_from_admin') {
+        setHiding(prev => ({ ...prev, [poemId]: false }));
+      } else {
+        setPublishing(prev => ({ ...prev, [poemId]: false }));
+      }
     }
   };
 
@@ -143,6 +154,7 @@ export const useBatchPoems = () => {
     fetchBatchPoems,
     handleStatusChange,
     publishing,
+    hiding,
     page,
     totalCount,
     visibleCount,

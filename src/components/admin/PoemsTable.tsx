@@ -13,19 +13,23 @@ import PoemPreviewDialog from './PoemPreviewDialog';
 
 interface PoemsTableProps {
   poems: any[];
-  onStatusChange: (id: string, status: 'published' | 'deleted') => void;
+  onStatusChange: (id: string, status: 'published' | 'deleted' | 'hidden_from_admin') => void;
   publishingState?: Record<string, boolean>;
+  hidingState?: Record<string, boolean>;
 }
 
 const PoemsTable: React.FC<PoemsTableProps> = ({ 
   poems, 
   onStatusChange,
-  publishingState = {}
+  publishingState = {},
+  hidingState = {}
 }) => {
   const [previewPoemId, setPreviewPoemId] = useState<string | null>(null);
   
-  // Only show drafts and published poems (filter out deleted)
-  const visiblePoems = poems.filter(poem => poem.status !== 'deleted');
+  // Only show visible poems (filter out deleted and hidden)
+  const visiblePoems = poems.filter(poem => 
+    poem.status !== 'deleted' && poem.status !== 'hidden_from_admin'
+  );
   
   // Group remaining poems by status (draft first, then published)
   const draftPoems = visiblePoems.filter(poem => poem.status === 'draft');
@@ -61,6 +65,7 @@ const PoemsTable: React.FC<PoemsTableProps> = ({
                 onStatusChange={onStatusChange}
                 onPreviewClick={handlePreviewClick}
                 isPublishing={!!publishingState[poem.id]}
+                isHiding={!!hidingState[poem.id]}
               />
             ))}
 
@@ -71,6 +76,7 @@ const PoemsTable: React.FC<PoemsTableProps> = ({
                 onStatusChange={onStatusChange}
                 onPreviewClick={handlePreviewClick}
                 isPublishing={!!publishingState[poem.id]}
+                isHiding={!!hidingState[poem.id]}
               />
             ))}
             

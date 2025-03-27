@@ -17,6 +17,7 @@ const BatchCreation = () => {
     fetchBatchPoems, 
     handleStatusChange,
     publishing,
+    hiding,
     page,
     totalCount,
     visibleCount,
@@ -82,6 +83,7 @@ const BatchCreation = () => {
           onStatusChange={handleStatusChange} 
           onRefresh={fetchBatchPoems}
           publishingState={publishing}
+          hidingState={hiding}
           page={page}
           totalCount={totalCount}
           visibleCount={visibleCount}

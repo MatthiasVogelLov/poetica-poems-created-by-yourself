@@ -10,9 +10,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 interface BatchPoemsListProps {
   poems: any[];
   isLoading: boolean;
-  onStatusChange: (id: string, status: 'published' | 'deleted') => void;
+  onStatusChange: (id: string, status: 'published' | 'deleted' | 'hidden_from_admin') => void;
   onRefresh: () => void;
   publishingState?: Record<string, boolean>;
+  hidingState?: Record<string, boolean>;
   page?: number;
   totalCount?: number;
   visibleCount?: number;
@@ -28,6 +29,7 @@ const BatchPoemsList: React.FC<BatchPoemsListProps> = ({
   onStatusChange,
   onRefresh,
   publishingState = {},
+  hidingState = {},
   page = 1,
   totalCount = 0,
   visibleCount = 0,
@@ -60,6 +62,7 @@ const BatchPoemsList: React.FC<BatchPoemsListProps> = ({
         poems={poems} 
         onStatusChange={onStatusChange}
         publishingState={publishingState}
+        hidingState={hidingState}
       />
       
       {visibleCount > poemsPerPage && (

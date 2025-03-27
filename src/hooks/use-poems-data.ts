@@ -37,7 +37,7 @@ export const usePoemsData = (): [
         const { count, error: countError } = await supabase
           .from('user_poems')
           .select('*', { count: 'exact', head: true })
-          .or('batch_created.is.null,and(batch_created.eq.true,status.eq.published)');
+          .or('batch_created.is.null,and(batch_created.eq.true,status.in.("published","hidden_from_admin"))');
         
         if (countError) throw countError;
         
@@ -47,7 +47,7 @@ export const usePoemsData = (): [
         const { data, error } = await supabase
           .from('user_poems')
           .select('*')
-          .or('batch_created.is.null,and(batch_created.eq.true,status.eq.published)')
+          .or('batch_created.is.null,and(batch_created.eq.true,status.in.("published","hidden_from_admin"))')
           .order('created_at', { ascending: false })
           .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
         

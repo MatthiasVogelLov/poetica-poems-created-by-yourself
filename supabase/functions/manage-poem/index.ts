@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.0';
 
@@ -48,10 +47,9 @@ serve(async (req) => {
 
         console.log(`Updating poem with data:`, poemData);
         
-        // For published poems, when setting status to 'deleted',
-        // we keep a copy in user_poems with status 'deleted' but don't actually delete it
-        // This way it remains in PoemsLand if it was published
-        if (poemData.status === 'deleted') {
+        // For published poems, when setting status to 'deleted' or 'hidden_from_admin',
+        // we keep the poem with the appropriate status
+        if (poemData.status === 'deleted' || poemData.status === 'hidden_from_admin') {
           // First check if the poem is published or not
           const { data: poemInfo, error: poemInfoError } = await supabase
             .from('user_poems')
@@ -64,11 +62,11 @@ serve(async (req) => {
             return createResponse({ error: 'Failed to get poem info', details: poemInfoError }, 500);
           }
           
-          // For all poems, just update the status to 'deleted' but don't remove them
+          // For all poems, just update the status
           // This preserves them in PoemsLand if they were published
           const { data: updateData, error: updateError } = await supabase
             .from('user_poems')
-            .update({ status: 'deleted' })
+            .update({ status: poemData.status })
             .eq('id', poemId)
             .select();
 
@@ -111,11 +109,11 @@ serve(async (req) => {
           return createResponse({ error: 'Failed to check poem status' }, 500);
         }
         
-        // If published, just mark as deleted instead of removing
+        // If published, just mark as hidden instead of removing
         if (poemToDelete && poemToDelete.status === 'published') {
           const { error: updateError } = await supabase
             .from('user_poems')
-            .update({ status: 'deleted' })
+            .update({ status: 'hidden_from_admin' })
             .eq('id', poemId);
             
           if (updateError) {
