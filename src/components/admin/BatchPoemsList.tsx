@@ -4,8 +4,7 @@ import BatchPoemsHeader from './BatchPoemsHeader';
 import PoemsTable from './PoemsTable';
 import EmptyPoemsList from './EmptyPoemsList';
 import LoadingState from './LoadingState';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import PaginationControls from './table/PaginationControls';
 
 interface BatchPoemsListProps {
   poems: any[];
@@ -46,9 +45,6 @@ const BatchPoemsList: React.FC<BatchPoemsListProps> = ({
     return <EmptyPoemsList />;
   }
 
-  const startRange = ((page - 1) * poemsPerPage) + 1;
-  const endRange = Math.min(page * poemsPerPage, visibleCount);
-
   return (
     <div className="space-y-6">
       <BatchPoemsHeader 
@@ -66,31 +62,15 @@ const BatchPoemsList: React.FC<BatchPoemsListProps> = ({
       />
       
       {visibleCount > poemsPerPage && (
-        <div className="flex items-center justify-between px-2">
-          <div className="text-sm text-muted-foreground">
-            Zeige {startRange} bis {endRange} von {visibleCount} sichtbaren Gedichten
-          </div>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onPrevPage}
-              disabled={page === 1}
-            >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Zurück
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onNextPage}
-              disabled={!hasMore}
-            >
-              Weiter
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
-          </div>
-        </div>
+        <PaginationControls
+          page={page}
+          startRange={(page - 1) * poemsPerPage + 1}
+          endRange={Math.min(page * poemsPerPage, visibleCount)}
+          visibleCount={visibleCount}
+          onPrevPage={onPrevPage}
+          onNextPage={onNextPage}
+          hasMore={hasMore}
+        />
       )}
     </div>
   );

@@ -10,6 +10,8 @@ import {
 } from '@/components/ui/table';
 import PoemTableRow from './PoemTableRow';
 import PoemPreviewDialog from './PoemPreviewDialog';
+import PoemsTableHeader from './table/PoemsTableHeader';
+import EmptyTableMessage from './table/EmptyTableMessage';
 
 interface PoemsTableProps {
   poems: any[];
@@ -43,21 +45,12 @@ const PoemsTable: React.FC<PoemsTableProps> = ({
     setPreviewPoemId(null);
   };
 
-  console.log('Poems data in PoemsTable:', visiblePoems);
-
   return (
     <>
       <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="w-[250px]">Titel</TableHead>
-              <TableHead>Anlass</TableHead>
-              <TableHead>Thema</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Erstellt am</TableHead>
-              <TableHead className="text-right">Aktionen</TableHead>
-            </TableRow>
+            <PoemsTableHeader />
           </TableHeader>
           <TableBody>
             {draftPoems.map((poem) => (
@@ -82,13 +75,7 @@ const PoemsTable: React.FC<PoemsTableProps> = ({
               />
             ))}
             
-            {visiblePoems.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                  Keine Gedichte gefunden
-                </TableCell>
-              </TableRow>
-            )}
+            {visiblePoems.length === 0 && <EmptyTableMessage />}
           </TableBody>
         </Table>
       </div>
