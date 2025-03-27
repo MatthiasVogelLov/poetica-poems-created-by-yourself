@@ -1,6 +1,7 @@
 
 import { generateSystemPrompt, generateUserPrompt } from "./prompt-builder.ts";
 import { generateTitleFromOccasion } from "./title-generator.ts";
+import { validatePoemQuality } from "./poem-validator.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -27,7 +28,7 @@ export async function generatePoem(formData: any) {
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      temperature: 0.7,
+      temperature: 0.5, // Reduced from 0.7 to improve coherence and reduce randomness
       max_tokens: 1000,
     }),
   });
@@ -43,6 +44,14 @@ export async function generatePoem(formData: any) {
   
   // Remove rhyme scheme indicators like (A), (B) from the poem
   poemContent = poemContent.replace(/\s*\([A-Z]\)\s*(?=$|,|\.|;)/g, '');
+
+  // Validate and improve poem quality
+  const validationResult = validatePoemQuality(poemContent, verseType);
+  if (!validationResult.valid) {
+    console.log("Poem quality check failed:", validationResult.issues);
+    // In a production system, we might regenerate the poem here
+    // For now, we'll log the issues and continue
+  }
 
   // Generate title
   const title = generateTitleFromOccasion(occasion, style);
