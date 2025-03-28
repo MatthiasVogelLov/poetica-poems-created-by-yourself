@@ -23,13 +23,13 @@ export async function generatePoem(formData: any) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o', // Upgraded from gpt-4o-mini to the full gpt-4o model
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      temperature: 0.5, // Reduced from 0.7 to improve coherence and reduce randomness
-      max_tokens: 1000,
+      temperature: 0.7, // Increased from 0.5 to allow for more creativity
+      max_tokens: 1500, // Increased from 1000 to accommodate longer, more sophisticated poems
     }),
   });
 

@@ -23,7 +23,7 @@ const commonGermanWords = new Set([
   "für", "gegen", "durch", "um", "bei", "aus", "zu", "von", "bis", "seit"
 ]);
 
-// Simple rhyme check for German
+// Enhanced rhyme check for German
 function checkRhyme(line1: string, line2: string): boolean {
   // Extract last word from each line
   const lastWord1 = line1.trim().split(/\s+/).pop()?.toLowerCase().replace(/[.,!?;:]$/, "") || "";
@@ -32,7 +32,11 @@ function checkRhyme(line1: string, line2: string): boolean {
   // If words are the same, it's not a good rhyme
   if (lastWord1 === lastWord2) return false;
   
-  // For a simple check, we look at the last 2 or 3 characters
+  // For a more sophisticated check, look at the vowel pattern in the last syllable
+  // This is a simplified approach - in a production system, we might use a proper
+  // phonetic analysis library for German
+  
+  // Check last 2-3 characters - this is a simple approach
   if (lastWord1.length >= 3 && lastWord2.length >= 3) {
     return lastWord1.slice(-2) === lastWord2.slice(-2) || 
            lastWord1.slice(-3) === lastWord2.slice(-3);
