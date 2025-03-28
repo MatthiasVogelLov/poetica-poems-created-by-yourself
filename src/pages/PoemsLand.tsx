@@ -8,6 +8,7 @@ import { usePoems } from '@/hooks/use-poems';
 import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay, getStyleDisplay } from '@/utils/poem-display-helpers';
 import PoemSEO from '@/components/poems-land/PoemSEO';
 import PoemsListView from '@/components/poems-land/PoemsListView';
+import { Helmet } from 'react-helmet';
 
 const PoemsLand = () => {
   const { poemSlug } = useParams();
@@ -66,30 +67,20 @@ const PoemsLand = () => {
     if (selectedPoem) {
       document.title = `${selectedPoem.title} - PoemsLand`;
       
-      // Update the SEO placeholder in the static HTML with the poem content
-      // This ensures search engines can see the content even with client-side rendering
-      const seoPlaceholder = document.getElementById('poem-seo-placeholder');
-      if (seoPlaceholder) {
-        const formattedContent = selectedPoem.content.split('\n').map(line => `<p>${line}</p>`).join('');
-        seoPlaceholder.innerHTML = `
-          <div itemscope itemtype="https://schema.org/Poem">
-            <h1 itemprop="name">${selectedPoem.title}</h1>
-            <div itemprop="text">${formattedContent}</div>
-            <meta itemprop="datePublished" content="${selectedPoem.created_at ? new Date(selectedPoem.created_at).toISOString() : new Date().toISOString()}">
-            <meta itemprop="keywords" content="${selectedPoem.occasion || ''}">
-            <meta itemprop="genre" content="${selectedPoem.content_type || ''}">
-            ${selectedPoem.audience ? `<meta itemprop="audience" content="${selectedPoem.audience}">` : ''}
-          </div>
-        `;
-      }
+      // Inject CSS for better SEO markup in print and reader modes
+      const style = document.createElement('style');
+      style.textContent = `
+        @media print {
+          .poem-content { font-size: 14pt; line-height: 1.5; }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      return () => {
+        document.head.removeChild(style);
+      };
     } else {
       document.title = "PoemsLand - Sammlung personalisierter Gedichte";
-      
-      // Clear the SEO placeholder when no poem is selected
-      const seoPlaceholder = document.getElementById('poem-seo-placeholder');
-      if (seoPlaceholder) {
-        seoPlaceholder.innerHTML = '';
-      }
     }
   }, [selectedPoem]);
 
@@ -111,10 +102,39 @@ const PoemsLand = () => {
 
   // Host and URL for SEO
   const host = window.location.origin;
-  const poemUrl = selectedPoem ? `${host}/poemsland/${getSlugForPoemId(selectedPoem.id) || selectedPoem.id}` : '';
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Global SEO for PoemsLand page */}
+      {!selectedPoem && (
+        <Helmet>
+          <title>PoemsLand - Sammlung personalisierter Gedichte</title>
+          <meta name="description" content="Entdecke eine Sammlung wunderschöner Gedichte zu verschiedenen Anlässen und Themen. Finde inspirierende Gedichte oder erstelle dein eigenes personalisiertes Gedicht." />
+          <meta name="keywords" content="Gedichte, Poesie, personalisierte Gedichte, Geburtstag, Liebe, Hochzeit, PoemsLand" />
+          <link rel="canonical" href={`${host}/poemsland`} />
+          <meta property="og:title" content="PoemsLand - Sammlung personalisierter Gedichte" />
+          <meta property="og:description" content="Entdecke eine Sammlung wunderschöner Gedichte zu verschiedenen Anlässen und Themen." />
+          <meta property="og:url" content={`${host}/poemsland`} />
+          <meta property="og:type" content="website" />
+          <meta name="twitter:title" content="PoemsLand - Sammlung personalisierter Gedichte" />
+          <meta name="twitter:description" content="Entdecke eine Sammlung wunderschöner Gedichte zu verschiedenen Anlässen und Themen." />
+          
+          {/* Structured data for collection page */}
+          <script type="application/ld+json">{JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": "PoemsLand - Sammlung personalisierter Gedichte",
+            "description": "Entdecke eine Sammlung wunderschöner Gedichte zu verschiedenen Anlässen und Themen.",
+            "url": `${host}/poemsland`,
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "PoemsLand",
+              "url": host
+            }
+          })}</script>
+        </Helmet>
+      )}
+      
       {/* Add SEO component for the selected poem */}
       {selectedPoem && <PoemSEO poem={selectedPoem} isPreview={false} host={host} />}
       

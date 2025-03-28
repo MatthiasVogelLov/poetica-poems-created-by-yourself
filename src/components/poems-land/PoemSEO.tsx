@@ -2,7 +2,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import { Poem } from '@/types/poem-types';
-import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay } from '@/utils/poem-display-helpers';
+import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay, getStyleDisplay } from '@/utils/poem-display-helpers';
 
 interface PoemSEOProps {
   poem: Poem;
@@ -23,8 +23,13 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
   const occasion = getOccasionDisplay(poem.occasion || '');
   const contentType = getContentTypeDisplay(poem.content_type || '');
   const audience = poem.audience ? getAudienceDisplay(poem.audience) : '';
+  const style = poem.style ? getStyleDisplay(poem.style) : '';
   
-  const metaDescription = `${poem.title} - Ein Gedicht zum Thema ${contentType}${occasion ? `, passend für ${occasion}` : ''}${audience ? `, für ${audience}` : ''}.`;
+  let metaDescription = `${poem.title} - Ein Gedicht`;
+  if (contentType) metaDescription += ` zum Thema ${contentType}`;
+  if (occasion) metaDescription += `, passend für ${occasion}`;
+  if (audience) metaDescription += `, für ${audience}`;
+  metaDescription += '.';
   
   // Get the first few lines for description if meta description is too short
   const firstFewLines = poem.content
@@ -52,12 +57,13 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
     "text": poem.content,
     "articleBody": poem.content,
     "datePublished": formattedDate,
-    "genre": occasion,
+    "genre": contentType,
     "description": finalDescription,
     "keywords": [
       occasion,
       contentType,
       audience,
+      style,
       "Gedicht", "Poem", "PoemsLand"
     ].filter(Boolean),
     "url": poemUrl,
@@ -71,11 +77,41 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
       "name": "PoemsLand",
       "url": siteHost
     },
+    "author": {
+      "@type": "Organization",
+      "name": "PoemsLand"
+    },
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": poemUrl
     },
     "inLanguage": "de"
+  };
+
+  // BreadcrumbList structured data
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": siteHost
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "PoemsLand",
+        "item": `${siteHost}/poemsland`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": poem.title,
+        "item": poemUrl
+      }
+    ]
   };
 
   return (
@@ -94,6 +130,7 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
             <p>Anlass: <span itemprop="keywords">${occasion}</span></p>
             <p>Thema: <span itemprop="genre">${contentType}</span></p>
             ${audience ? `<p>Zielgruppe: <span itemprop="audience">${audience}</span></p>` : ''}
+            ${style ? `<p>Stil: <span itemprop="about">${style}</span></p>` : ''}
             <meta itemprop="datePublished" content="${formattedDate}">
           </div>
         `}
@@ -115,10 +152,19 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
         {JSON.stringify(structuredData)}
       </script>
       
+      {/* Breadcrumb structured data */}
+      <script type="application/ld+json">
+        {JSON.stringify(breadcrumbData)}
+      </script>
+      
       {/* Additional SEO metadata */}
       <meta name="robots" content="index, follow" />
-      <meta name="keywords" content={[occasion, contentType, audience, 'gedicht', 'poem', 'poemsland'].filter(Boolean).join(', ')} />
+      <meta name="keywords" content={[occasion, contentType, audience, style, 'gedicht', 'poem', 'poemsland'].filter(Boolean).join(', ')} />
       <link rel="canonical" href={poemUrl} />
+      
+      {/* Language metadata */}
+      <meta property="og:locale" content="de_DE" />
+      <meta httpEquiv="content-language" content="de" />
       
       {/* Direct embedding of poem content in meta tags for search engines */}
       <meta property="poem:content" content={poem.content} />
@@ -126,6 +172,7 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
       <meta property="poem:occasion" content={occasion} />
       <meta property="poem:content-type" content={contentType} />
       <meta property="poem:audience" content={audience} />
+      <meta property="poem:style" content={style} />
       
       {/* Hidden poem content for search engines */}
       <script data-poem-content type="text/plain">
