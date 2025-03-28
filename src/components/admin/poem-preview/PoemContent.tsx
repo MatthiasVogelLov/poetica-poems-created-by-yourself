@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay, getStyleDisplay } from '@/utils/poem-display-helpers';
 
 interface PoemContentProps {
   poem: any;
@@ -32,17 +33,17 @@ const PoemContent: React.FC<PoemContentProps> = ({ poem }) => {
       <div className="flex flex-wrap gap-2 mt-6 text-sm text-gray-500 justify-center">
         {poem.occasion && (
           <span className="bg-gray-100 rounded-full px-3 py-1">
-            {poem.occasion}
+            {getOccasionDisplay(poem.occasion)}
           </span>
         )}
         {poem.content_type && (
           <span className="bg-gray-100 rounded-full px-3 py-1">
-            {poem.content_type}
+            {getContentTypeDisplay(poem.content_type)}
           </span>
         )}
         {poem.style && (
           <span className="bg-gray-100 rounded-full px-3 py-1">
-            {poem.style}
+            {getStyleDisplay(poem.style)}
           </span>
         )}
       </div>

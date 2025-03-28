@@ -6,6 +6,7 @@ import LoadingState from '@/components/admin/LoadingState';
 import { Badge } from '@/components/ui/badge';
 import { Poem } from '@/types/poem-types';
 import ActionButtons from '@/components/poem-preview/ActionButtons';
+import { getOccasionDisplay, getContentTypeDisplay, getStyleDisplay, getAudienceDisplay } from '@/utils/poem-display-helpers';
 
 interface SinglePoemViewProps {
   poem: Poem | null;
@@ -98,19 +99,25 @@ const SinglePoemView: React.FC<SinglePoemViewProps> = ({
             <div className="flex flex-wrap justify-center gap-2 mt-4">
               {poem.occasion && (
                 <Badge variant="secondary" className="transition-all duration-300 hover:bg-violet-100 hover:text-violet-700 hover:scale-105 hover:shadow-sm">
-                  <span itemProp="keywords">{poem.occasion}</span>
+                  <span itemProp="keywords">{getOccasionDisplay(poem.occasion)}</span>
                 </Badge>
               )}
               
               {poem.content_type && (
                 <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 transition-all duration-300 hover:bg-blue-100 hover:text-blue-700 hover:scale-105 hover:shadow-sm">
-                  <span itemProp="genre">{poem.content_type}</span>
+                  <span itemProp="genre">{getContentTypeDisplay(poem.content_type)}</span>
                 </Badge>
               )}
               
               {poem.audience && (
                 <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200 transition-all duration-300 hover:bg-amber-100 hover:text-amber-700 hover:scale-105 hover:shadow-sm">
-                  {poem.audience}
+                  {getAudienceDisplay(poem.audience)}
+                </Badge>
+              )}
+              
+              {poem.style && (
+                <Badge variant="info" className="transition-all duration-300 hover:bg-blue-100 hover:text-blue-700 hover:scale-105 hover:shadow-sm">
+                  {getStyleDisplay(poem.style)}
                 </Badge>
               )}
             </div>
