@@ -1,5 +1,8 @@
 
 import React from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { FormDescription } from '@/components/ui/form';
 
 interface KeywordsSectionProps {
   keywords: string;
@@ -8,18 +11,23 @@ interface KeywordsSectionProps {
 
 const KeywordsSection: React.FC<KeywordsSectionProps> = ({ keywords, onKeywordsChange }) => {
   return (
-    <div>
-      <label className="text-sm font-medium mb-2 block">Schlüsselwörter (optional)</label>
-      <input
+    <div className="space-y-2">
+      <Label htmlFor="poem-keywords" className="text-sm font-medium">Schlüsselwörter (SEO-relevant)</Label>
+      <Input
+        id="poem-keywords"
         type="text"
         value={keywords}
         onChange={(e) => onKeywordsChange(e.target.value)}
-        className="w-full p-2 border rounded mb-4"
+        className="w-full"
         placeholder="Schlüsselwörter durch Komma getrennt"
       />
-      <p className="text-xs text-gray-500">
-        Hinweis: Nomen werden automatisch großgeschrieben und am Ende des Gedichts aufgelistet.
-      </p>
+      <FormDescription className="text-xs">
+        Schlüsselwörter verbessern die Auffindbarkeit in Suchmaschinen. Nomen werden automatisch großgeschrieben und am Ende des Gedichts aufgelistet.
+        <br />
+        <span className="text-muted-foreground mt-1 block">
+          Tipp: Denken Sie an Suchbegriffe, die potenzielle Leser eingeben könnten.
+        </span>
+      </FormDescription>
     </div>
   );
 };

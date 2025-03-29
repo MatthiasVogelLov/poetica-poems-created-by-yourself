@@ -3,6 +3,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet';
 import { Poem } from '@/types/poem-types';
 import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay, getStyleDisplay } from '@/utils/poem-display-helpers';
+import { usePoems } from '@/hooks/use-poems';
 
 interface PoemSEOProps {
   poem: Poem;
@@ -15,6 +16,9 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
   if (isPreview || !poem) {
     return null;
   }
+
+  const { getPoemSeoMetadata } = usePoems();
+  const seoData = getPoemSeoMetadata(poem.id);
 
   const siteHost = host || window.location.origin;
   const poemUrl = `${siteHost}/poemsland/${poem.id}`;
@@ -40,13 +44,23 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
   
   const finalDescription = metaDescription.length > 80 ? metaDescription : `${metaDescription} ${firstFewLines}`;
   
-  // Format poem content for HTML output
+  // Format poem content for HTML output - this is essential for search engine indexing
   const formattedPoemContent = poem.content
     .split('\n')
     .map(line => `<p>${line}</p>`)
     .join('');
 
   const formattedDate = poem.created_at ? new Date(poem.created_at).toISOString() : new Date().toISOString();
+  
+  // Extract keywords from poem metadata or generate from content/occasion
+  const keywordsList = [
+    ...seoData.keywords,
+    occasion,
+    contentType,
+    audience,
+    style,
+    "Gedicht", "Poem", "PoemsLand"
+  ].filter(Boolean);
   
   // Main structured data for the poem using Schema.org
   const structuredData = {
@@ -58,14 +72,8 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
     "articleBody": poem.content,
     "datePublished": formattedDate,
     "genre": contentType,
-    "description": finalDescription,
-    "keywords": [
-      occasion,
-      contentType,
-      audience,
-      style,
-      "Gedicht", "Poem", "PoemsLand"
-    ].filter(Boolean),
+    "description": seoData.description || finalDescription,
+    "keywords": keywordsList,
     "url": poemUrl,
     "isAccessibleForFree": true,
     "audience": audience ? {
@@ -117,9 +125,9 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
   return (
     <Helmet>
       <title>{poem.title} - PoemsLand</title>
-      <meta name="description" content={finalDescription} />
+      <meta name="description" content={seoData.description || finalDescription} />
       
-      {/* Static HTML version of the poem - This is crucial for SEO */}
+      {/* Static HTML version of the poem - Critical for SEO */}
       <noscript>
         {`
           <div itemscope itemtype="https://schema.org/Poem">
@@ -138,14 +146,14 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
 
       {/* Open Graph */}
       <meta property="og:title" content={`${poem.title} - PoemsLand`} />
-      <meta property="og:description" content={finalDescription} />
+      <meta property="og:description" content={seoData.description || finalDescription} />
       <meta property="og:type" content="article" />
       <meta property="og:url" content={poemUrl} />
       
       {/* Twitter Card */}
       <meta name="twitter:card" content="summary" />
       <meta name="twitter:title" content={`${poem.title} - PoemsLand`} />
-      <meta name="twitter:description" content={finalDescription} />
+      <meta name="twitter:description" content={seoData.description || finalDescription} />
       
       {/* JSON-LD Structured Data - Most important for search engines */}
       <script type="application/ld+json">
@@ -159,7 +167,7 @@ const PoemSEO: React.FC<PoemSEOProps> = ({ poem, isPreview = false, host }) => {
       
       {/* Additional SEO metadata */}
       <meta name="robots" content="index, follow" />
-      <meta name="keywords" content={[occasion, contentType, audience, style, 'gedicht', 'poem', 'poemsland'].filter(Boolean).join(', ')} />
+      <meta name="keywords" content={keywordsList.join(', ')} />
       <link rel="canonical" href={poemUrl} />
       
       {/* Language metadata */}

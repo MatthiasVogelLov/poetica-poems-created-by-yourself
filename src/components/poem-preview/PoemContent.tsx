@@ -153,6 +153,11 @@ const PoemContent: React.FC<PoemContentProps> = ({
     );
   }
 
+  // Format the poem for SEO-friendly display with proper semantic markup
+  const formattedPoem = currentPoem.split('\n').map((line, i) => 
+    line.trim() === '' ? <br key={i} /> : <p key={i}>{line}</p>
+  );
+
   return (
     <div className="poem-text mb-8 relative poem-container">
       {isPaid && !isInPoemsLand && (
@@ -169,8 +174,15 @@ const PoemContent: React.FC<PoemContentProps> = ({
           </Button>
         </div>
       )}
-      <div className={`whitespace-pre-line text-center ${getFontFamily(editorPreferences.font)} ${editorPreferences.fontSize} ${editorPreferences.textColor} ${editorPreferences.backgroundColor} p-6 rounded-lg border border-gray-100 shadow-inner`}>
-        {currentPoem}
+      <div 
+        className={`whitespace-pre-line text-center ${getFontFamily(editorPreferences.font)} ${editorPreferences.fontSize} ${editorPreferences.textColor} ${editorPreferences.backgroundColor} p-6 rounded-lg border border-gray-100 shadow-inner`}
+        itemScope
+        itemType="https://schema.org/Poem"
+      >
+        {isInPoemsLand && <meta itemProp="text" content={currentPoem} />}
+        <div className="poem-content">
+          {isInPoemsLand ? formattedPoem : currentPoem}
+        </div>
       </div>
     </div>
   );

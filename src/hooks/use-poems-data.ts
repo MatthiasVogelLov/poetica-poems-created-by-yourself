@@ -27,6 +27,7 @@ export const usePoemsData = (): [
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [totalCount, setTotalCount] = useState<number>(0);
   const poemsPerPage = 12;
+  const [seoMetadata, setSeoMetadata] = useState<{[key: string]: {description: string, keywords: string[]}}>({}); 
 
   // Fetch poems from Supabase
   useEffect(() => {
@@ -53,12 +54,35 @@ export const usePoemsData = (): [
         
         if (error) throw error;
         
-        setPoems(data || []);
-        setFilteredPoems(data || []);
+        // Pre-process poems for SEO metadata
+        const processedPoems = data || [];
+        const metadata: {[key: string]: {description: string, keywords: string[]}} = {};
+        
+        processedPoems.forEach(poem => {
+          // Generate SEO description from poem content (first 160 chars)
+          const description = poem.content
+            ? poem.content.substring(0, 160).trim() + (poem.content.length > 160 ? '...' : '')
+            : '';
+            
+          // Extract keywords from poem keywords field or content
+          const keywordsString = poem.keywords || '';
+          const extractedKeywords = keywordsString.split(',')
+            .map(k => k.trim())
+            .filter(k => k.length > 0);
+            
+          metadata[poem.id] = {
+            description,
+            keywords: extractedKeywords
+          };
+        });
+        
+        setSeoMetadata(metadata);
+        setPoems(processedPoems);
+        setFilteredPoems(processedPoems);
         setHasMore((page * poemsPerPage) < (count || 0));
         
         // Generate slugs for all poems
-        const { poemSlugs, slugToId } = generatePoemSlugs(data || []);
+        const { poemSlugs, slugToId } = generatePoemSlugs(processedPoems);
         setPoemSlugs(poemSlugs);
         setSlugToId(slugToId);
       } catch (error) {
@@ -92,6 +116,27 @@ export const usePoemsData = (): [
           }
           
           console.log('Poem data received:', data);
+          
+          // Generate SEO metadata for this specific poem
+          if (data) {
+            const description = data.content
+              ? data.content.substring(0, 160).trim() + (data.content.length > 160 ? '...' : '')
+              : '';
+              
+            const keywordsString = data.keywords || '';
+            const extractedKeywords = keywordsString.split(',')
+              .map(k => k.trim())
+              .filter(k => k.length > 0);
+              
+            setSeoMetadata(prev => ({
+              ...prev,
+              [data.id]: {
+                description,
+                keywords: extractedKeywords
+              }
+            }));
+          }
+          
           setSelectedPoem(data);
         } catch (error) {
           console.error('Error fetching poem:', error);
@@ -107,6 +152,11 @@ export const usePoemsData = (): [
       setSelectedPoem(null);
     }
   }, [selectedPoemId]);
+
+  // Method to get SEO metadata for a specific poem
+  const getPoemSeoMetadata = (poemId: string) => {
+    return seoMetadata[poemId] || { description: '', keywords: [] };
+  };
 
   const nextPage = () => {
     if (hasMore) {
@@ -138,7 +188,8 @@ export const usePoemsData = (): [
     totalCount,
     poemsPerPage,
     nextPage,
-    prevPage
+    prevPage,
+    getPoemSeoMetadata
   };
 
   return [state, setPoems, setSelectedPoemId];

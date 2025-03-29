@@ -32,6 +32,14 @@ export const usePoems = () => {
     state.slugToId
   );
 
+  // Method to get SEO metadata for a specific poem
+  const getPoemSeoMetadata = (poemId: string) => {
+    if (state.getPoemSeoMetadata) {
+      return state.getPoemSeoMetadata(poemId);
+    }
+    return { description: '', keywords: [] };
+  };
+
   return {
     ...state,
     filteredPoems: filteredPoemsByFilters,
@@ -44,6 +52,7 @@ export const usePoems = () => {
     hasMore: state.hasMore,
     nextPage: state.nextPage,
     prevPage: state.prevPage,
-    poemsPerPage: state.poemsPerPage
+    poemsPerPage: state.poemsPerPage,
+    getPoemSeoMetadata
   };
 };

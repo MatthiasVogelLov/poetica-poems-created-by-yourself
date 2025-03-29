@@ -11,6 +11,7 @@ export interface Poem {
   status?: string;
   batch_created?: boolean;
   audience?: string;
+  keywords?: string;
 }
 
 export interface PoemFilters {
@@ -19,6 +20,11 @@ export interface PoemFilters {
   styleFilter: string;
   audienceFilter?: string;
   searchQuery?: string;
+}
+
+export interface PoemSeoMetadata {
+  description: string;
+  keywords: string[];
 }
 
 export interface PoemHookState {
@@ -40,6 +46,7 @@ export interface PoemHookState {
   poemsPerPage: number;
   nextPage: () => void;
   prevPage: () => void;
+  getPoemSeoMetadata?: (poemId: string) => PoemSeoMetadata;
 }
 
 export interface PoemHookActions {
