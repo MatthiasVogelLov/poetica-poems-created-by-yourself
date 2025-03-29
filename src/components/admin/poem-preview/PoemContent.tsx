@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay, getStyleDisplay } from '@/utils/poem-display-helpers';
+import PoemTitle from '@/components/poem-preview/PoemTitle';
 
 interface PoemContentProps {
   poem: any;
@@ -24,7 +25,8 @@ const PoemContent: React.FC<PoemContentProps> = ({ poem }) => {
   
   return (
     <div className="poem-container rounded-lg p-6 border shadow-sm">
-      <h2 className="text-xl font-serif text-center mb-6">{poem.title}</h2>
+      {/* Use the PoemTitle component to display the title */}
+      <PoemTitle title={poem.title} />
       
       <div className="whitespace-pre-wrap text-center font-serif leading-relaxed">
         {poem.content}

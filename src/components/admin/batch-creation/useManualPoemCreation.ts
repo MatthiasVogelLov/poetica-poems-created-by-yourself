@@ -111,15 +111,12 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
 
       // Format keywords before storage
       const keywords = manualPoemData.keywords?.trim() || null;
-
-      // Add the title to the beginning of the content as a header
-      const contentWithTitle = content;
       
       const { error } = await supabase
         .from('user_poems')
         .insert({
           title: title,
-          content: contentWithTitle,
+          content: content, // Store content without adding title
           audience: manualPoemData.audience,
           occasion: manualPoemData.occasion,
           content_type: manualPoemData.contentType,

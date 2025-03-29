@@ -94,6 +94,7 @@ export type Database = {
       }
       user_poems: {
         Row: {
+          audience: string | null
           batch_created: boolean | null
           content: string
           content_type: string | null
@@ -109,6 +110,7 @@ export type Database = {
           verse_type: string | null
         }
         Insert: {
+          audience?: string | null
           batch_created?: boolean | null
           content: string
           content_type?: string | null
@@ -124,6 +126,7 @@ export type Database = {
           verse_type?: string | null
         }
         Update: {
+          audience?: string | null
           batch_created?: boolean | null
           content?: string
           content_type?: string | null
