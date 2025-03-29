@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -15,10 +14,12 @@ interface ManualPoemData {
   length: Length;
   keywords?: string;
   generateContent?: boolean;
+  publishAfterCreation?: boolean;
 }
 
 export const useManualPoemCreation = (onSuccess: () => void) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [manualPoemData, setManualPoemData] = useState<ManualPoemData>({
     title: '',
     content: '',
@@ -29,7 +30,8 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
     verseType: 'kreuzreim',
     length: 'mittel',
     keywords: '',
-    generateContent: false
+    generateContent: false,
+    publishAfterCreation: false
   });
 
   const handleManualChange = (field: string, value: any) => {
@@ -39,10 +41,8 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
   const generatePoemContent = async () => {
     setIsGenerating(true);
     try {
-      // Format keywords - retain original input for database storage
       const keywords = manualPoemData.keywords?.trim() || '';
       
-      // Call the generate-poem edge function to create content
       const { data: generationResult, error: generationError } = await supabase.functions.invoke('generate-poem', {
         body: {
           audience: manualPoemData.audience,
@@ -51,7 +51,7 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
           style: manualPoemData.style,
           verseType: manualPoemData.verseType,
           length: manualPoemData.length,
-          keywords: keywords // Pass the keywords to the generator
+          keywords: keywords
         }
       });
       
@@ -60,10 +60,8 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
         throw generationError;
       }
       
-      // Use the provided title if available, otherwise use the generated title
       const title = manualPoemData.title.trim() || generationResult.title;
       
-      // Update the poem data with the generated content
       setManualPoemData(prev => ({
         ...prev,
         title: title,
@@ -80,12 +78,34 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
     }
   };
 
+  const publishPoem = async (poemId: string) => {
+    setIsPublishing(true);
+    try {
+      const { error } = await supabase.functions.invoke('manage-poem', {
+        body: {
+          action: 'update',
+          poemId: poemId,
+          poemData: { status: 'published' }
+        }
+      });
+      
+      if (error) throw error;
+      toast.success('Gedicht wurde veröffentlicht');
+      return true;
+    } catch (error) {
+      console.error('Error publishing poem:', error);
+      toast.error('Fehler bei der Veröffentlichung: ' + (error.message || 'Unbekannter Fehler'));
+      return false;
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   const createManualPoem = async () => {
     try {
       let title = manualPoemData.title.trim();
       let content = manualPoemData.content;
       
-      // If generateContent is true and content is empty, generate content
       if (manualPoemData.generateContent && !content) {
         setIsGenerating(true);
         try {
@@ -94,7 +114,7 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
           content = result.content;
         } catch (error) {
           setIsGenerating(false);
-          return; // Error already handled in generatePoemContent
+          return;
         }
         setIsGenerating(false);
       }
@@ -109,14 +129,15 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
         return;
       }
 
-      // Format keywords before storage
       const keywords = manualPoemData.keywords?.trim() || null;
       
-      const { error } = await supabase
+      const initialStatus = manualPoemData.publishAfterCreation ? 'published' : 'draft';
+      
+      const { data, error } = await supabase
         .from('user_poems')
         .insert({
           title: title,
-          content: content, // Store content without adding title
+          content: content,
           audience: manualPoemData.audience,
           occasion: manualPoemData.occasion,
           content_type: manualPoemData.contentType,
@@ -124,16 +145,23 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
           verse_type: manualPoemData.verseType,
           length: manualPoemData.length,
           batch_created: true,
-          status: 'draft',
+          status: initialStatus,
           keywords: keywords
-        });
+        })
+        .select('id')
+        .single();
         
       if (error) {
         console.error('Database insertion error:', error);
         throw error;
       }
       
-      toast.success('Gedicht wurde erstellt');
+      if (manualPoemData.publishAfterCreation) {
+        toast.success('Gedicht wurde erstellt und veröffentlicht');
+      } else {
+        toast.success('Gedicht wurde als Entwurf erstellt');
+      }
+      
       setManualPoemData({
         title: '',
         content: '',
@@ -144,8 +172,10 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
         verseType: 'kreuzreim',
         length: 'mittel',
         keywords: '',
-        generateContent: manualPoemData.generateContent
+        generateContent: manualPoemData.generateContent,
+        publishAfterCreation: manualPoemData.publishAfterCreation
       });
+      
       onSuccess();
     } catch (error) {
       console.error('Error creating poem:', error);
@@ -158,6 +188,8 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
     handleManualChange,
     createManualPoem,
     generatePoemContent,
-    isGenerating
+    publishPoem,
+    isGenerating,
+    isPublishing
   };
 };

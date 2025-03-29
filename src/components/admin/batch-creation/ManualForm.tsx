@@ -1,12 +1,12 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { PlusCircle, Wand2 } from 'lucide-react';
+import { PlusCircle, Wand2, Upload, CircleCheck } from 'lucide-react';
 import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
 import BatchSelectField from '../BatchSelectField';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 
 interface ManualPoemData {
   title: string;
@@ -19,6 +19,7 @@ interface ManualPoemData {
   length: Length;
   keywords?: string;
   generateContent?: boolean;
+  publishAfterCreation?: boolean;
 }
 
 interface ManualFormProps {
@@ -148,15 +149,34 @@ const ManualForm: React.FC<ManualFormProps> = ({
         </p>
       </div>
       
-      <div className="flex items-center space-x-2 py-2">
-        <Switch
-          id="generate-content"
-          checked={poemData.generateContent}
-          onCheckedChange={(value) => onFieldChange('generateContent', value)}
-        />
-        <Label htmlFor="generate-content" className="font-medium">
-          Inhalt automatisch generieren
-        </Label>
+      <div className="space-y-2 py-2">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="generate-content"
+            checked={poemData.generateContent}
+            onCheckedChange={(value) => onFieldChange('generateContent', value)}
+          />
+          <Label htmlFor="generate-content" className="font-medium">
+            Inhalt automatisch generieren
+          </Label>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="publish-after-creation"
+            checked={poemData.publishAfterCreation}
+            onCheckedChange={(value) => onFieldChange('publishAfterCreation', value)}
+          />
+          <Label htmlFor="publish-after-creation" className="font-medium">
+            Nach Erstellung direkt veröffentlichen
+          </Label>
+          {poemData.publishAfterCreation && (
+            <Badge variant="success" className="ml-2">
+              <CircleCheck className="h-3 w-3 mr-1" />
+              Wird direkt in PoemsLand erscheinen
+            </Badge>
+          )}
+        </div>
       </div>
       
       <div>
@@ -189,11 +209,20 @@ const ManualForm: React.FC<ManualFormProps> = ({
       
       <Button 
         onClick={onSubmit}
-        className="w-full mt-6"
+        className={`w-full mt-6 ${poemData.publishAfterCreation ? 'bg-green-600 hover:bg-green-700' : ''}`}
         disabled={isGenerating}
       >
-        <PlusCircle className="mr-2 h-4 w-4" />
-        {isGenerating ? 'Generiere Gedicht...' : 'Gedicht erstellen'}
+        {poemData.publishAfterCreation ? (
+          <>
+            <Upload className="mr-2 h-4 w-4" />
+            {isGenerating ? 'Generiere Gedicht...' : 'Gedicht erstellen & veröffentlichen'}
+          </>
+        ) : (
+          <>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            {isGenerating ? 'Generiere Gedicht...' : 'Gedicht erstellen'}
+          </>
+        )}
       </Button>
     </div>
   );

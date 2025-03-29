@@ -3,7 +3,7 @@ import React from 'react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Upload, X, Loader2, EyeOff } from 'lucide-react';
+import { Eye, Upload, X, Loader2, EyeOff, List } from 'lucide-react';
 import { getOccasionDisplay, getContentTypeDisplay } from '@/utils/poem-display-helpers';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -33,7 +33,7 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
       case 'hidden':
         return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Ausgeblendet</Badge>;
       default:
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Entwurf</Badge>;
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 animate-pulse">Entwurf</Badge>;
     }
   };
 
@@ -46,7 +46,7 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
       case 'hidden':
         return "bg-purple-50/10";
       default:
-        return "";
+        return "bg-blue-50/10 border-l-4 border-blue-300"; // Highlight draft rows
     }
   };
 
@@ -67,7 +67,14 @@ const PoemTableRow: React.FC<PoemTableRowProps> = ({
 
   return (
     <TableRow key={poem.id} className={getRowClassName()}>
-      <TableCell className="font-medium">{poem.title}</TableCell>
+      <TableCell className="font-medium">
+        {poem.title}
+        {poem.status === 'draft' && (
+          <span className="text-xs text-blue-600 font-normal block">
+            (Noch nicht in PoemsLand veröffentlicht)
+          </span>
+        )}
+      </TableCell>
       <TableCell>{getOccasionDisplay(poem.occasion)}</TableCell>
       <TableCell>{getContentTypeDisplay(poem.content_type)}</TableCell>
       <TableCell>{getStatusBadge(poem.status)}</TableCell>
