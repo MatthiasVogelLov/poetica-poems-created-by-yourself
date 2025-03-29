@@ -63,8 +63,8 @@ const Index = () => {
       <section className="py-20 bg-white">
         <div className="container-wide bg-slate-100">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <span className="subheading mb-4 block">Prozess</span>
-            <h2 className="heading-lg mb-6">
+            
+            <h2 className="heading-lg mb-6 py-[15px]">
               So funktioniert es
             </h2>
             <p className="text-muted-foreground text-lg">
