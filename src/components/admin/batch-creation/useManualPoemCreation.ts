@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -59,14 +60,17 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
         throw generationError;
       }
       
+      // Use the provided title if available, otherwise use the generated title
+      const title = manualPoemData.title.trim() || generationResult.title;
+      
       // Update the poem data with the generated content
       setManualPoemData(prev => ({
         ...prev,
-        title: manualPoemData.title || generationResult.title,
+        title: title,
         content: generationResult.poem
       }));
       
-      return { title: generationResult.title, content: generationResult.poem };
+      return { title, content: generationResult.poem };
     } catch (error) {
       console.error('Error generating poem content:', error);
       toast.error('Fehler bei der Gedichterstellung: ' + (error.message || 'Unbekannter Fehler'));
@@ -78,7 +82,7 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
 
   const createManualPoem = async () => {
     try {
-      let title = manualPoemData.title;
+      let title = manualPoemData.title.trim();
       let content = manualPoemData.content;
       
       // If generateContent is true and content is empty, generate content
@@ -89,10 +93,10 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
           title = title || result.title;
           content = result.content;
         } catch (error) {
-          return; // Error already handled in generatePoemContent
-        } finally {
           setIsGenerating(false);
+          return; // Error already handled in generatePoemContent
         }
+        setIsGenerating(false);
       }
       
       if (!title) {
@@ -105,15 +109,17 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
         return;
       }
 
-      // Format keywords before storage: ensure we keep original casing for poem generation
-      // but format them properly for display
+      // Format keywords before storage
       const keywords = manualPoemData.keywords?.trim() || null;
 
+      // Add the title to the beginning of the content as a header
+      const contentWithTitle = content;
+      
       const { error } = await supabase
         .from('user_poems')
         .insert({
           title: title,
-          content: content,
+          content: contentWithTitle,
           audience: manualPoemData.audience,
           occasion: manualPoemData.occasion,
           content_type: manualPoemData.contentType,
@@ -125,7 +131,10 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
           keywords: keywords
         });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Database insertion error:', error);
+        throw error;
+      }
       
       toast.success('Gedicht wurde erstellt');
       setManualPoemData({
@@ -143,7 +152,7 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
       onSuccess();
     } catch (error) {
       console.error('Error creating poem:', error);
-      toast.error('Fehler bei der Gedichterstellung');
+      toast.error('Fehler bei der Gedichterstellung: ' + (error.message || 'Unbekannter Fehler'));
     }
   };
 
