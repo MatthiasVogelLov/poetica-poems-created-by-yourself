@@ -24,7 +24,7 @@ export type Occasion =
   | 'andere';
 export type ContentType = 'liebe' | 'freundschaft' | 'natur' | 'leben' | 'motivation' | 'humor' | 'trauer';
 export type Style = 'klassisch' | 'modern' | 'romantisch' | 'humorvoll' | 'experimentell';
-export type Length = 'kurz' | 'mittel' | 'lang';
+export type Length = 'mittel' | 'lang';
 export type VerseType = 'frei' | 'paarreim' | 'kreuzreim' | 'umarmenderreim';
 
 export interface PoemFormData {

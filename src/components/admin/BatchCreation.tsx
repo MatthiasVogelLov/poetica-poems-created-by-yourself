@@ -4,12 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TemplateForm from './batch-creation/TemplateForm';
 import ManualForm from './batch-creation/ManualForm';
-import MassUploadForm from './batch-creation/MassUploadForm';
 import BatchPoemsList from './BatchPoemsList';
 import { useBatchPoems } from './batch-creation/useBatchPoems';
 import { useTemplateGeneration } from './batch-creation/useTemplateGeneration';
 import { useManualPoemCreation } from './batch-creation/useManualPoemCreation';
-import { useMassUpload } from './batch-creation/useMassUpload';
 import BatchCreationErrorBoundary from './batch-creation/BatchCreationErrorBoundary';
 
 const BatchCreation = () => {
@@ -44,11 +42,6 @@ const BatchCreation = () => {
     isGenerating: isGeneratingManual
   } = useManualPoemCreation(fetchBatchPoems);
 
-  const {
-    isGenerating: isGeneratingMassUpload,
-    handleMassUpload
-  } = useMassUpload(fetchBatchPoems);
-
   return (
     <div className="space-y-6">
       <BatchCreationErrorBoundary>
@@ -61,9 +54,8 @@ const BatchCreation = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="template">
-              <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="template">Template-basiert</TabsTrigger>
-                <TabsTrigger value="massupload">Massenupload</TabsTrigger>
                 <TabsTrigger value="manual">Manuell</TabsTrigger>
               </TabsList>
               
@@ -73,13 +65,6 @@ const BatchCreation = () => {
                   onFieldChange={handleTemplateChange}
                   onGenerate={generateTemplatePoems}
                   isGenerating={isGeneratingTemplate}
-                />
-              </TabsContent>
-              
-              <TabsContent value="massupload">
-                <MassUploadForm 
-                  onGenerate={handleMassUpload}
-                  isGenerating={isGeneratingMassUpload}
                 />
               </TabsContent>
               
