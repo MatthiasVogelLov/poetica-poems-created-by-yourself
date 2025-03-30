@@ -2,7 +2,6 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FormDescription } from '@/components/ui/form';
 
 interface TitleInputSectionProps {
   title: string;
@@ -21,9 +20,9 @@ const TitleInputSection: React.FC<TitleInputSectionProps> = ({ title, onTitleCha
         className="w-full"
         placeholder="Gedichttitel"
       />
-      <FormDescription className="text-xs">
+      <p className="text-xs text-muted-foreground">
         Ein guter Titel verbessert die Auffindbarkeit des Gedichts in PoemsLand und in Suchmaschinen.
-      </FormDescription>
+      </p>
     </div>
   );
 };

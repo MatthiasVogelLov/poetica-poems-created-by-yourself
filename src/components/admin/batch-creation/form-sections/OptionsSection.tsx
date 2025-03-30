@@ -2,48 +2,46 @@
 import React from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { CircleCheck } from 'lucide-react';
 
 interface OptionsSectionProps {
   generateContent: boolean;
   publishAfterCreation: boolean;
-  onOptionChange: (field: string, value: boolean) => void;
+  onOptionChange: (field: string, value: any) => void;
 }
 
-const OptionsSection: React.FC<OptionsSectionProps> = ({
-  generateContent,
-  publishAfterCreation,
-  onOptionChange
+const OptionsSection: React.FC<OptionsSectionProps> = ({ 
+  generateContent, 
+  publishAfterCreation, 
+  onOptionChange 
 }) => {
   return (
-    <div className="space-y-2 py-2">
-      <div className="flex items-center space-x-2">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="space-y-0.5">
+          <Label htmlFor="generate-content" className="text-sm font-medium">Inhalt automatisch generieren</Label>
+          <p className="text-xs text-muted-foreground">
+            Lässt KI den Gedichtinhalt automatisch generieren
+          </p>
+        </div>
         <Switch
           id="generate-content"
           checked={generateContent}
-          onCheckedChange={(value) => onOptionChange('generateContent', value)}
+          onCheckedChange={(checked) => onOptionChange('generateContent', checked)}
         />
-        <Label htmlFor="generate-content" className="font-medium">
-          Inhalt automatisch generieren
-        </Label>
       </div>
       
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center justify-between">
+        <div className="space-y-0.5">
+          <Label htmlFor="publish-creation" className="text-sm font-medium">Nach Erstellung veröffentlichen</Label>
+          <p className="text-xs text-muted-foreground">
+            Gedicht direkt für PoemsLand Besucher freischalten
+          </p>
+        </div>
         <Switch
-          id="publish-after-creation"
+          id="publish-creation"
           checked={publishAfterCreation}
-          onCheckedChange={(value) => onOptionChange('publishAfterCreation', value)}
+          onCheckedChange={(checked) => onOptionChange('publishAfterCreation', checked)}
         />
-        <Label htmlFor="publish-after-creation" className="font-medium">
-          Nach Erstellung direkt veröffentlichen
-        </Label>
-        {publishAfterCreation && (
-          <Badge variant="success" className="ml-2">
-            <CircleCheck className="h-3 w-3 mr-1" />
-            Wird direkt in PoemsLand erscheinen
-          </Badge>
-        )}
       </div>
     </div>
   );
