@@ -9,6 +9,8 @@ import { useBatchPoems } from './batch-creation/useBatchPoems';
 import { useTemplateGeneration } from './batch-creation/useTemplateGeneration';
 import { useManualPoemCreation } from './batch-creation/useManualPoemCreation';
 import BatchCreationErrorBoundary from './batch-creation/BatchCreationErrorBoundary';
+import MassUploadForm from './batch-creation/MassUploadForm';
+import { useMassUpload } from './batch-creation/useMassUpload';
 
 const BatchCreation = () => {
   const { 
@@ -42,6 +44,17 @@ const BatchCreation = () => {
     isGenerating: isGeneratingManual
   } = useManualPoemCreation(fetchBatchPoems);
 
+  const {
+    massUploadData,
+    isGenerating: isGeneratingMassUpload,
+    handleStyleChange,
+    handleVerseTypeChange,
+    handleLengthChange,
+    handleRandomOptionsChange,
+    handlePoemEntryChange,
+    generateMassUploadPoems
+  } = useMassUpload(fetchBatchPoems);
+
   return (
     <div className="space-y-6">
       <BatchCreationErrorBoundary>
@@ -54,9 +67,10 @@ const BatchCreation = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="template">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsList className="grid w-full grid-cols-3 mb-6">
                 <TabsTrigger value="template">Template-basiert</TabsTrigger>
                 <TabsTrigger value="manual">Manuell</TabsTrigger>
+                <TabsTrigger value="massupload">Mass Upload</TabsTrigger>
               </TabsList>
               
               <TabsContent value="template">
@@ -75,6 +89,23 @@ const BatchCreation = () => {
                   onSubmit={createManualPoem}
                   onGenerateContent={generatePoemContent}
                   isGenerating={isGeneratingManual}
+                />
+              </TabsContent>
+
+              <TabsContent value="massupload">
+                <MassUploadForm 
+                  style={massUploadData.style}
+                  verseType={massUploadData.verseType}
+                  length={massUploadData.length}
+                  useRandomOptions={massUploadData.useRandomOptions}
+                  poemEntries={massUploadData.poemEntries}
+                  onStyleChange={handleStyleChange}
+                  onVerseTypeChange={handleVerseTypeChange}
+                  onLengthChange={handleLengthChange}
+                  onRandomOptionsChange={handleRandomOptionsChange}
+                  onPoemEntryChange={handlePoemEntryChange}
+                  onGenerate={generateMassUploadPoems}
+                  isGenerating={isGeneratingMassUpload}
                 />
               </TabsContent>
             </Tabs>
