@@ -3,10 +3,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Wand2 } from 'lucide-react';
 import StyleRhymeSection from './form-sections/StyleRhymeSection';
-import TitleInputSection from './form-sections/TitleInputSection';
-import KeywordsSection from './form-sections/KeywordsSection';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Style, VerseType, Length } from '@/types/poem';
 
 interface PoemEntry {
@@ -71,20 +70,30 @@ const MassUploadForm: React.FC<MassUploadFormProps> = ({
 
       <div className="border-t pt-4 mt-6">
         <h3 className="text-lg font-medium mb-4">Gedichte-Eingabe</h3>
-        <div className="space-y-6">
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-4 mb-2">
+            <div className="text-sm font-medium text-muted-foreground">Titel</div>
+            <div className="text-sm font-medium text-muted-foreground">Schlüsselwörter</div>
+          </div>
+          
           {poemEntries.map((entry, index) => (
-            <div key={index} className="p-4 border rounded-md space-y-4">
-              <h4 className="font-medium">Gedicht {index + 1}</h4>
-              <TitleInputSection
-                title={entry.title}
-                onTitleChange={(value) => onPoemEntryChange(index, 'title', value)}
+            <div key={index} className="grid grid-cols-2 gap-4">
+              <Input
+                placeholder="Gedichttitel"
+                value={entry.title}
+                onChange={(e) => onPoemEntryChange(index, 'title', e.target.value)}
               />
-              <KeywordsSection
-                keywords={entry.keywords}
-                onKeywordsChange={(value) => onPoemEntryChange(index, 'keywords', value)}
+              <Input
+                placeholder="Schlüsselwörter durch Komma getrennt"
+                value={entry.keywords}
+                onChange={(e) => onPoemEntryChange(index, 'keywords', e.target.value)}
               />
             </div>
           ))}
+          
+          <p className="text-xs text-muted-foreground mt-2">
+            Schlüsselwörter verbessern die Auffindbarkeit in Suchmaschinen. Nomen werden automatisch großgeschrieben und am Ende des Gedichts aufgelistet.
+          </p>
         </div>
       </div>
 
