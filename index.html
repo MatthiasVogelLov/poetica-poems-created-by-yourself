@@ -11,8 +11,26 @@
     <meta property="og:image" content="/og-image.png" />
     <meta property="og:site_name" content="PoemsLand" />
     <meta property="og:type" content="website" />
+    
+    <!-- Preconnects for faster loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Schema.org markup for search engines -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "PoemsLand",
+        "url": "https://poemsland.com",
+        "description": "Erstelle wunderschöne, personalisierte Gedichte für jeden Anlass.",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://poemsland.com/poemsland?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
     
     <!-- Poem SEO Content placeholder - Will be populated by JavaScript -->
     <div id="poem-seo-placeholder" style="display:none;"></div>

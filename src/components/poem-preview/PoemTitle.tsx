@@ -14,6 +14,7 @@ const PoemTitle: React.FC<PoemTitleProps> = ({ title, isInPoemsLand = false }) =
         <h1 
           className="relative inline-block px-4 bg-white text-xl sm:text-2xl font-serif text-center z-10"
           itemProp="name"
+          data-poem-title
         >
           {title}
         </h1>

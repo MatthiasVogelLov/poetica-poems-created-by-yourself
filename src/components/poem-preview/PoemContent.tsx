@@ -178,6 +178,7 @@ const PoemContent: React.FC<PoemContentProps> = ({
         className={`whitespace-pre-line text-center ${getFontFamily(editorPreferences.font)} ${editorPreferences.fontSize} ${editorPreferences.textColor} ${editorPreferences.backgroundColor} p-6 rounded-lg border border-gray-100 shadow-inner`}
         itemScope
         itemType="https://schema.org/Poem"
+        data-poem-content
       >
         {isInPoemsLand && <meta itemProp="text" content={currentPoem} />}
         <div className="poem-content">

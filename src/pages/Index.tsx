@@ -1,14 +1,17 @@
+
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import TellAFriend from '../components/TellAFriend';
 import { Sparkles, Heart, Star, Users, Calendar, Type } from 'lucide-react';
+
 const Index = () => {
   const navigate = useNavigate();
   const goToGenerator = () => {
     navigate('/generator');
   };
+
   return <div className="min-h-screen bg-white">
       <Header />
       
@@ -20,7 +23,7 @@ const Index = () => {
               Personalisierte Gedichte in Sekunden<br />
               von Dir mit KI-Unterstützung geschrieben
             </span>
-            <h1 className="heading-xl mb-6 animate-slide-up">
+            <h1 className="heading-xl mb-6 animate-slide-up" itemProp="headline">
               Berührende Gedichte für jeden Anlass
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-10 animate-slide-up" style={{
@@ -45,7 +48,7 @@ const Index = () => {
         <div className="container-wide">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <span className="subheading mb-4 block">Funktionen</span>
-            <h2 className="heading-lg mb-6">
+            <h2 className="heading-lg mb-6" itemProp="alternativeHeadline">
               Alles was Sie brauchen
             </h2>
             <p className="text-muted-foreground text-lg">
@@ -64,7 +67,7 @@ const Index = () => {
         <div className="container-wide bg-slate-100">
           <div className="max-w-3xl mx-auto text-center mb-16">
             
-            <h2 className="heading-lg mb-6 py-[15px]">
+            <h2 className="heading-lg mb-6 py-[15px]" itemProp="knowsAbout">
               So funktioniert es
             </h2>
             <p className="text-muted-foreground text-lg">
@@ -96,10 +99,27 @@ const Index = () => {
         </div>
       </section>
       
+      {/* Structured data for SEO */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "PoemsLand",
+          "url": window.location.origin,
+          "description": "Personalisierte Gedichte für jeden Anlass erstellen mit KI-Unterstützung",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": `${window.location.origin}/poemsland?q={search_term_string}`,
+            "query-input": "required name=search_term_string"
+          }
+        })
+      }} />
+      
       {/* Footer */}
       <Footer />
     </div>;
 };
+
 const FeatureCard = ({
   icon: Icon,
   title,
@@ -116,6 +136,7 @@ const FeatureCard = ({
     <h3 className="text-xl font-medium mb-3">{title}</h3>
     <p className="text-muted-foreground">{description}</p>
   </div>;
+
 const StepCard = ({
   number,
   title,
@@ -132,6 +153,7 @@ const StepCard = ({
     <h3 className="text-xl font-medium mb-3">{title}</h3>
     <p className="text-muted-foreground">{description}</p>
   </div>;
+
 const features = [{
   icon: Users,
   title: "Für jeden Empfänger",
@@ -157,6 +179,7 @@ const features = [{
   title: "KI-gestützt",
   description: "Unsere fortschrittliche KI sorgt für qualitativ hochwertige, kreative Ergebnisse."
 }];
+
 const steps = [{
   title: "Optionen wählen",
   description: "Wählen Sie Zielgruppe, Anlass, Thema, Stil und Länge des Gedichts aus."
@@ -167,4 +190,5 @@ const steps = [{
   title: "Generieren & Teilen",
   description: "Erhalten Sie Ihr Gedicht, speichern Sie es oder teilen Sie direkt mit Ihren Liebsten."
 }];
+
 export default Index;
