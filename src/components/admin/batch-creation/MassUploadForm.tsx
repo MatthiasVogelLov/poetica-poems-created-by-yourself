@@ -62,8 +62,17 @@ const MassUploadForm: React.FC<MassUploadFormProps> = ({
       const data = await readExcelFile(file);
       
       // Update each poem entry with data from Excel
+      // This will work even if there are more than 5 entries
       data.forEach((row, index) => {
         if (index < poemEntries.length) {
+          // Update existing entries
+          const [title, keywords] = row;
+          onPoemEntryChange(index, 'title', title || '');
+          onPoemEntryChange(index, 'keywords', keywords || '');
+        } else {
+          // For additional entries, we need to add new entries to the poemEntries array
+          // This will be handled in useMassUpload.ts via the onPoemEntryChange callback
+          // by checking if the index is beyond the current array length
           const [title, keywords] = row;
           onPoemEntryChange(index, 'title', title || '');
           onPoemEntryChange(index, 'keywords', keywords || '');

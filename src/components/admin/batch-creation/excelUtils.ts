@@ -22,12 +22,11 @@ export const readExcelFile = (file: File): Promise<string[][]> => {
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         
-        // Convert to array of arrays and limit to max 5 rows (for 5 poem entries)
+        // Convert to array of arrays (remove the 5-row limit)
         const jsonData = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1 });
-        const limitedData = jsonData.slice(0, 5);
         
         // Ensure we have at least two columns (title and keywords)
-        const processedData = limitedData.map(row => {
+        const processedData = jsonData.map(row => {
           // If row has less than 2 columns, pad with empty strings
           if (row.length < 2) {
             return [...row, ...Array(2 - row.length).fill('')];

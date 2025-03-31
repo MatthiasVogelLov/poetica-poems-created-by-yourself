@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -17,6 +18,7 @@ interface MassUploadData {
   poemEntries: PoemEntry[];
 }
 
+// Default to 5 empty poem entries
 const initialPoemEntries = Array(5).fill({
   title: '',
   keywords: ''
@@ -52,7 +54,19 @@ export const useMassUpload = (onCompletion: () => void) => {
   const handlePoemEntryChange = (index: number, field: 'title' | 'keywords', value: string) => {
     setMassUploadData(prev => {
       const updatedEntries = [...prev.poemEntries];
+      
+      // Handle the case when index is beyond the current array length
+      // This happens when uploading an Excel file with more entries than we currently have
+      if (index >= updatedEntries.length) {
+        // Add empty entries up to the index
+        for (let i = updatedEntries.length; i <= index; i++) {
+          updatedEntries.push({ title: '', keywords: '' });
+        }
+      }
+      
+      // Now update the entry at the specified index
       updatedEntries[index] = { ...updatedEntries[index], [field]: value };
+      
       return { ...prev, poemEntries: updatedEntries };
     });
   };
