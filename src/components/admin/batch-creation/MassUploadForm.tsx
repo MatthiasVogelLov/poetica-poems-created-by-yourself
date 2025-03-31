@@ -1,12 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Wand2 } from 'lucide-react';
+import { Wand2, Upload, X } from 'lucide-react';
 import StyleRhymeSection from './form-sections/StyleRhymeSection';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Style, VerseType, Length } from '@/types/poem';
+import { toast } from 'sonner';
+import { readExcelFile } from './excelUtils';
 
 interface PoemEntry {
   title: string;
@@ -42,10 +44,51 @@ const MassUploadForm: React.FC<MassUploadFormProps> = ({
   onGenerate,
   isGenerating,
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  
   const handleStyleRhymeChange = (field: string, value: any) => {
     if (field === 'style') onStyleChange(value as Style);
     if (field === 'verseType') onVerseTypeChange(value as VerseType);
     if (field === 'length') onLengthChange(value as Length);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      setFileName(file.name);
+      const data = await readExcelFile(file);
+      
+      // Update each poem entry with data from Excel
+      data.forEach((row, index) => {
+        if (index < poemEntries.length) {
+          const [title, keywords] = row;
+          onPoemEntryChange(index, 'title', title || '');
+          onPoemEntryChange(index, 'keywords', keywords || '');
+        }
+      });
+      
+      toast.success(`Datei "${file.name}" erfolgreich importiert`);
+    } catch (error) {
+      console.error('Error parsing Excel file:', error);
+      toast.error('Fehler beim Lesen der Excel-Datei. Bitte überprüfen Sie das Format.');
+      setFileName(null);
+    }
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const clearFileSelection = () => {
+    setFileName(null);
   };
 
   return (
@@ -70,6 +113,48 @@ const MassUploadForm: React.FC<MassUploadFormProps> = ({
 
       <div className="border-t pt-4 mt-6">
         <h3 className="text-lg font-medium mb-4">Gedichte-Eingabe</h3>
+        
+        <div className="mb-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="excel-upload">Excel-Datei (.xls/.xlsx) importieren</Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full md:w-auto"
+                onClick={handleUploadClick}
+              >
+                <Upload size={16} className="mr-2" />
+                Excel-Datei hochladen
+              </Button>
+              
+              {fileName && (
+                <div className="flex items-center text-sm text-muted-foreground border rounded-md px-3 py-2">
+                  <span className="truncate max-w-[200px]">{fileName}</span>
+                  <button
+                    type="button"
+                    onClick={clearFileSelection}
+                    className="p-1 ml-2 hover:bg-gray-100 rounded-full"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              id="excel-upload"
+              type="file"
+              accept=".xls,.xlsx"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <p className="text-xs text-muted-foreground">
+              Die Excel-Datei sollte 2 Spalten enthalten: Die erste für Titel, die zweite für Schlüsselwörter.
+            </p>
+          </div>
+        </div>
+        
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-4 mb-2">
             <div className="text-sm font-medium text-muted-foreground">Titel</div>
