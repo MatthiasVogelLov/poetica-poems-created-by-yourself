@@ -9,7 +9,7 @@ export const usePoemFilters = (poems: Poem[]) => {
   const [styleFilter, setStyleFilter] = useState<string>('all');
   const [audienceFilter, setAudienceFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [keywordFilter, setKeywordFilter] = useState<string | null>(null);
+  const [keywordFilters, setKeywordFilters] = useState<string[]>([]);
   const [filteredPoems, setFilteredPoems] = useState<Poem[]>(poems);
   const [popularKeywords, setPopularKeywords] = useState<string[]>([]);
 
@@ -50,18 +50,34 @@ export const usePoemFilters = (poems: Poem[]) => {
       searchQuery
     );
     
-    // Apply keyword filter if selected
-    if (keywordFilter) {
+    // Apply keyword filters if selected
+    if (keywordFilters.length > 0) {
       result = result.filter(poem => {
         if (!poem.keywords) return false;
         
         const poemKeywords = poem.keywords.toLowerCase().split(',').map(k => k.trim());
-        return poemKeywords.includes(keywordFilter.toLowerCase());
+        return keywordFilters.some(filter => 
+          poemKeywords.includes(filter.toLowerCase())
+        );
       });
     }
     
     setFilteredPoems(result);
-  }, [poems, occasionFilter, contentTypeFilter, styleFilter, audienceFilter, searchQuery, keywordFilter]);
+  }, [poems, occasionFilter, contentTypeFilter, styleFilter, audienceFilter, searchQuery, keywordFilters]);
+
+  const toggleKeywordFilter = (keyword: string) => {
+    setKeywordFilters(prev => {
+      if (prev.includes(keyword)) {
+        return prev.filter(k => k !== keyword);
+      } else {
+        return [...prev, keyword];
+      }
+    });
+  };
+  
+  const clearKeywordFilters = () => {
+    setKeywordFilters([]);
+  };
 
   const clearFilters = () => {
     setOccasionFilter('all');
@@ -69,7 +85,7 @@ export const usePoemFilters = (poems: Poem[]) => {
     setStyleFilter('all');
     setAudienceFilter('all');
     setSearchQuery('');
-    setKeywordFilter(null);
+    setKeywordFilters([]);
   };
 
   const getUniqueOccasions = () => getUniqueValues(poems, 'occasion');
@@ -85,7 +101,7 @@ export const usePoemFilters = (poems: Poem[]) => {
       styleFilter,
       audienceFilter,
       searchQuery,
-      keywordFilter
+      keywordFilters
     },
     popularKeywords,
     actions: {
@@ -94,7 +110,8 @@ export const usePoemFilters = (poems: Poem[]) => {
       setStyleFilter,
       setAudienceFilter,
       setSearchQuery,
-      setKeywordFilter,
+      toggleKeywordFilter,
+      clearKeywordFilters,
       clearFilters,
       getUniqueOccasions,
       getUniqueContentTypes,

@@ -14,14 +14,15 @@ interface PoemsListViewProps {
   styleFilter: string;
   audienceFilter: string;
   searchQuery: string;
-  keywordFilter: string | null;
+  keywordFilters: string[];
   popularKeywords: string[];
   setOccasionFilter: (filter: string) => void;
   setContentTypeFilter: (filter: string) => void;
   setStyleFilter: (filter: string) => void;
   setAudienceFilter: (filter: string) => void;
   setSearchQuery: (query: string) => void;
-  setKeywordFilter: (keyword: string | null) => void;
+  toggleKeywordFilter: (keyword: string) => void;
+  clearKeywordFilters: () => void;
   clearFilters: () => void;
   getUniqueOccasions: () => string[];
   getUniqueContentTypes: () => string[];
@@ -50,14 +51,15 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
   styleFilter = 'all',
   audienceFilter = 'all',
   searchQuery = '',
-  keywordFilter = null,
+  keywordFilters = [],
   popularKeywords = [],
   setOccasionFilter,
   setContentTypeFilter,
   setStyleFilter,
   setAudienceFilter,
   setSearchQuery,
-  setKeywordFilter,
+  toggleKeywordFilter,
+  clearKeywordFilters,
   clearFilters,
   getUniqueOccasions,
   getUniqueContentTypes,
@@ -77,14 +79,6 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
   prevPage,
   poemsPerPage = 12,
 }) => {
-  const handleKeywordClick = (keyword: string) => {
-    if (keywordFilter === keyword) {
-      // If already selected, unselect it
-      setKeywordFilter(null);
-    } else {
-      setKeywordFilter(keyword);
-    }
-  };
   
   return (
     <>
@@ -96,11 +90,13 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
         styleFilter={styleFilter}
         audienceFilter={audienceFilter}
         searchQuery={searchQuery}
+        keywordFilters={keywordFilters}
         setOccasionFilter={setOccasionFilter}
         setContentTypeFilter={setContentTypeFilter}
         setStyleFilter={setStyleFilter}
         setAudienceFilter={setAudienceFilter}
         setSearchQuery={setSearchQuery}
+        toggleKeywordFilter={toggleKeywordFilter}
         clearFilters={clearFilters}
         occasions={getUniqueOccasions()}
         contentTypes={getUniqueContentTypes()}
@@ -110,7 +106,6 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
         getContentTypeDisplay={getContentTypeDisplay}
         getStyleDisplay={getStyleDisplay}
         getAudienceDisplay={getAudienceDisplay}
-        keywordFilter={keywordFilter}
       />
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
@@ -118,8 +113,9 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
         <div className="lg:col-span-1">
           <PopularKeywords 
             keywords={popularKeywords}
-            onKeywordClick={handleKeywordClick}
-            activeKeyword={keywordFilter}
+            selectedKeywords={keywordFilters}
+            onKeywordClick={toggleKeywordFilter}
+            onClearAllKeywords={clearKeywordFilters}
           />
         </div>
         

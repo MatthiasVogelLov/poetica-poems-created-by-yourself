@@ -24,7 +24,7 @@ const PoemsLand = () => {
     styleFilter,
     audienceFilter,
     searchQuery,
-    keywordFilter,
+    keywordFilters,
     popularKeywords,
     setSelectedPoemId,
     setOccasionFilter,
@@ -32,7 +32,8 @@ const PoemsLand = () => {
     setStyleFilter,
     setAudienceFilter,
     setSearchQuery,
-    setKeywordFilter,
+    toggleKeywordFilter,
+    clearKeywordFilters,
     handleDeletePoem,
     clearFilters,
     getUniqueOccasions,
@@ -162,14 +163,15 @@ const PoemsLand = () => {
               styleFilter={styleFilter}
               audienceFilter={audienceFilter}
               searchQuery={searchQuery}
-              keywordFilter={keywordFilter}
+              keywordFilters={keywordFilters || []}
               popularKeywords={popularKeywords}
               setOccasionFilter={setOccasionFilter}
               setContentTypeFilter={setContentTypeFilter}
               setStyleFilter={setStyleFilter}
               setAudienceFilter={setAudienceFilter}
               setSearchQuery={setSearchQuery}
-              setKeywordFilter={setKeywordFilter}
+              toggleKeywordFilter={toggleKeywordFilter!}
+              clearKeywordFilters={clearKeywordFilters!}
               clearFilters={clearFilters}
               getUniqueOccasions={getUniqueOccasions}
               getUniqueContentTypes={getUniqueContentTypes}

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Filter, Search, Tag } from 'lucide-react';
+import { Filter, Search, Tag, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -12,12 +12,13 @@ interface PoemFiltersProps {
   styleFilter: string;
   audienceFilter: string;
   searchQuery: string;
-  keywordFilter: string | null;
+  keywordFilters: string[];
   setOccasionFilter: (value: string) => void;
   setContentTypeFilter: (value: string) => void;
   setStyleFilter: (value: string) => void;
   setAudienceFilter: (value: string) => void;
   setSearchQuery: (value: string) => void;
+  toggleKeywordFilter?: (keyword: string) => void;
   clearFilters: () => void;
   occasions: string[];
   contentTypes: string[];
@@ -35,12 +36,13 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
   styleFilter = 'all',
   audienceFilter = 'all',
   searchQuery = '',
-  keywordFilter = null,
+  keywordFilters = [],
   setOccasionFilter,
   setContentTypeFilter,
   setStyleFilter,
   setAudienceFilter,
   setSearchQuery,
+  toggleKeywordFilter,
   clearFilters,
   occasions,
   contentTypes,
@@ -57,7 +59,7 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
     styleFilter !== 'all' || 
     (audienceFilter && audienceFilter !== 'all') || 
     searchQuery !== '' ||
-    keywordFilter !== null
+    keywordFilters.length > 0
   );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,7 +80,7 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
               <SelectValue placeholder="Anlass" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle Anlässe</SelectItem>
+              <SelectItem value="all">Anlässe</SelectItem>
               {occasions.map(occasion => (
                 <SelectItem key={occasion} value={occasion}>
                   {getOccasionDisplay(occasion)}
@@ -92,7 +94,7 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
               <SelectValue placeholder="Thema" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle Themen</SelectItem>
+              <SelectItem value="all">Themen</SelectItem>
               {contentTypes.map(contentType => (
                 <SelectItem key={contentType} value={contentType}>
                   {getContentTypeDisplay(contentType)}
@@ -106,7 +108,7 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
               <SelectValue placeholder="Stil" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle Stile</SelectItem>
+              <SelectItem value="all">Stile</SelectItem>
               {styles.map(style => (
                 <SelectItem key={style} value={style}>
                   {getStyleDisplay(style)}
@@ -120,7 +122,7 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
               <SelectValue placeholder="Zielgruppe" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle Zielgruppen</SelectItem>
+              <SelectItem value="all">Zielgruppen</SelectItem>
               {audiences.map(audience => (
                 <SelectItem key={audience} value={audience}>
                   {getAudienceDisplay(audience)}
@@ -137,13 +139,32 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
         </div>
       </div>
       
-      {keywordFilter && (
-        <div className="flex items-center gap-2 ml-1">
-          <Tag size={14} className="text-muted-foreground" />
-          <span className="text-sm">Schlagwort:</span>
-          <Badge variant="default" className="px-3 py-1">
-            {keywordFilter}
-          </Badge>
+      {keywordFilters.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 ml-1">
+          <div className="flex items-center">
+            <Tag size={14} className="text-muted-foreground mr-2" />
+            <span className="text-sm">Schlagwörter:</span>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {keywordFilters.map(keyword => (
+              <Badge 
+                key={keyword}
+                variant="default" 
+                className="px-2 py-1 flex items-center"
+              >
+                {keyword}
+                {toggleKeywordFilter && (
+                  <X 
+                    className="ml-1 h-3 w-3 cursor-pointer" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleKeywordFilter(keyword);
+                    }}
+                  />
+                )}
+              </Badge>
+            ))}
+          </div>
         </div>
       )}
       
