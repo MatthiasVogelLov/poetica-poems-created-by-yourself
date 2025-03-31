@@ -11,6 +11,7 @@ describe('PoemFilters Component', () => {
     styleFilter: 'all',
     audienceFilter: 'all',
     searchQuery: '',
+    keywordFilter: null, // Add the missing keywordFilter prop
     setOccasionFilter: jest.fn(),
     setContentTypeFilter: jest.fn(),
     setStyleFilter: jest.fn(),
