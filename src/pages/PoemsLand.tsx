@@ -1,19 +1,18 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import SinglePoemView from '@/components/poems-land/SinglePoemView';
 import { usePoems } from '@/hooks/use-poems';
 import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay, getStyleDisplay } from '@/utils/poem-display-helpers';
 import PoemSEO from '@/components/poems-land/PoemSEO';
 import PoemsListView from '@/components/poems-land/PoemsListView';
-import { Helmet } from 'react-helmet';
+import PoemsLandSEO from '@/components/poems-land/PoemsLandSEO';
+import { usePoemNavigation } from '@/hooks/use-poem-navigation';
 
 const PoemsLand = () => {
   const { poemSlug } = useParams();
-  const navigate = useNavigate();
-
   const {
     filteredPoems,
     isLoading,
@@ -50,96 +49,26 @@ const PoemsLand = () => {
     poemsPerPage
   } = usePoems();
 
-  useEffect(() => {
-    if (poemSlug) {
-      console.log('Finding poem ID for slug:', poemSlug);
-      const poemId = findPoemBySlug(poemSlug);
-      
-      if (poemId) {
-        console.log('Setting selected poem ID from slug:', poemId);
-        setSelectedPoemId(poemId);
-      } else {
-        console.log('Poem not found for slug:', poemSlug);
-        navigate('/poemsland', { replace: true });
-      }
-    } else {
-      setSelectedPoemId(null);
-    }
-  }, [poemSlug, findPoemBySlug, setSelectedPoemId, navigate]);
-
-  useEffect(() => {
-    if (selectedPoem) {
-      document.title = `${selectedPoem.title} - PoemsLand`;
-      
-      // Inject CSS for better SEO markup in print and reader modes
-      const style = document.createElement('style');
-      style.textContent = `
-        @media print {
-          .poem-content { font-size: 14pt; line-height: 1.5; }
-        }
-      `;
-      document.head.appendChild(style);
-      
-      return () => {
-        document.head.removeChild(style);
-      };
-    } else {
-      document.title = "PoemsLand - Sammlung personalisierter Gedichte";
-    }
-  }, [selectedPoem]);
-
-  const handleGoBack = () => {
-    setSelectedPoemId(null);
-    navigate('/poemsland', { replace: true });
-  };
-
-  const handleCreatePoem = () => {
-    navigate('/generator');
-  };
-
-  const navigateToPoemDetail = (poemId: string) => {
-    const slug = getSlugForPoemId(poemId);
-    if (slug) {
-      navigate(`/poemsland/${slug}`);
-    }
-  };
+  // Custom hook for poem navigation
+  const {
+    handleGoBack,
+    handleCreatePoem,
+    navigateToPoemDetail
+  } = usePoemNavigation({
+    poemSlug,
+    findPoemBySlug,
+    setSelectedPoemId,
+    getSlugForPoemId,
+    selectedPoem
+  });
 
   // Host and URL for SEO
   const host = window.location.origin;
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Global SEO for PoemsLand page */}
-      {!selectedPoem && (
-        <Helmet>
-          <title>PoemsLand - Sammlung personalisierter Gedichte</title>
-          <meta name="description" content="Entdecke eine Sammlung wunderschöner Gedichte zu verschiedenen Anlässen und Themen. Finde inspirierende Gedichte oder erstelle dein eigenes personalisiertes Gedicht." />
-          <meta name="keywords" content="Gedichte, Poesie, personalisierte Gedichte, Geburtstag, Liebe, Hochzeit, PoemsLand" />
-          <link rel="canonical" href={`${host}/poemsland`} />
-          <meta property="og:title" content="PoemsLand - Sammlung personalisierter Gedichte" />
-          <meta property="og:description" content="Entdecke eine Sammlung wunderschöner Gedichte zu verschiedenen Anlässen und Themen." />
-          <meta property="og:url" content={`${host}/poemsland`} />
-          <meta property="og:type" content="website" />
-          <meta name="twitter:title" content="PoemsLand - Sammlung personalisierter Gedichte" />
-          <meta name="twitter:description" content="Entdecke eine Sammlung wunderschöner Gedichte zu verschiedenen Anlässen und Themen." />
-          
-          {/* Structured data for collection page */}
-          <script type="application/ld+json">{JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "CollectionPage",
-            "name": "PoemsLand - Sammlung personalisierter Gedichte",
-            "description": "Entdecke eine Sammlung wunderschöner Gedichte zu verschiedenen Anlässen und Themen.",
-            "url": `${host}/poemsland`,
-            "isPartOf": {
-              "@type": "WebSite",
-              "name": "PoemsLand",
-              "url": host
-            }
-          })}</script>
-        </Helmet>
-      )}
-      
-      {/* Add SEO component for the selected poem */}
+      {/* SEO metadata */}
+      <PoemsLandSEO selectedPoem={selectedPoem} host={host} />
       {selectedPoem && <PoemSEO poem={selectedPoem} isPreview={false} host={host} />}
       
       <Header />
