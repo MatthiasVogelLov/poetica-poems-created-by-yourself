@@ -15,6 +15,7 @@ export const usePoems = () => {
   const { 
     filteredPoems: filteredPoemsByFilters,
     filters,
+    popularKeywords,
     actions: filterActions
   } = usePoemFilters(state.poems);
 
@@ -44,6 +45,7 @@ export const usePoems = () => {
     ...state,
     filteredPoems: filteredPoemsByFilters,
     ...filters,
+    popularKeywords,
     setSelectedPoemId,
     ...filterActions,
     ...poemActions,

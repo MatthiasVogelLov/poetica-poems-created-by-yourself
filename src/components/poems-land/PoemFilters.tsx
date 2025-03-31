@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { Filter, Search } from 'lucide-react';
+import { Filter, Search, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 interface PoemFiltersProps {
   occasionFilter: string;
@@ -11,6 +12,7 @@ interface PoemFiltersProps {
   styleFilter: string;
   audienceFilter: string;
   searchQuery: string;
+  keywordFilter: string | null;
   setOccasionFilter: (value: string) => void;
   setContentTypeFilter: (value: string) => void;
   setStyleFilter: (value: string) => void;
@@ -33,6 +35,7 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
   styleFilter = 'all',
   audienceFilter = 'all',
   searchQuery = '',
+  keywordFilter = null,
   setOccasionFilter,
   setContentTypeFilter,
   setStyleFilter,
@@ -53,7 +56,8 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
     contentTypeFilter !== 'all' || 
     styleFilter !== 'all' || 
     (audienceFilter && audienceFilter !== 'all') || 
-    searchQuery !== ''
+    searchQuery !== '' ||
+    keywordFilter !== null
   );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,7 +65,7 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
   };
 
   return (
-    <div className="mb-8 space-y-4">
+    <div className="mb-4 space-y-4">
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
         <div className="flex items-center">
           <Filter size={18} className="mr-2 text-muted-foreground" />
@@ -132,6 +136,16 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
           )}
         </div>
       </div>
+      
+      {keywordFilter && (
+        <div className="flex items-center gap-2 ml-1">
+          <Tag size={14} className="text-muted-foreground" />
+          <span className="text-sm">Schlagwort:</span>
+          <Badge variant="default" className="px-3 py-1">
+            {keywordFilter}
+          </Badge>
+        </div>
+      )}
       
       <div className="relative w-full max-w-md mx-auto">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />

@@ -3,6 +3,7 @@ import React from 'react';
 import PoemFilters from './PoemFilters';
 import PoemsList from './PoemsList';
 import CreatePoemButton from './CreatePoemButton';
+import PopularKeywords from './PopularKeywords';
 import type { Poem } from '@/types/poem-types';
 
 interface PoemsListViewProps {
@@ -13,11 +14,14 @@ interface PoemsListViewProps {
   styleFilter: string;
   audienceFilter: string;
   searchQuery: string;
+  keywordFilter: string | null;
+  popularKeywords: string[];
   setOccasionFilter: (filter: string) => void;
   setContentTypeFilter: (filter: string) => void;
   setStyleFilter: (filter: string) => void;
   setAudienceFilter: (filter: string) => void;
   setSearchQuery: (query: string) => void;
+  setKeywordFilter: (keyword: string | null) => void;
   clearFilters: () => void;
   getUniqueOccasions: () => string[];
   getUniqueContentTypes: () => string[];
@@ -46,11 +50,14 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
   styleFilter = 'all',
   audienceFilter = 'all',
   searchQuery = '',
+  keywordFilter = null,
+  popularKeywords = [],
   setOccasionFilter,
   setContentTypeFilter,
   setStyleFilter,
   setAudienceFilter,
   setSearchQuery,
+  setKeywordFilter,
   clearFilters,
   getUniqueOccasions,
   getUniqueContentTypes,
@@ -70,6 +77,15 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
   prevPage,
   poemsPerPage = 12,
 }) => {
+  const handleKeywordClick = (keyword: string) => {
+    if (keywordFilter === keyword) {
+      // If already selected, unselect it
+      setKeywordFilter(null);
+    } else {
+      setKeywordFilter(keyword);
+    }
+  };
+  
   return (
     <>
       <h1 className="text-3xl font-serif mb-8 text-center">PoemsLand</h1>
@@ -94,24 +110,39 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
         getContentTypeDisplay={getContentTypeDisplay}
         getStyleDisplay={getStyleDisplay}
         getAudienceDisplay={getAudienceDisplay}
+        keywordFilter={keywordFilter}
       />
       
-      <PoemsList 
-        poems={filteredPoems}
-        isLoading={isLoading}
-        handleDeletePoem={handleDeletePoem}
-        setSelectedPoemId={navigateToPoemDetail}
-        getOccasionDisplay={getOccasionDisplay}
-        getContentTypeDisplay={getContentTypeDisplay}
-        getStyleDisplay={getStyleDisplay}
-        getAudienceDisplay={getAudienceDisplay}
-        page={page}
-        totalCount={totalCount}
-        hasMore={hasMore}
-        onNextPage={nextPage}
-        onPrevPage={prevPage}
-        poemsPerPage={poemsPerPage}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
+        {/* Keywords sidebar (left side) */}
+        <div className="lg:col-span-1">
+          <PopularKeywords 
+            keywords={popularKeywords}
+            onKeywordClick={handleKeywordClick}
+            activeKeyword={keywordFilter}
+          />
+        </div>
+        
+        {/* Poems list (right side) */}
+        <div className="lg:col-span-3">
+          <PoemsList 
+            poems={filteredPoems}
+            isLoading={isLoading}
+            handleDeletePoem={handleDeletePoem}
+            setSelectedPoemId={navigateToPoemDetail}
+            getOccasionDisplay={getOccasionDisplay}
+            getContentTypeDisplay={getContentTypeDisplay}
+            getStyleDisplay={getStyleDisplay}
+            getAudienceDisplay={getAudienceDisplay}
+            page={page}
+            totalCount={totalCount}
+            hasMore={hasMore}
+            onNextPage={nextPage}
+            onPrevPage={prevPage}
+            poemsPerPage={poemsPerPage}
+          />
+        </div>
+      </div>
       
       <CreatePoemButton onClick={handleCreatePoem} />
     </>

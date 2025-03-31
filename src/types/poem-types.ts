@@ -20,6 +20,7 @@ export interface PoemFilters {
   styleFilter: string;
   audienceFilter?: string;
   searchQuery?: string;
+  keywordFilter?: string | null;
 }
 
 export interface PoemSeoMetadata {
@@ -38,6 +39,7 @@ export interface PoemHookState {
   styleFilter: string;
   audienceFilter?: string;
   searchQuery?: string;
+  keywordFilter?: string | null;
   poemSlugs: {[key: string]: string};
   slugToId: {[key: string]: string};
   page: number;
@@ -56,6 +58,7 @@ export interface PoemHookActions {
   setStyleFilter: (filter: string) => void;
   setAudienceFilter?: (filter: string) => void;
   setSearchQuery?: (query: string) => void;
+  setKeywordFilter?: (keyword: string | null) => void;
   handleDeletePoem: (id: string, e: React.MouseEvent) => void;
   clearFilters: () => void;
   getUniqueOccasions: () => string[];

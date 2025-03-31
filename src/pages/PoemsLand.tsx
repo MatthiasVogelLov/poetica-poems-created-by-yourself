@@ -24,12 +24,15 @@ const PoemsLand = () => {
     styleFilter,
     audienceFilter,
     searchQuery,
+    keywordFilter,
+    popularKeywords,
     setSelectedPoemId,
     setOccasionFilter,
     setContentTypeFilter,
     setStyleFilter,
     setAudienceFilter,
     setSearchQuery,
+    setKeywordFilter,
     handleDeletePoem,
     clearFilters,
     getUniqueOccasions,
@@ -141,7 +144,7 @@ const PoemsLand = () => {
       <Header />
       
       <div className="pt-32 pb-20 bg-white">
-        <div className="container-narrow px-4">
+        <div className="container px-4 max-w-7xl mx-auto">
           {selectedPoemId ? (
             <SinglePoemView 
               poem={selectedPoem}
@@ -159,11 +162,14 @@ const PoemsLand = () => {
               styleFilter={styleFilter}
               audienceFilter={audienceFilter}
               searchQuery={searchQuery}
+              keywordFilter={keywordFilter}
+              popularKeywords={popularKeywords}
               setOccasionFilter={setOccasionFilter}
               setContentTypeFilter={setContentTypeFilter}
               setStyleFilter={setStyleFilter}
               setAudienceFilter={setAudienceFilter}
               setSearchQuery={setSearchQuery}
+              setKeywordFilter={setKeywordFilter}
               clearFilters={clearFilters}
               getUniqueOccasions={getUniqueOccasions}
               getUniqueContentTypes={getUniqueContentTypes}
