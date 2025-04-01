@@ -10,7 +10,7 @@ interface HeroSectionProps {
 
 const HeroSection: React.FC<HeroSectionProps> = ({ featuredPoem, onPoemClick }) => {
   return (
-    <div className="w-full min-h-[90vh] relative overflow-hidden">
+    <div className="w-full min-h-screen relative overflow-hidden">
       <div 
         className="absolute inset-0 bg-gradient-to-t from-gray-700 via-gray-400 to-gray-100" 
       />

@@ -73,7 +73,7 @@ const PoemsLand = () => {
       
       <Header />
       
-      <div className={`pt-20 pb-20 bg-white ${!selectedPoemId ? 'px-0' : 'px-4'}`}>
+      <div className={`${!selectedPoemId ? 'px-0 pb-0 pt-0' : 'px-4 pt-20 pb-20'} bg-white`}>
         <div className={selectedPoemId ? 'container max-w-7xl mx-auto' : 'w-full'}>
           {selectedPoemId ? (
             <div className="pt-12">

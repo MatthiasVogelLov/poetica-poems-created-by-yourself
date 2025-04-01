@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Poem } from '@/types/poem-types';
 import { Star } from 'lucide-react';
 
@@ -9,6 +9,11 @@ interface PoemOfTheDayProps {
 }
 
 const PoemOfTheDay: React.FC<PoemOfTheDayProps> = ({ poem, onClick }) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const [contentHeight, setContentHeight] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(0);
+  
   // Format the poem content to preserve stanza structure
   const formatPoemContent = (content: string) => {
     // Split the content by double line breaks (stanzas)
@@ -29,6 +34,59 @@ const PoemOfTheDay: React.FC<PoemOfTheDayProps> = ({ poem, onClick }) => {
       </div>
     );
   };
+
+  useEffect(() => {
+    if (contentRef.current) {
+      const contentElement = contentRef.current;
+      setContentHeight(contentElement.scrollHeight);
+      setContainerHeight(contentElement.clientHeight);
+      
+      // Determine if the content needs scrolling
+      const needsScrolling = contentElement.scrollHeight > contentElement.clientHeight;
+      
+      if (needsScrolling) {
+        // Start scrolling after a delay
+        const timer = setTimeout(() => {
+          setShouldScroll(true);
+        }, 3000); // 3 seconds delay
+        
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [poem.content]);
+
+  useEffect(() => {
+    if (shouldScroll && contentRef.current && contentHeight > containerHeight) {
+      const contentElement = contentRef.current;
+      let startTime: number | null = null;
+      const scrollDuration = Math.max(contentHeight * 30, 15000); // Adjust scroll speed based on content length
+      
+      const scrollAnimation = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        
+        const scrollProgress = Math.min(elapsed / scrollDuration, 1);
+        const scrollPosition = scrollProgress * (contentHeight - containerHeight);
+        
+        if (contentElement) {
+          contentElement.scrollTop = scrollPosition;
+        }
+        
+        if (scrollProgress < 1) {
+          requestAnimationFrame(scrollAnimation);
+        } else {
+          // Reset to top and start over
+          if (contentElement) contentElement.scrollTop = 0;
+          startTime = null;
+          requestAnimationFrame(scrollAnimation);
+        }
+      };
+      
+      const animationFrame = requestAnimationFrame(scrollAnimation);
+      
+      return () => cancelAnimationFrame(animationFrame);
+    }
+  }, [shouldScroll, contentHeight, containerHeight]);
   
   return (
     <div 
@@ -44,7 +102,10 @@ const PoemOfTheDay: React.FC<PoemOfTheDayProps> = ({ poem, onClick }) => {
       
       <h2 className="text-2xl md:text-3xl font-serif font-medium mb-5 text-white">{poem.title}</h2>
       
-      <div className="text-white/90 leading-relaxed font-serif text-lg">
+      <div 
+        ref={contentRef}
+        className="text-white/90 leading-relaxed font-serif text-lg max-h-[400px] overflow-hidden"
+      >
         {formatPoemContent(poem.content)}
       </div>
       
