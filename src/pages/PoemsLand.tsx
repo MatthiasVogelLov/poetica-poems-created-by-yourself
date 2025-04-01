@@ -73,16 +73,18 @@ const PoemsLand = () => {
       
       <Header />
       
-      <div className="pt-32 pb-20 bg-white">
-        <div className="container px-4 max-w-7xl mx-auto">
+      <div className={`pt-20 pb-20 bg-white ${!selectedPoemId ? 'px-0' : 'px-4'}`}>
+        <div className={selectedPoemId ? 'container max-w-7xl mx-auto' : 'w-full'}>
           {selectedPoemId ? (
-            <SinglePoemView 
-              poem={selectedPoem}
-              isLoading={isLoading}
-              navigateBack={handleGoBack}
-              isPreview={false}
-              handleCreatePoem={handleCreatePoem}
-            />
+            <div className="pt-12">
+              <SinglePoemView 
+                poem={selectedPoem}
+                isLoading={isLoading}
+                navigateBack={handleGoBack}
+                isPreview={false}
+                handleCreatePoem={handleCreatePoem}
+              />
+            </div>
           ) : (
             <PoemsListView 
               filteredPoems={filteredPoems}
