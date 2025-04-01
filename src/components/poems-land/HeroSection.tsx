@@ -1,29 +1,48 @@
+
 import React from 'react';
 import PoemOfTheDay from './PoemOfTheDay';
 import { Poem } from '@/types/poem-types';
+
 interface HeroSectionProps {
   featuredPoem: Poem | null;
   onPoemClick: (id: string) => void;
 }
+
 const HeroSection: React.FC<HeroSectionProps> = ({
   featuredPoem,
   onPoemClick
 }) => {
-  return <div className="w-full min-h-screen relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-t from-gray-700 via-gray-400 to-gray-100" />
+  return (
+    <div className="w-full min-h-screen relative overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ 
+          backgroundImage: "url('/lovable-uploads/4d0e3a69-19d9-431c-ae54-5e14face08f2.png')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+      
+      {/* Subtle overlay to ensure text readability */}
+      <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
       
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div className="container max-w-5xl mx-auto px-4">
-          <div className="text-center text-white mb-16 mt-32">
-            
-            
+          <div className="text-center text-slate-800 mb-16 mt-32">
+            {/* Can add title or description here if needed */}
           </div>
           
-          {featuredPoem && <div className="mt-8 mb-24">
+          {featuredPoem && (
+            <div className="mt-8 mb-24">
               <PoemOfTheDay poem={featuredPoem} onClick={() => onPoemClick(featuredPoem.id)} />
-            </div>}
+            </div>
+          )}
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default HeroSection;
