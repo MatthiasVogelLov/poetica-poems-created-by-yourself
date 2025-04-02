@@ -18,7 +18,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       <div 
         className="fixed inset-0 bg-cover bg-center z-[-1]"
         style={{ 
-          backgroundImage: "url('/lovable-uploads/117a5233-568a-486e-a0f8-5eb29bb26d0e.png')", 
+          backgroundImage: "url('/lovable-uploads/3185e7a6-20ef-4a25-b3aa-c2a73f70b6e4.png')", 
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -34,7 +34,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
           <h1 className="text-4xl font-serif mb-10 text-white text-center">PoemsLand</h1>
           
           {featuredPoem && (
-            <div className="flex justify-center">
+            <div className="flex justify-start">
               <div className="max-w-md">
                 <PoemOfTheDay poem={featuredPoem} onClick={() => onPoemClick(featuredPoem.id)} />
               </div>
