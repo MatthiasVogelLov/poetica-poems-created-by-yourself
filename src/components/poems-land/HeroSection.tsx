@@ -2,6 +2,7 @@
 import React from 'react';
 import PoemOfTheDay from './PoemOfTheDay';
 import { Poem } from '@/types/poem-types';
+import { ArrowDown } from 'lucide-react';
 
 interface HeroSectionProps {
   featuredPoem: Poem | null;
@@ -12,13 +13,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   featuredPoem,
   onPoemClick
 }) => {
+  const scrollToContent = () => {
+    window.scrollTo({
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <div className="w-full min-h-screen relative overflow-hidden">
-      {/* Background Image - covering the entire screen */}
+      {/* Background Image with higher z-index to ensure it's visible */}
       <div 
         className="fixed inset-0 bg-cover bg-center z-[-1]"
         style={{ 
-          backgroundImage: "url('/lovable-uploads/4803d3cc-49c3-40cc-9227-a8bdeee7703c.png')", 
+          backgroundImage: "url('/lovable-uploads/d089299f-d136-40eb-a6eb-b67e71aa4671.png')", 
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -31,7 +39,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       <div className="relative pt-24 pb-16">
         <div className="container max-w-5xl mx-auto px-4">
           {/* PoemsLand title positioned above the poem box */}
-          <h1 className="text-4xl font-serif mb-10 text-white text-center">PoemsLand</h1>
+          <h1 className="text-4xl font-serif mb-10 text-white text-center drop-shadow-md">PoemsLand</h1>
           
           {featuredPoem && (
             <div className="flex justify-start">
@@ -41,6 +49,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           )}
         </div>
+      </div>
+
+      {/* Scroll down arrow */}
+      <div 
+        className="absolute bottom-10 left-10 animate-bounce cursor-pointer"
+        onClick={scrollToContent}
+      >
+        <ArrowDown size={36} className="text-white drop-shadow-lg" />
       </div>
     </div>
   );

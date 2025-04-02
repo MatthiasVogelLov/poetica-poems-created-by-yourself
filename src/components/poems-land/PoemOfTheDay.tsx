@@ -90,7 +90,7 @@ const PoemOfTheDay: React.FC<PoemOfTheDayProps> = ({ poem, onClick }) => {
   
   return (
     <div 
-      className="p-6 md:p-8 rounded-xl bg-white/10 backdrop-blur-md shadow-lg"
+      className="p-6 md:p-8 rounded-xl bg-white/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300"
       onClick={onClick}
     >
       <div className="flex justify-between items-start mb-4">
@@ -100,7 +100,7 @@ const PoemOfTheDay: React.FC<PoemOfTheDayProps> = ({ poem, onClick }) => {
         </div>
       </div>
       
-      <h2 className="text-2xl md:text-3xl font-serif font-medium mb-5 text-white">{poem.title}</h2>
+      <h2 className="text-2xl md:text-3xl font-serif font-medium mb-5">{poem.title}</h2>
       
       <div 
         ref={contentRef}
@@ -110,7 +110,7 @@ const PoemOfTheDay: React.FC<PoemOfTheDayProps> = ({ poem, onClick }) => {
       </div>
       
       <div className="flex flex-wrap mt-6 gap-2">
-        <span className="px-3 py-1 bg-white/20 text-white text-sm rounded-full">
+        <span className="px-3 py-1 bg-primary/20 text-primary text-sm rounded-full">
           Zum vollständigen Gedicht
         </span>
       </div>
