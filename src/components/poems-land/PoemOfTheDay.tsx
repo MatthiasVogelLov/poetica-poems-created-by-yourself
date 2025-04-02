@@ -90,7 +90,7 @@ const PoemOfTheDay: React.FC<PoemOfTheDayProps> = ({ poem, onClick }) => {
   
   return (
     <div 
-      className="max-w-xl mx-auto p-6 md:p-8 rounded-xl bg-white/10 backdrop-blur-md shadow-lg"
+      className="p-6 md:p-8 rounded-xl bg-white/10 backdrop-blur-md shadow-lg"
       onClick={onClick}
     >
       <div className="flex justify-between items-start mb-4">
@@ -104,7 +104,7 @@ const PoemOfTheDay: React.FC<PoemOfTheDayProps> = ({ poem, onClick }) => {
       
       <div 
         ref={contentRef}
-        className="text-black leading-relaxed font-serif text-lg max-h-[400px] overflow-hidden"
+        className="text-black leading-relaxed font-serif text-lg max-h-[300px] overflow-hidden"
       >
         {formatPoemContent(poem.content)}
       </div>

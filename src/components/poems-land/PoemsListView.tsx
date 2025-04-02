@@ -100,7 +100,7 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
   
   return (
     <>
-      <h1 className="text-3xl font-serif mb-8 text-center">PoemsLand</h1>
+      {/* Remove the redundant PoemsLand title here as it's now in HeroSection */}
       
       <HeroSection 
         featuredPoem={featuredPoem} 

@@ -14,9 +14,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 }) => {
   return (
     <div className="w-full min-h-screen relative overflow-hidden">
-      {/* Background Image */}
+      {/* Background Image - covering the entire screen */}
       <div 
-        className="absolute inset-0 bg-cover bg-center"
+        className="fixed inset-0 bg-cover bg-center z-[-1]"
         style={{ 
           backgroundImage: "url('/lovable-uploads/117a5233-568a-486e-a0f8-5eb29bb26d0e.png')", 
           backgroundSize: 'cover',
@@ -26,17 +26,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       />
       
       {/* Subtle overlay to ensure text readability */}
-      <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" />
+      <div className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-[-1]" />
       
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
+      <div className="relative pt-24 pb-16">
         <div className="container max-w-5xl mx-auto px-4">
-          <div className="text-center text-white mb-28 mt-48">
-            {/* Space for PoemsLand title, handled by Header component */}
-          </div>
+          {/* PoemsLand title positioned above the poem box */}
+          <h1 className="text-4xl font-serif mb-10 text-white text-center">PoemsLand</h1>
           
           {featuredPoem && (
-            <div className="mt-8 mb-24">
-              <PoemOfTheDay poem={featuredPoem} onClick={() => onPoemClick(featuredPoem.id)} />
+            <div className="flex justify-center">
+              <div className="max-w-md">
+                <PoemOfTheDay poem={featuredPoem} onClick={() => onPoemClick(featuredPoem.id)} />
+              </div>
             </div>
           )}
         </div>
