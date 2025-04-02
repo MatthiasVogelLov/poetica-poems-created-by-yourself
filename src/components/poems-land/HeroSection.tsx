@@ -18,7 +18,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       <div 
         className="fixed inset-0 bg-cover bg-center z-[-1]"
         style={{ 
-          backgroundImage: "url('/lovable-uploads/3185e7a6-20ef-4a25-b3aa-c2a73f70b6e4.png')", 
+          backgroundImage: "url('/lovable-uploads/4803d3cc-49c3-40cc-9227-a8bdeee7703c.png')", 
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',

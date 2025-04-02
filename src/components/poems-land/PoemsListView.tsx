@@ -100,8 +100,6 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
   
   return (
     <>
-      {/* Remove the redundant PoemsLand title here as it's now in HeroSection */}
-      
       <HeroSection 
         featuredPoem={featuredPoem} 
         onPoemClick={navigateToPoemDetail} 

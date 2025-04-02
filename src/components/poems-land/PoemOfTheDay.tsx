@@ -104,7 +104,7 @@ const PoemOfTheDay: React.FC<PoemOfTheDayProps> = ({ poem, onClick }) => {
       
       <div 
         ref={contentRef}
-        className="text-black leading-relaxed font-serif text-lg max-h-[300px] overflow-hidden"
+        className="text-black leading-relaxed font-serif text-lg max-h-[250px] overflow-hidden"
       >
         {formatPoemContent(poem.content)}
       </div>
