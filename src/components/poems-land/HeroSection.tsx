@@ -22,24 +22,24 @@ const HeroSection: React.FC<HeroSectionProps> = ({
 
   return (
     <div className="w-full min-h-screen relative overflow-hidden">
-      {/* Background Image with higher z-index to ensure it's visible */}
+      {/* Background Image with the new uploaded image */}
       <div 
         className="fixed inset-0 bg-cover bg-center z-[-1]"
         style={{ 
-          backgroundImage: "url('/lovable-uploads/d089299f-d136-40eb-a6eb-b67e71aa4671.png')", 
+          backgroundImage: "url('/lovable-uploads/e0b2a410-58c0-48b2-b6e0-1904424475f6.png')", 
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
         }}
       />
       
-      {/* Subtle overlay to ensure text readability */}
-      <div className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-[-1]" />
+      {/* Very subtle overlay to ensure text readability */}
+      <div className="fixed inset-0 bg-black/5 z-[-1]" />
       
       <div className="relative pt-24 pb-16">
         <div className="container max-w-5xl mx-auto px-4">
-          {/* PoemsLand title positioned above the poem box */}
-          <h1 className="text-4xl font-serif mb-10 text-white text-center drop-shadow-md">PoemsLand</h1>
+          {/* PoemsLand title positioned above the poem box with dark text */}
+          <h1 className="text-4xl font-serif mb-10 text-black font-bold text-center">PoemsLand</h1>
           
           {featuredPoem && (
             <div className="flex justify-start">
@@ -56,7 +56,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         className="absolute bottom-10 left-10 animate-bounce cursor-pointer"
         onClick={scrollToContent}
       >
-        <ArrowDown size={36} className="text-white drop-shadow-lg" />
+        <ArrowDown size={36} className="text-black" />
       </div>
     </div>
   );
