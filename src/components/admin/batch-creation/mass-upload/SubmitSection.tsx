@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Wand2 } from 'lucide-react';
+import { Wand2, Loader2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
@@ -27,7 +27,7 @@ const SubmitSection: React.FC<SubmitSectionProps> = ({
           <Checkbox 
             id="publish-poems-land" 
             checked={publishToPoemsLand}
-            onCheckedChange={onPublishToPoemsLandChange}
+            onCheckedChange={(checked) => onPublishToPoemsLandChange(checked === true)}
           />
           <Label htmlFor="publish-poems-land">Automatisch auf PoemsLand publizieren</Label>
         </div>
@@ -38,7 +38,10 @@ const SubmitSection: React.FC<SubmitSectionProps> = ({
           className="w-full md:w-auto"
         >
           {isGenerating ? (
-            <span className="animate-pulse">Generiere Gedichte...</span>
+            <>
+              <Loader2 size={16} className="mr-2 animate-spin" />
+              Generiere Gedichte...
+            </>
           ) : (
             <>
               <Wand2 size={16} className="mr-2" />

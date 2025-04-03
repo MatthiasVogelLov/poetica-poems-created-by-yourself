@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -89,7 +88,12 @@ export const useMassUpload = (onCompletion: () => void) => {
     setIsGenerating(true);
     
     try {
-      const generatePromises = validEntries.map(async (entry) => {
+      // Create an array to track failed entries
+      const failedEntries: { title: string, error: string }[] = [];
+      const successfulEntries: string[] = [];
+      
+      // Process entries sequentially to avoid overwhelming the API
+      for (const entry of validEntries) {
         let poemOptions = {
           style: massUploadData.style,
           verseType: massUploadData.verseType,
@@ -106,54 +110,87 @@ export const useMassUpload = (onCompletion: () => void) => {
           };
         }
 
-        // Call the generate-poem edge function
-        const { data, error } = await supabase.functions.invoke('generate-poem', {
-          body: {
-            ...poemOptions,
-            title: entry.title,
-            keywords: entry.keywords
-          }
-        });
-
-        if (error) throw error;
-        
-        // Save the generated poem to the database
-        const { error: saveError } = await supabase
-          .from('user_poems')
-          .insert({
-            title: entry.title,
-            content: data.poem,
-            style: poemOptions.style,
-            verse_type: poemOptions.verseType,
-            occasion: 'andere',
-            content_type: 'natur',
-            audience: 'erwachsene',
-            status: massUploadData.publishToPoemsLand ? 'published' : 'draft',
-            keywords: entry.keywords,
-            length: poemOptions.length,
-            batch_created: true
+        try {
+          // Call the generate-poem edge function
+          const { data, error } = await supabase.functions.invoke('generate-poem', {
+            body: {
+              ...poemOptions,
+              title: entry.title,
+              keywords: entry.keywords,
+              audience: 'erwachsene',
+              occasion: 'andere',
+              contentType: 'natur'
+            }
           });
 
-        if (saveError) throw saveError;
-        
-        return data;
-      });
+          if (error) {
+            failedEntries.push({ title: entry.title, error: error.message });
+            continue;
+          }
+          
+          if (!data) {
+            failedEntries.push({ title: entry.title, error: 'Keine Daten vom Server erhalten' });
+            continue;
+          }
+          
+          // Save the generated poem to the database
+          const { error: saveError } = await supabase
+            .from('user_poems')
+            .insert({
+              title: entry.title,
+              content: data.poem,
+              style: poemOptions.style,
+              verse_type: poemOptions.verseType,
+              occasion: 'andere',
+              content_type: 'natur',
+              audience: 'erwachsene',
+              status: massUploadData.publishToPoemsLand ? 'published' : 'draft',
+              keywords: entry.keywords,
+              length: poemOptions.length,
+              batch_created: true
+            });
 
-      await Promise.all(generatePromises);
+          if (saveError) {
+            failedEntries.push({ title: entry.title, error: saveError.message });
+          } else {
+            successfulEntries.push(entry.title);
+          }
+        } catch (entryError) {
+          console.error(`Error processing entry "${entry.title}":`, entryError);
+          failedEntries.push({ title: entry.title, error: entryError instanceof Error ? entryError.message : 'Unbekannter Fehler' });
+        }
+        
+        // Add a small delay between API calls to prevent rate limiting
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      // Report results
+      if (successfulEntries.length > 0) {
+        toast.success(`${successfulEntries.length} Gedichte wurden erfolgreich erstellt.`);
+      }
       
-      toast.success(`${validEntries.length} Gedichte wurden erfolgreich erstellt.`);
+      if (failedEntries.length > 0) {
+        console.error('Failed entries:', failedEntries);
+        toast.error(`${failedEntries.length} Gedichte konnten nicht erstellt werden.`, {
+          description: "Bitte versuchen Sie es später erneut oder reduzieren Sie die Anzahl der gleichzeitigen Anfragen."
+        });
+      }
       
-      // Reset form entries but keep the style settings
-      setMassUploadData(prev => ({
-        ...prev,
-        poemEntries: initialPoemEntries
-      }));
+      // Reset form entries but keep the style settings if at least one poem was successful
+      if (successfulEntries.length > 0) {
+        setMassUploadData(prev => ({
+          ...prev,
+          poemEntries: initialPoemEntries
+        }));
+      }
       
       // Trigger callback to refresh poem list
       onCompletion();
     } catch (error) {
       console.error('Error generating mass upload poems:', error);
-      toast.error('Fehler beim Erstellen der Gedichte. Bitte versuchen Sie es später erneut.');
+      toast.error('Fehler beim Erstellen der Gedichte. Bitte versuchen Sie es später erneut.', {
+        description: error instanceof Error ? error.message : 'Unbekannter Fehler'
+      });
     } finally {
       setIsGenerating(false);
     }
