@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Poem } from '@/types/poem-types';
 import { Star } from 'lucide-react';
@@ -89,7 +90,7 @@ const PoemOfTheDay: React.FC<PoemOfTheDayProps> = ({ poem, onClick }) => {
   
   return (
     <div 
-      className="p-6 md:p-8 rounded-xl bg-white/95 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+      className="p-6 md:p-8 rounded-xl bg-white/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
       onClick={onClick}
     >
       <div className="flex justify-between items-start mb-4">

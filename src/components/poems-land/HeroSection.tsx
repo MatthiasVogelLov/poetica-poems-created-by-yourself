@@ -23,7 +23,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   // Force background image reload on component mount
   useEffect(() => {
     const img = new Image();
-    img.src = '/lovable-uploads/6169c2b0-b024-4ab5-919e-049befc3844b.png';
+    img.src = '/lovable-uploads/4045edd2-4676-46be-8fd9-26ab8e3a633f.png';
   }, []);
 
   return (
@@ -32,7 +32,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       <div 
         className="fixed inset-0 bg-cover bg-center z-[-1]"
         style={{ 
-          backgroundImage: "url('/lovable-uploads/6169c2b0-b024-4ab5-919e-049befc3844b.png')", 
+          backgroundImage: "url('/lovable-uploads/4045edd2-4676-46be-8fd9-26ab8e3a633f.png')", 
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -40,12 +40,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       />
       
       {/* Very subtle overlay to ensure text readability */}
-      <div className="fixed inset-0 bg-black/10 z-[-1]" />
+      <div className="fixed inset-0 bg-black/5 z-[-1]" />
       
       <div className="relative pt-24 pb-16">
         <div className="container max-w-5xl mx-auto px-4">
-          {/* PoemsLand title positioned above the poem box with dark text */}
-          <h1 className="text-4xl font-serif mb-10 text-black font-bold text-center text-shadow-sm">PoemsLand</h1>
+          {/* PoemsLand title positioned above the poem box with text shadow for better visibility */}
+          <h1 className="text-4xl font-serif mb-10 text-black font-bold text-center drop-shadow-md">PoemsLand</h1>
           
           {featuredPoem && (
             <div className="flex justify-start">
@@ -62,7 +62,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         className="absolute bottom-10 left-10 animate-bounce cursor-pointer"
         onClick={scrollToContent}
       >
-        <ArrowDown size={36} className="text-black" />
+        <ArrowDown size={36} className="text-black drop-shadow-md" />
       </div>
     </div>
   );

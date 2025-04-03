@@ -9,6 +9,7 @@ import { Sparkles, Heart, Star, Users, Calendar, Type } from 'lucide-react';
 const Index = () => {
   const navigate = useNavigate();
   const goToGenerator = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate('/generator');
   };
 
