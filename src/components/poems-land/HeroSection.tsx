@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PoemOfTheDay from './PoemOfTheDay';
 import { Poem } from '@/types/poem-types';
 import { ArrowDown } from 'lucide-react';
@@ -20,13 +20,19 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     });
   };
 
+  // Force background image reload on component mount
+  useEffect(() => {
+    const img = new Image();
+    img.src = '/lovable-uploads/6169c2b0-b024-4ab5-919e-049befc3844b.png';
+  }, []);
+
   return (
     <div className="w-full min-h-screen relative overflow-hidden">
-      {/* Background Image with the new uploaded image */}
+      {/* Background Image */}
       <div 
         className="fixed inset-0 bg-cover bg-center z-[-1]"
         style={{ 
-          backgroundImage: "url('/lovable-uploads/e0b2a410-58c0-48b2-b6e0-1904424475f6.png')", 
+          backgroundImage: "url('/lovable-uploads/6169c2b0-b024-4ab5-919e-049befc3844b.png')", 
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -34,12 +40,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       />
       
       {/* Very subtle overlay to ensure text readability */}
-      <div className="fixed inset-0 bg-black/5 z-[-1]" />
+      <div className="fixed inset-0 bg-black/10 z-[-1]" />
       
       <div className="relative pt-24 pb-16">
         <div className="container max-w-5xl mx-auto px-4">
           {/* PoemsLand title positioned above the poem box with dark text */}
-          <h1 className="text-4xl font-serif mb-10 text-black font-bold text-center">PoemsLand</h1>
+          <h1 className="text-4xl font-serif mb-10 text-black font-bold text-center text-shadow-sm">PoemsLand</h1>
           
           {featuredPoem && (
             <div className="flex justify-start">

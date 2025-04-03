@@ -4,12 +4,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>poemia-generate</title>
-    <meta name="description" content="Erstelle wunderschöne, personalisierte Gedichte für jeden Anlass." />
+    <title>Poetica - Personalisierte Gedichte für jeden Anlass</title>
+    <meta name="description" content="Erstelle wunderschöne, personalisierte Gedichte für jeden Anlass. Durchsuche unsere Sammlung von Gedichten oder generiere dein eigenes." />
     <meta name="author" content="PoemsLand" />
-    <meta name="keywords" content="gedichte, poesie, personalisierte gedichte, gedichtgenerator" />
+    <meta name="keywords" content="gedichte, poesie, personalisierte gedichte, gedichtgenerator, poemsland" />
     <meta property="og:image" content="/og-image.png" />
-    <meta property="og:site_name" content="PoemsLand" />
+    <meta property="og:site_name" content="Poetica" />
     <meta property="og:type" content="website" />
     
     <!-- Preconnects for faster loading -->
@@ -21,16 +21,30 @@
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": "PoemsLand",
-        "url": "https://poemsland.com",
+        "name": "Poetica",
+        "url": "https://poetica.netlify.app",
         "description": "Erstelle wunderschöne, personalisierte Gedichte für jeden Anlass.",
         "potentialAction": {
           "@type": "SearchAction",
-          "target": "https://poemsland.com/poemsland?q={search_term_string}",
+          "target": "https://poetica.netlify.app/poemsland?q={search_term_string}",
           "query-input": "required name=search_term_string"
         }
       }
     </script>
+    
+    <!-- For SEO, add custom styles for SEO indexing -->
+    <style>
+      /* Styles to ensure poem content is rendered properly for search engines */
+      .poem-seo-content {
+        display: none;
+      }
+      
+      /* For print/reader mode optimization */
+      @media print {
+        .poem-content { font-size: 14pt; line-height: 1.6; }
+        .poem-article { max-width: 100%; margin: 0; padding: 2cm; }
+      }
+    </style>
     
     <!-- Poem SEO Content placeholder - Will be populated by JavaScript -->
     <div id="poem-seo-placeholder" style="display:none;"></div>
