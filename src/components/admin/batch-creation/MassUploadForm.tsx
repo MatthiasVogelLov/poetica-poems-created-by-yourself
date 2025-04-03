@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Style, VerseType, Length } from '@/types/poem';
 import { toast } from 'sonner';
 import { readExcelFile } from './excelUtils';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface PoemEntry {
   title: string;
@@ -20,11 +21,13 @@ interface MassUploadFormProps {
   verseType: VerseType;
   length: Length;
   useRandomOptions: boolean;
+  publishToPoemsLand: boolean;
   poemEntries: PoemEntry[];
   onStyleChange: (style: Style) => void;
   onVerseTypeChange: (verseType: VerseType) => void;
   onLengthChange: (length: Length) => void;
   onRandomOptionsChange: (useRandom: boolean) => void;
+  onPublishToPoemsLandChange: (publish: boolean) => void;
   onPoemEntryChange: (index: number, field: 'title' | 'keywords', value: string) => void;
   onGenerate: () => void;
   isGenerating: boolean;
@@ -35,11 +38,13 @@ const MassUploadForm: React.FC<MassUploadFormProps> = ({
   verseType,
   length,
   useRandomOptions,
+  publishToPoemsLand,
   poemEntries,
   onStyleChange,
   onVerseTypeChange,
   onLengthChange,
   onRandomOptionsChange,
+  onPublishToPoemsLandChange,
   onPoemEntryChange,
   onGenerate,
   isGenerating,
@@ -192,20 +197,31 @@ const MassUploadForm: React.FC<MassUploadFormProps> = ({
       </div>
 
       <div className="flex justify-end pt-4">
-        <Button 
-          onClick={onGenerate}
-          disabled={isGenerating || poemEntries.every(entry => !entry.title.trim())}
-          className="w-full md:w-auto"
-        >
-          {isGenerating ? (
-            <span className="animate-pulse">Generiere Gedichte...</span>
-          ) : (
-            <>
-              <Wand2 size={16} className="mr-2" />
-              Gedichte generieren
-            </>
-          )}
-        </Button>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="publish-poems-land" 
+              checked={publishToPoemsLand}
+              onCheckedChange={onPublishToPoemsLandChange}
+            />
+            <Label htmlFor="publish-poems-land">Automatisch auf PoemsLand publizieren</Label>
+          </div>
+          
+          <Button 
+            onClick={onGenerate}
+            disabled={isGenerating || poemEntries.every(entry => !entry.title.trim())}
+            className="w-full md:w-auto"
+          >
+            {isGenerating ? (
+              <span className="animate-pulse">Generiere Gedichte...</span>
+            ) : (
+              <>
+                <Wand2 size={16} className="mr-2" />
+                Gedichte generieren
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -51,6 +51,7 @@ const BatchCreation = () => {
     handleVerseTypeChange,
     handleLengthChange,
     handleRandomOptionsChange,
+    handlePublishToPoemsLandChange,
     handlePoemEntryChange,
     generateMassUploadPoems
   } = useMassUpload(fetchBatchPoems);
@@ -98,11 +99,13 @@ const BatchCreation = () => {
                   verseType={massUploadData.verseType}
                   length={massUploadData.length}
                   useRandomOptions={massUploadData.useRandomOptions}
+                  publishToPoemsLand={massUploadData.publishToPoemsLand}
                   poemEntries={massUploadData.poemEntries}
                   onStyleChange={handleStyleChange}
                   onVerseTypeChange={handleVerseTypeChange}
                   onLengthChange={handleLengthChange}
                   onRandomOptionsChange={handleRandomOptionsChange}
+                  onPublishToPoemsLandChange={handlePublishToPoemsLandChange}
                   onPoemEntryChange={handlePoemEntryChange}
                   onGenerate={generateMassUploadPoems}
                   isGenerating={isGeneratingMassUpload}

@@ -16,6 +16,7 @@ interface MassUploadData {
   length: Length;
   useRandomOptions: boolean;
   poemEntries: PoemEntry[];
+  publishToPoemsLand: boolean;
 }
 
 // Default to 5 empty poem entries
@@ -30,7 +31,8 @@ export const useMassUpload = (onCompletion: () => void) => {
     verseType: 'kreuzreim',
     length: 'mittel',
     useRandomOptions: false,
-    poemEntries: initialPoemEntries
+    poemEntries: initialPoemEntries,
+    publishToPoemsLand: true
   });
   
   const [isGenerating, setIsGenerating] = useState(false);
@@ -49,6 +51,10 @@ export const useMassUpload = (onCompletion: () => void) => {
 
   const handleRandomOptionsChange = (useRandomOptions: boolean) => {
     setMassUploadData(prev => ({ ...prev, useRandomOptions }));
+  };
+
+  const handlePublishToPoemsLandChange = (publishToPoemsLand: boolean) => {
+    setMassUploadData(prev => ({ ...prev, publishToPoemsLand }));
   };
 
   const handlePoemEntryChange = (index: number, field: 'title' | 'keywords', value: string) => {
@@ -122,7 +128,7 @@ export const useMassUpload = (onCompletion: () => void) => {
             occasion: 'andere',
             content_type: 'natur',
             audience: 'erwachsene',
-            status: 'draft',
+            status: massUploadData.publishToPoemsLand ? 'published' : 'draft',
             keywords: entry.keywords,
             length: poemOptions.length,
             batch_created: true
@@ -160,6 +166,7 @@ export const useMassUpload = (onCompletion: () => void) => {
     handleVerseTypeChange,
     handleLengthChange,
     handleRandomOptionsChange,
+    handlePublishToPoemsLandChange,
     handlePoemEntryChange,
     generateMassUploadPoems
   };
