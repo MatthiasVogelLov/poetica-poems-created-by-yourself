@@ -9,7 +9,7 @@ import { useBatchPoems } from './batch-creation/useBatchPoems';
 import { useTemplateGeneration } from './batch-creation/useTemplateGeneration';
 import { useManualPoemCreation } from './batch-creation/useManualPoemCreation';
 import BatchCreationErrorBoundary from './batch-creation/BatchCreationErrorBoundary';
-import MassUploadForm from './batch-creation/MassUploadForm';
+import MassUploadForm from './batch-creation/mass-upload/MassUploadForm';
 import { useMassUpload } from './batch-creation/useMassUpload';
 
 const BatchCreation = () => {
