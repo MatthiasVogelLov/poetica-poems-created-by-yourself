@@ -1,0 +1,60 @@
+
+{
+  "common": {
+    "appName": "Poetica",
+    "backToHome": "Back to Home",
+    "logout": "Log out",
+    "language": "Language"
+  },
+  "header": {
+    "generatePoem": "Generate Poem",
+    "poems": "Poems",
+    "contact": "Contact",
+    "help": "Help"
+  },
+  "admin": {
+    "title": "Admin Area",
+    "loginTitle": "Admin Login",
+    "enterPassword": "Enter the admin password",
+    "login": "Login",
+    "logout": "Logout",
+    "statistics": "Statistics",
+    "content": "Content",
+    "batchCreation": "Batch Creation"
+  },
+  "generator": {
+    "title": "Create Your Personal Poem",
+    "subtitle": "Choose options and add personal details",
+    "audience": "For whom?",
+    "occasion": "For what occasion?",
+    "contentType": "What type of content?",
+    "style": "Which style?",
+    "verseType": "What verse form?",
+    "length": "How long?",
+    "keywords": "Keywords (optional)",
+    "generate": "Generate Poem"
+  },
+  "preview": {
+    "title": "Your Personalized Poem",
+    "backToGenerator": "Back to Generator",
+    "fullUnlock": "Unlock Full Poem",
+    "alreadyPaid": "You have already unlocked the full poem.",
+    "sharePoem": "Share Poem",
+    "printPoem": "Print Poem",
+    "downloadPoem": "Download Poem",
+    "emailPoem": "Email Poem"
+  },
+  "poemsland": {
+    "title": "Discover Poems",
+    "subtitle": "Browse our collection",
+    "search": "Search poems",
+    "filters": "Filters",
+    "occasion": "Occasion",
+    "contentType": "Content Type",
+    "style": "Style",
+    "audience": "Audience",
+    "createPoem": "Create Your Own Poem",
+    "backToList": "Back to List",
+    "popularKeywords": "Popular Keywords"
+  }
+}

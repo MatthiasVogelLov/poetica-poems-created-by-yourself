@@ -1,9 +1,13 @@
 
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslations } from '@/hooks/use-translations';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { language, isAdmin } = useLanguage();
+  const { t } = useTranslations();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,8 +36,16 @@ const Header = () => {
           className="font-serif text-xl md:text-2xl font-medium transition-all duration-300 hover:opacity-70 text-black font-bold"
           onClick={scrollToTop}
         >
-          Poetica
+          {t('common.appName')}
         </NavLink>
+        
+        {isAdmin && (
+          <div className="text-sm text-muted-foreground">
+            <span className="bg-gray-100 px-3 py-1 rounded-full">
+              {language === 'de' ? 'Deutsche Version' : 'English Version'}
+            </span>
+          </div>
+        )}
       </div>
     </header>
   );

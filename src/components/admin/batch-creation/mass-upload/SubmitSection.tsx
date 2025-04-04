@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Wand2, Loader2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface SubmitSectionProps {
   isGenerating: boolean;
@@ -20,6 +21,20 @@ const SubmitSection: React.FC<SubmitSectionProps> = ({
   publishToPoemsLand,
   onPublishToPoemsLandChange
 }) => {
+  const { language } = useTranslations();
+  
+  const publishText = language === 'de' 
+    ? "Automatisch auf PoemsLand publizieren" 
+    : "Automatically publish to PoemsLand";
+    
+  const generateText = language === 'de'
+    ? "Gedichte generieren"
+    : "Generate Poems";
+    
+  const generatingText = language === 'de'
+    ? "Generiere Gedichte..."
+    : "Generating poems...";
+    
   return (
     <div className="flex justify-end pt-4">
       <div className="flex items-center justify-between w-full">
@@ -29,7 +44,7 @@ const SubmitSection: React.FC<SubmitSectionProps> = ({
             checked={publishToPoemsLand}
             onCheckedChange={(checked) => onPublishToPoemsLandChange(checked === true)}
           />
-          <Label htmlFor="publish-poems-land">Automatisch auf PoemsLand publizieren</Label>
+          <Label htmlFor="publish-poems-land">{publishText}</Label>
         </div>
         
         <Button 
@@ -40,12 +55,12 @@ const SubmitSection: React.FC<SubmitSectionProps> = ({
           {isGenerating ? (
             <>
               <Loader2 size={16} className="mr-2 animate-spin" />
-              Generiere Gedichte...
+              {generatingText}
             </>
           ) : (
             <>
               <Wand2 size={16} className="mr-2" />
-              Gedichte generieren
+              {generateText}
             </>
           )}
         </Button>

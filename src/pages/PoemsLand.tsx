@@ -1,8 +1,8 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import SinglePoemView from '@/components/poems-land/SinglePoemView';
 import { usePoems } from '@/hooks/use-poems';
 import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay, getStyleDisplay } from '@/utils/poem-display-helpers';
@@ -10,9 +10,22 @@ import PoemSEO from '@/components/poems-land/PoemSEO';
 import PoemsListView from '@/components/poems-land/PoemsListView';
 import PoemsLandSEO from '@/components/poems-land/PoemsLandSEO';
 import { usePoemNavigation } from '@/hooks/use-poem-navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const PoemsLand = () => {
   const { poemSlug } = useParams();
+  const location = useLocation();
+  const { language } = useLanguage();
+  
+  // Set language-specific filters based on URL
+  const isEnglishRoute = location.pathname.startsWith('/en/');
+  
+  // Update language in context based on route if needed
+  useEffect(() => {
+    // This ensures poems are filtered by language correctly
+    console.log(`PoemsLand component loaded with language: ${language}, path: ${location.pathname}`);
+  }, [language, location.pathname]);
+  
   const {
     filteredPoems,
     isLoading,

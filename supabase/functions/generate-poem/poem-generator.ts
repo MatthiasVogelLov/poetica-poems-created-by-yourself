@@ -12,13 +12,13 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Main function to generate a poem based on form data
 export async function generatePoem(formData: any) {
-  const { audience, occasion, contentType, style, verseType, length, keywords, title } = formData;
+  const { audience, occasion, contentType, style, verseType, length, keywords, title, language = 'de' } = formData;
   
   console.log("Sending to OpenAI with form data:", formData);
 
   // Generate prompts
-  const systemPrompt = generateSystemPrompt();
-  const userPrompt = generateUserPrompt({ audience, occasion, contentType, style, verseType, length, keywords });
+  const systemPrompt = generateSystemPrompt(language);
+  const userPrompt = generateUserPrompt({ audience, occasion, contentType, style, verseType, length, keywords, language });
 
   let retries = 0;
   
@@ -79,7 +79,7 @@ export async function generatePoem(formData: any) {
       }
 
       // Generate title if not provided
-      const finalTitle = title || generateTitleFromOccasion(occasion, style);
+      const finalTitle = title || generateTitleFromOccasion(occasion, style, language);
 
       // Add a list of keywords at the end of the poem if keywords were provided
       if (keywords && keywords.trim()) {

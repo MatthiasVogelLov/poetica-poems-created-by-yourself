@@ -2,6 +2,7 @@
 import React from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface OptionsSectionProps {
   useRandomOptions: boolean;
@@ -12,6 +13,12 @@ const OptionsSection: React.FC<OptionsSectionProps> = ({
   useRandomOptions, 
   onRandomOptionsChange 
 }) => {
+  const { language } = useTranslations();
+  
+  const randomOptionsText = language === 'de' 
+    ? "Optionen zufällig wählen"
+    : "Randomly select options";
+    
   return (
     <div className="flex items-center space-x-2 mt-4">
       <Switch
@@ -19,7 +26,7 @@ const OptionsSection: React.FC<OptionsSectionProps> = ({
         checked={useRandomOptions}
         onCheckedChange={onRandomOptionsChange}
       />
-      <Label htmlFor="random-options">Optionen zufällig wählen</Label>
+      <Label htmlFor="random-options">{randomOptionsText}</Label>
     </div>
   );
 };
