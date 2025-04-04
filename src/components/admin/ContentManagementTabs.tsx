@@ -22,14 +22,14 @@ const ContentManagementTabs: React.FC<ContentManagementTabsProps> = ({
     return localStorage.getItem(`admin_${section}_${language}`) || '';
   };
 
-  // Content sections
+  // Content sections based on language
   const contentSections = language === 'en' ? ["help", "contact"] : ["hilfe", "kontakt"];
 
   return (
     <Tabs defaultValue="stats" className="w-full" value={activeTab} onValueChange={onTabChange}>
       <TabsList className="grid grid-cols-4 mb-8">
-        <TabsTrigger value="stats">{language === 'en' ? 'Statistics' : 'Statistiken'}</TabsTrigger>
-        <TabsTrigger value="batch">{language === 'en' ? 'Batch Creation' : 'Batch Creation'}</TabsTrigger>
+        <TabsTrigger value="stats">{t('admin.statistics')}</TabsTrigger>
+        <TabsTrigger value="batch">{t('admin.batchCreation')}</TabsTrigger>
         {contentSections.map(section => (
           <TabsTrigger key={section} value={section} className="capitalize">
             {section}

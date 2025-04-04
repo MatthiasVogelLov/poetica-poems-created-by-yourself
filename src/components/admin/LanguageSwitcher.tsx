@@ -15,11 +15,15 @@ const LanguageSwitcher: React.FC = () => {
   const { language, setLanguage } = useLanguage();
   const { t } = useTranslations();
 
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value as 'de' | 'en');
+  };
+
   return (
     <div className="flex items-center">
       <Globe size={16} className="mr-2 text-muted-foreground" />
-      <Select value={language} onValueChange={(value) => setLanguage(value as 'de' | 'en')}>
-        <SelectTrigger className="w-[110px] h-9">
+      <Select value={language} onValueChange={handleLanguageChange}>
+        <SelectTrigger className="w-[120px] h-9 border-orange-400 border-2">
           <SelectValue placeholder={t('common.language')} />
         </SelectTrigger>
         <SelectContent>

@@ -20,7 +20,8 @@
     "logout": "Abmelden",
     "statistics": "Statistiken",
     "content": "Inhalte",
-    "batchCreation": "Stapelerstellung"
+    "batchCreation": "Stapelerstellung",
+    "randomOptions": "Zufällige Optionen auswählen"
   },
   "generator": {
     "title": "Gestalten Sie Ihr persönliches Gedicht",
