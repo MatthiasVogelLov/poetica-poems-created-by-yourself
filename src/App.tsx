@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, HashRouter } from "react-router-dom";
 import Index from "./pages/Index";
 import Generator from "./pages/Generator";
 import Preview from "./pages/Preview";
@@ -23,26 +23,31 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/generator" element={<Generator />} />
-          <Route path="/preview" element={<Preview />} />
-          <Route path="/kontakt" element={<Kontakt />} />
-          <Route path="/hilfe" element={<Hilfe />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/poemsland" element={<PoemsLand />} />
-          <Route path="/poemsland/:poemSlug" element={<PoemsLand />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Get the base URL from the environment or default to '/'
+  const basename = import.meta.env.BASE_URL || '/';
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter basename={basename}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/generator" element={<Generator />} />
+            <Route path="/preview" element={<Preview />} />
+            <Route path="/kontakt" element={<Kontakt />} />
+            <Route path="/hilfe" element={<Hilfe />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/poemsland" element={<PoemsLand />} />
+            <Route path="/poemsland/:poemSlug" element={<PoemsLand />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
