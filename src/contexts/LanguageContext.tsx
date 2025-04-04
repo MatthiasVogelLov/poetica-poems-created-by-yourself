@@ -36,7 +36,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     // This is a simple solution that ensures everything updates correctly
     if (lang === 'en') {
       // If we're switching to English and we're not already on an English route, redirect
-      if (!window.location.hash.includes('/en/') && !window.location.hash === '#/en') {
+      if (!window.location.hash.includes('/en/') && window.location.hash !== '#/en') {
         if (window.location.hash === '#/') {
           window.location.hash = '#/en';
         } else {
