@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslations } from '@/hooks/use-translations';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Preview = () => {
   const location = useLocation();
@@ -19,11 +21,14 @@ const Preview = () => {
   const isPaid = searchParams.get('paid') === 'true';
   const paymentProvider = searchParams.get('payment_provider');
   const transactionId = searchParams.get('tx');
+  const { t, language } = useTranslations();
+  const { language: langContext } = useLanguage();
   
   useEffect(() => {
     console.log('Preview page loaded with payment status:', isPaid ? 'PAID' : 'NOT PAID');
     console.log('Payment provider:', paymentProvider || 'none');
     console.log('Transaction ID:', transactionId || 'none');
+    console.log('Language:', language);
     
     try {
       const poemData = localStorage.getItem('currentPoemData');
@@ -36,10 +41,17 @@ const Preview = () => {
     }
     
     if (isPaid && (paymentProvider || transactionId)) {
-      const provider = paymentProvider === 'paypal' || transactionId ? 'PayPal' : 'Kreditkarte';
-      toast.success(`Zahlung erfolgreich (${provider})`, {
-        description: "Vielen Dank für Ihren Kauf! Das vollständige Gedicht wurde freigeschaltet."
-      });
+      const provider = paymentProvider === 'paypal' || transactionId ? 'PayPal' : (language === 'en' ? 'Credit Card' : 'Kreditkarte');
+      
+      const successMessage = language === 'en' 
+        ? `Payment successful (${provider})` 
+        : `Zahlung erfolgreich (${provider})`;
+        
+      const description = language === 'en'
+        ? "Thank you for your purchase! The full poem has been unlocked."
+        : "Vielen Dank für Ihren Kauf! Das vollständige Gedicht wurde freigeschaltet.";
+        
+      toast.success(successMessage, { description });
       
       if (!isPaid && transactionId) {
         navigate('/preview?paid=true&payment_provider=paypal&tx=' + transactionId, { 
@@ -48,7 +60,7 @@ const Preview = () => {
         });
       }
     }
-  }, [isPaid, paymentProvider, transactionId, location.state, navigate]);
+  }, [isPaid, paymentProvider, transactionId, location.state, navigate, language]);
   
   const { poemTitle, poemContent, isGenerating } = usePoemLoader(
     isPaid || !!transactionId, 
@@ -79,6 +91,7 @@ const Preview = () => {
                 style: location.state.formData.style,
                 verse_type: location.state.formData.verseType,
                 length: location.state.formData.length,
+                language: langContext
               }
             ]);
             
@@ -87,8 +100,12 @@ const Preview = () => {
             return;
           }
           
-          toast.success('Gedicht wurde in PoemsLand gespeichert', {
-            description: 'Sie können es jederzeit in PoemsLand ansehen.',
+          toast.success(language === 'en' 
+            ? 'Poem has been saved to PoemsLand' 
+            : 'Gedicht wurde in PoemsLand gespeichert', {
+            description: language === 'en' 
+              ? 'You can view it anytime in PoemsLand.' 
+              : 'Sie können es jederzeit in PoemsLand ansehen.',
             duration: 5000,
           });
           
@@ -99,11 +116,11 @@ const Preview = () => {
     };
     
     savePoemToDatabase();
-  }, [isPaid, transactionId, poemContent, poemTitle, location.state, isGenerating]);
+  }, [isPaid, transactionId, poemContent, poemTitle, location.state, isGenerating, language, langContext]);
 
   const goBack = () => {
     // When going back to generator, include state to indicate we're returning from preview
-    navigate('/generator', { 
+    navigate('/' + (language === 'en' ? 'en/' : '') + 'generator', { 
       state: { 
         returnFromPreview: true,
         formData: location.state?.formData // Pass the original form data back
@@ -125,7 +142,7 @@ const Preview = () => {
               className="flex items-center gap-1"
             >
               <ArrowLeft className="w-4 h-4" />
-              Zurück zum Generator
+              {t('preview.backToGenerator')}
             </Button>
           </div>
           
@@ -135,7 +152,7 @@ const Preview = () => {
             <LoadingIndicator />
           ) : (
             <PoemPreview 
-              title={poemTitle || 'Personalisiertes Gedicht'} 
+              title={poemTitle || (language === 'en' ? 'Personalized Poem' : 'Personalisiertes Gedicht')} 
               poem={poemContent || ''} 
               isPaid={isPaid || !!transactionId} 
             />

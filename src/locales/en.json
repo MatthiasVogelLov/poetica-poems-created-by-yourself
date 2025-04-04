@@ -20,7 +20,8 @@
     "logout": "Logout",
     "statistics": "Statistics",
     "content": "Content",
-    "batchCreation": "Batch Creation"
+    "batchCreation": "Batch Creation",
+    "randomOptions": "Randomly select options"
   },
   "generator": {
     "title": "Create Your Personal Poem",

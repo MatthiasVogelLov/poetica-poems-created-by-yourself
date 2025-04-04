@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from '@/hooks/use-toast';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface ContentEditorProps {
   section: string;
@@ -11,6 +12,7 @@ interface ContentEditorProps {
 
 const ContentEditor: React.FC<ContentEditorProps> = ({ section, initialContent }) => {
   const { toast } = useToast();
+  const { t, language } = useTranslations();
   const [isLoading, setIsLoading] = useState(false);
   const [content, setContent] = useState(initialContent);
 
@@ -22,14 +24,16 @@ const ContentEditor: React.FC<ContentEditorProps> = ({ section, initialContent }
     setIsLoading(true);
     
     // Save to localStorage (in a real app, this would be a database call)
-    localStorage.setItem(`admin_${section}`, content);
+    localStorage.setItem(`admin_${section}_${language}`, content);
     
     // Simulate network delay
     setTimeout(() => {
       setIsLoading(false);
       toast({
-        title: "Gespeichert",
-        description: "Die Änderungen wurden erfolgreich gespeichert.",
+        title: language === 'en' ? "Saved" : "Gespeichert",
+        description: language === 'en' 
+          ? "The changes have been successfully saved." 
+          : "Die Änderungen wurden erfolgreich gespeichert.",
       });
     }, 500);
   };
@@ -38,12 +42,16 @@ const ContentEditor: React.FC<ContentEditorProps> = ({ section, initialContent }
     <div className="p-4 sm:p-6 border rounded-lg">
       <h2 className="text-xl font-medium mb-4 capitalize">{section}</h2>
       <p className="mb-4 text-muted-foreground text-sm">
-        Bearbeiten Sie hier den Inhalt für die {section}-Seite. Sie können HTML verwenden.
+        {language === 'en' 
+          ? `Edit content for the ${section} page here. You can use HTML.` 
+          : `Bearbeiten Sie hier den Inhalt für die ${section}-Seite. Sie können HTML verwenden.`}
       </p>
       <Textarea 
         value={content} 
         onChange={(e) => handleTextChange(e.target.value)}
-        placeholder={`${section} Inhalt hier einfügen...`}
+        placeholder={language === 'en' 
+          ? `Insert ${section} content here...` 
+          : `${section} Inhalt hier einfügen...`}
         className="min-h-[400px] font-mono text-sm"
       />
       <div className="mt-4 flex justify-end">
@@ -51,7 +59,9 @@ const ContentEditor: React.FC<ContentEditorProps> = ({ section, initialContent }
           onClick={handleSave}
           disabled={isLoading}
         >
-          {isLoading ? 'Wird gespeichert...' : 'Speichern'}
+          {isLoading 
+            ? (language === 'en' ? 'Saving...' : 'Wird gespeichert...') 
+            : (language === 'en' ? 'Save' : 'Speichern')}
         </Button>
       </div>
     </div>

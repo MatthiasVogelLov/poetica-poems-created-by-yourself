@@ -13,12 +13,8 @@ const OptionsSection: React.FC<OptionsSectionProps> = ({
   useRandomOptions, 
   onRandomOptionsChange 
 }) => {
-  const { language } = useTranslations();
+  const { t } = useTranslations();
   
-  const randomOptionsText = language === 'de' 
-    ? "Optionen zufällig wählen"
-    : "Randomly select options";
-    
   return (
     <div className="flex items-center space-x-2 mt-4">
       <Switch
@@ -26,7 +22,7 @@ const OptionsSection: React.FC<OptionsSectionProps> = ({
         checked={useRandomOptions}
         onCheckedChange={onRandomOptionsChange}
       />
-      <Label htmlFor="random-options">{randomOptionsText}</Label>
+      <Label htmlFor="random-options">{t('admin.randomOptions')}</Label>
     </div>
   );
 };

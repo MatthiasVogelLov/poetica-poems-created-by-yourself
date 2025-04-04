@@ -15,6 +15,7 @@ import { Loader2 } from 'lucide-react';
 import { validateEmail } from '@/utils/validation';
 import EmailForm from './EmailForm';
 import EmailDebugInfo from './EmailDebugInfo';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface EmailDialogProps {
   poem: string;
@@ -34,6 +35,7 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
   const [personalMessage, setPersonalMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
+  const { t, language } = useTranslations();
 
   const handleEmailSend = async () => {
     // Reset debug info
@@ -41,17 +43,17 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
     
     // Input validation
     if (!email) {
-      toast.error('Bitte geben Sie eine E-Mail-Adresse ein');
+      toast.error(language === 'en' ? 'Please enter an email address' : 'Bitte geben Sie eine E-Mail-Adresse ein');
       return;
     }
 
     if (!validateEmail(email)) {
-      toast.error('Bitte geben Sie eine gültige E-Mail-Adresse ein');
+      toast.error(language === 'en' ? 'Please enter a valid email address' : 'Bitte geben Sie eine gültige E-Mail-Adresse ein');
       return;
     }
 
     if (!poem || !title) {
-      toast.error('Gedicht oder Titel fehlt');
+      toast.error(language === 'en' ? 'Poem or title is missing' : 'Gedicht oder Titel fehlt');
       return;
     }
 
@@ -64,13 +66,15 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
       console.log('- Poem title length:', title.length);
       console.log('- Poem content length:', poem.length);
       console.log('- Personal message length:', personalMessage?.length || 0);
+      console.log('- Language:', language);
 
       const payload = {
         recipientEmail: email,
-        recipientName: name || 'Empfänger', // Default name if not provided
+        recipientName: name || (language === 'en' ? 'Recipient' : 'Empfänger'),
         poemTitle: title,
         poemContent: poem,
-        personalMessage: personalMessage
+        personalMessage: personalMessage,
+        language: language
       };
 
       console.log('Full payload being sent:', JSON.stringify(payload));
@@ -82,29 +86,31 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
       if (error) {
         console.error('Error from Edge Function:', error);
         setDebugInfo(`Edge Function error: ${JSON.stringify(error)}`);
-        throw new Error(error.message || 'Fehler beim Senden der E-Mail');
+        throw new Error(error.message || (language === 'en' ? 'Error sending email' : 'Fehler beim Senden der E-Mail'));
       }
 
       console.log('Email send response:', data);
       
       if (!data || !data.success) {
-        const errorMsg = data?.error || 'Unbekannter Fehler beim Senden';
+        const errorMsg = data?.error || (language === 'en' ? 'Unknown error while sending' : 'Unbekannter Fehler beim Senden');
         setDebugInfo(`API response error: ${JSON.stringify(data)}`);
         throw new Error(errorMsg);
       }
 
-      toast.success('E-Mail erfolgreich gesendet');
+      toast.success(language === 'en' ? 'Email sent successfully' : 'E-Mail erfolgreich gesendet');
       onOpenChange(false);
       setEmail('');
       setName('');
       setPersonalMessage('');
     } catch (error) {
       console.error('Error sending email:', error);
-      toast.error(`Fehler beim Senden der E-Mail: ${error.message || 'Unbekannter Fehler'}`);
+      toast.error(language === 'en' 
+        ? `Error sending email: ${error.message || 'Unknown error'}` 
+        : `Fehler beim Senden der E-Mail: ${error.message || 'Unbekannter Fehler'}`);
       
       // Set debug info if not already set
       if (!debugInfo) {
-        setDebugInfo(`Exception: ${error.message || 'Unbekannter Fehler'}`);
+        setDebugInfo(`Exception: ${error.message || (language === 'en' ? 'Unknown error' : 'Unbekannter Fehler')}`);
       }
     } finally {
       setIsSending(false);
@@ -125,9 +131,11 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
     <Dialog open={open} onOpenChange={handleCloseDialog}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Gedicht per E-Mail senden</DialogTitle>
+          <DialogTitle>{language === 'en' ? 'Send Poem by Email' : 'Gedicht per E-Mail senden'}</DialogTitle>
           <DialogDescription>
-            Teilen Sie Ihr Gedicht per E-Mail mit Freunden oder Familie.
+            {language === 'en' 
+              ? 'Share your poem with friends or family via email.' 
+              : 'Teilen Sie Ihr Gedicht per E-Mail mit Freunden oder Familie.'}
           </DialogDescription>
         </DialogHeader>
         
@@ -144,15 +152,15 @@ const EmailDialog: React.FC<EmailDialogProps> = ({
         
         <DialogFooter>
           <Button type="button" variant="outline" onClick={handleCloseDialog} disabled={isSending}>
-            Abbrechen
+            {language === 'en' ? 'Cancel' : 'Abbrechen'}
           </Button>
           <Button type="button" onClick={handleEmailSend} disabled={isSending}>
             {isSending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Wird gesendet...
+                {language === 'en' ? 'Sending...' : 'Wird gesendet...'}
               </>
-            ) : 'Senden'}
+            ) : (language === 'en' ? 'Send' : 'Senden')}
           </Button>
         </DialogFooter>
       </DialogContent>
