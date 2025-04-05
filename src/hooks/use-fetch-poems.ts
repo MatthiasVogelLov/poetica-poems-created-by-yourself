@@ -16,35 +16,36 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
     const fetchPoems = async () => {
       setIsLoading(true);
       try {
-        // Get count with a simple query to avoid TypeScript recursion
-        const countResponse = await supabase
+        // First, get the total count
+        const { count, error: countError } = await supabase
           .from('user_poems')
-          .select('id', { count: 'exact', head: true });
+          .select('*', { count: 'exact', head: true });
         
-        if (countResponse.error) throw countResponse.error;
-        const count = countResponse.count || 0;
-        setTotalCount(count);
+        if (countError) throw countError;
         
-        // Fetch data with minimal chaining
-        const response = await supabase
+        // Set the total count from the count query
+        setTotalCount(count || 0);
+        
+        // Then fetch the actual data in a separate query
+        const { data, error } = await supabase
           .from('user_poems')
-          .select()
+          .select('*')
           .eq('language', language)
           .order('created_at', { ascending: false })
           .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
         
-        if (response.error) throw response.error;
+        if (error) throw error;
         
-        // Filter in memory to avoid complex query chains
-        const filteredData = (response.data || []).filter(poem => 
+        // Filter the data in memory to avoid complex query chains
+        const filteredData = data ? data.filter(poem => 
           poem.batch_created === null || 
           poem.batch_created === true || 
           poem.status === 'published' || 
           poem.status === 'hidden'
-        );
+        ) : [];
         
         setPoems(filteredData);
-        setHasMore((page * poemsPerPage) < count);
+        setHasMore((page * poemsPerPage) < (count || 0));
       } catch (error) {
         console.error('Error fetching poems:', error);
         toast.error(language === 'en' ? 'Error loading poems' : 'Fehler beim Laden der Gedichte');
