@@ -44,11 +44,6 @@ const Header = () => {
         </NavLink>
         
         <div className="flex items-center gap-4">
-          {isAdmin && (
-            <span className="text-sm text-muted-foreground bg-gray-100 px-3 py-1 rounded-full">
-              {language === 'de' ? 'Deutsche Version' : 'English Version'}
-            </span>
-          )}
           {isAdmin && <LanguageSwitcher />}
         </div>
       </div>

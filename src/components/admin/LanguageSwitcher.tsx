@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Globe } from 'lucide-react';
 import { useTranslations } from '@/hooks/use-translations';
 
 const LanguageSwitcher: React.FC = () => {
@@ -22,7 +21,6 @@ const LanguageSwitcher: React.FC = () => {
 
   return (
     <div className="flex items-center">
-      <Globe size={16} className="mr-2 text-muted-foreground" />
       <Select value={language} onValueChange={handleLanguageChange}>
         <SelectTrigger className="w-[120px] h-9 border-orange-400 border-2">
           <SelectValue placeholder={t('common.language')} />
