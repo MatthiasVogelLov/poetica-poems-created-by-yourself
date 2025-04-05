@@ -28,7 +28,7 @@ const PayPalHostedButton: React.FC<PayPalHostedButtonProps> = ({ isLoading: exte
         onClick={handlePayPalClick}
         hasError={!!error}
       />
-      <PayPalFooter />
+      <PayPalFooter isLoading={combinedLoading} onPayPalClick={handlePayPalClick} />
     </div>
   );
 };
