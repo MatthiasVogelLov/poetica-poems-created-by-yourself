@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -35,30 +36,41 @@ export const usePoemsData = (): [
     const fetchPoems = async () => {
       setIsLoading(true);
       try {
-        // First get the total count for pagination
-        const { count, error: countError } = await supabase
+        // Get the total count using a simple query to avoid deep type instantiation
+        const countQuery = await supabase
           .from('user_poems')
           .select('id', { count: 'exact', head: true })
           .eq('language', language);
         
-        if (countError) throw countError;
+        if (countQuery.error) throw countQuery.error;
         
-        setTotalCount(count || 0);
+        setTotalCount(countQuery.count || 0);
         
-        // Use a raw SQL query through the `.or()` method to avoid deep type instantiation
-        // This bypasses the TypeScript recursion issue
-        const { data, error } = await supabase
+        // Use a separate query for fetching the data to avoid complex chaining
+        // This approach avoids the TypeScript recursion issue
+        let query = supabase
           .from('user_poems')
           .select('*')
           .eq('language', language)
-          .or('batch_created.is.null,batch_created.eq.true,status.eq.published,status.eq.hidden')
           .order('created_at', { ascending: false })
           .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
+          
+        // Add the filter for batch created or status manually to avoid deep nesting
+        const { data, error } = await query;
         
         if (error) throw error;
         
+        // Filter the results in memory after fetching
+        // This is more explicit and avoids the complex TypeScript nesting
+        const filteredData = data?.filter(poem => 
+          poem.batch_created === null || 
+          poem.batch_created === true || 
+          poem.status === 'published' || 
+          poem.status === 'hidden'
+        ) || [];
+        
         // Pre-process poems for SEO metadata
-        const processedPoems = data || [];
+        const processedPoems = filteredData;
         const metadata: {[key: string]: {description: string, keywords: string[]}} = {};
         
         processedPoems.forEach(poem => {
@@ -82,7 +94,7 @@ export const usePoemsData = (): [
         setSeoMetadata(metadata);
         setPoems(processedPoems);
         setFilteredPoems(processedPoems);
-        setHasMore((page * poemsPerPage) < (count || 0));
+        setHasMore((page * poemsPerPage) < (countQuery.count || 0));
         
         // Generate slugs for all poems
         const { poemSlugs, slugToId } = generatePoemSlugs(processedPoems);
