@@ -29,7 +29,7 @@ export const usePoemsData = (): [
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [totalCount, setTotalCount] = useState<number>(0);
   const poemsPerPage = 12;
-  const [seoMetadata, setSeoMetadata] = useState<{[key: string]: {description: string, keywords: string[]}}>({}); 
+  const [seoMetadata, setSeoMetadata] = useState<{[key: string]: {description: string, keywords: string[]}}>({});
 
   // Fetch poems from Supabase
   useEffect(() => {
@@ -40,8 +40,7 @@ export const usePoemsData = (): [
         const { count, error: countError } = await supabase
           .from('user_poems')
           .select('*', { count: 'exact', head: true })
-          .eq('language', language)
-          .or('batch_created.is.null,and(batch_created.eq.true,status.in.("published","hidden"))');
+          .eq('language', language);
         
         if (countError) throw countError;
         

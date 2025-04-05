@@ -15,8 +15,8 @@ const Hilfe = () => {
     
     // Set default content based on language
     const defaultContent = language === 'en'
-      ? 'Here you can find help on using Poetica.'
-      : 'Hier finden Sie Hilfe zur Nutzung von Poetica.';
+      ? '<h2>Help</h2><p>Here you can find help on using Poetica. This page can be edited in the admin section.</p>'
+      : '<h2>Hilfe</h2><p>Hier finden Sie Hilfe zur Nutzung von Poetica. Diese Seite kann im Admin-Bereich bearbeitet werden.</p>';
     
     setContent(savedContent || defaultContent);
   }, [language]);

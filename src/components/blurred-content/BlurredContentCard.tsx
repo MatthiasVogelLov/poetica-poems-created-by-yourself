@@ -18,7 +18,7 @@ const BlurredContentCard: React.FC<BlurredContentCardProps> = ({ isLoading, erro
   const { language } = useLanguage();
   const { t } = useTranslations();
   
-  // Payment provider buttons
+  // Payment provider button
   const renderPaymentButtons = () => {
     return (
       <div className="flex flex-col gap-3 w-full">

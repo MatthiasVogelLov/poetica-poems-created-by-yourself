@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { usePaymentProcess } from './blurred-content/usePaymentProcess';
@@ -32,8 +33,8 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       console.log('User returned from PayPal payment with transaction ID:', transactionId);
       
       if (location.pathname === '/preview') {
-        toast.success(`Zahlung erfolgreich (PayPal)`, {
-          description: "Ihr Gedicht wurde erfolgreich freigeschaltet."
+        toast.success(`Payment successful (PayPal)`, {
+          description: "Your poem has been successfully unlocked."
         });
         
         if (!isPaid) {
@@ -63,8 +64,8 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       });
       
       if (location.pathname === '/preview') {
-        toast.success(`Zahlung erfolgreich (PayPal)`, {
-          description: "Ihr Gedicht wurde erfolgreich freigeschaltet."
+        toast.success(`Payment successful (PayPal)`, {
+          description: "Your poem has been successfully unlocked."
         });
       } else {
         navigate('/preview?paid=true&payment_provider=paypal', { replace: true });

@@ -15,8 +15,8 @@ const Kontakt = () => {
     
     // Set default content based on language
     const defaultContent = language === 'en' 
-      ? 'Placeholder for Contact content.' 
-      : 'Platzhalter für Kontakt Inhalt.';
+      ? '<h2>Contact</h2><p>Contact information for Poetica. This page can be edited in the admin section.</p>' 
+      : '<h2>Kontakt</h2><p>Kontaktinformationen für Poetica. Diese Seite kann im Admin-Bereich bearbeitet werden.</p>';
     
     setContent(savedContent || defaultContent);
   }, [language]);
@@ -38,8 +38,8 @@ const Kontakt = () => {
               ) : (
                 <p className="text-muted-foreground">
                   {language === 'en' 
-                    ? 'Placeholder for Contact content.' 
-                    : 'Platzhalter für Kontakt Inhalt.'}
+                    ? 'Contact information for Poetica.' 
+                    : 'Kontaktinformationen für Poetica.'}
                 </p>
               )}
             </div>
