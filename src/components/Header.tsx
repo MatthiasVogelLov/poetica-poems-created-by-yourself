@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslations } from '@/hooks/use-translations';
+import LanguageSwitcher from './admin/LanguageSwitcher';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -42,13 +43,14 @@ const Header = () => {
           {t('common.appName')}
         </NavLink>
         
-        {isAdmin && (
-          <div className="text-sm text-muted-foreground">
-            <span className="bg-gray-100 px-3 py-1 rounded-full">
+        <div className="flex items-center gap-4">
+          {isAdmin && (
+            <span className="text-sm text-muted-foreground bg-gray-100 px-3 py-1 rounded-full">
               {language === 'de' ? 'Deutsche Version' : 'English Version'}
             </span>
-          </div>
-        )}
+          )}
+          {isAdmin && <LanguageSwitcher />}
+        </div>
       </div>
     </header>
   );

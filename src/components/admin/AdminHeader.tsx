@@ -23,7 +23,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ handleLogout }) => {
       </Link>
       
       <div className="flex items-center gap-4">
-        {isAdmin && <LanguageSwitcher />}
+        <LanguageSwitcher />
         <Button variant="outline" onClick={handleLogout} className="text-sm">
           {t('common.logout')}
         </Button>

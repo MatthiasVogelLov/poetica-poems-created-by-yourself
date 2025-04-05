@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 type Language = 'de' | 'en';
@@ -16,6 +15,13 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Default to German, but check localStorage for saved preference
   const [language, setLanguageState] = useState<Language>(() => {
     const savedLanguage = localStorage.getItem('preferred_language');
+    // Also check URL for language preference
+    const isEnglishRoute = window.location.hash.includes('/en');
+    
+    if (isEnglishRoute) {
+      return 'en';
+    }
+    
     return (savedLanguage === 'en' ? 'en' : 'de') as Language;
   });
   
@@ -29,22 +35,29 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   
   // Save language preference to localStorage when it changes
   const setLanguage = (lang: Language) => {
+    console.log('Setting language to:', lang);
     setLanguageState(lang);
     localStorage.setItem('preferred_language', lang);
     
-    // Force a reload to ensure all components re-render with the new language
-    // This is a simple solution that ensures everything updates correctly
+    // Handle route changes based on language
     if (lang === 'en') {
       // If we're switching to English and we're not already on an English route, redirect
       if (!window.location.hash.includes('/en/') && window.location.hash !== '#/en') {
         if (window.location.hash === '#/') {
           window.location.hash = '#/en';
+        } else if (window.location.hash === '#/admin') {
+          // For admin, keep the admin route but reload to update language
+          window.location.hash = '#/admin';
+          window.location.reload();
         } else {
           // Convert route to English equivalent
           const currentPath = window.location.hash.substring(1); // Remove the #
           const englishPath = currentPath.replace(/^\//, '/en/');
           window.location.hash = englishPath;
         }
+      } else if (window.location.hash === '#/admin') {
+        // For admin, reload to update language
+        window.location.reload();
       }
     } else {
       // If we're switching to German and we're on an English route, redirect
@@ -54,6 +67,9 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         window.location.hash = germanPath;
       } else if (window.location.hash === '#/en') {
         window.location.hash = '#/';
+      } else if (window.location.hash === '#/admin') {
+        // For admin, reload to update language
+        window.location.reload();
       }
     }
   };

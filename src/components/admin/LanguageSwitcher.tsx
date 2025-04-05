@@ -16,6 +16,7 @@ const LanguageSwitcher: React.FC = () => {
   const { t } = useTranslations();
 
   const handleLanguageChange = (value: string) => {
+    console.log('Language change requested:', value);
     setLanguage(value as 'de' | 'en');
   };
 

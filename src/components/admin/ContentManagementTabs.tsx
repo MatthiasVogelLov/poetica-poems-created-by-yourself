@@ -23,7 +23,9 @@ const ContentManagementTabs: React.FC<ContentManagementTabsProps> = ({
   };
 
   // Content sections based on language
-  const contentSections = language === 'en' ? ["help", "contact"] : ["hilfe", "kontakt"];
+  const contentSections = language === 'en' 
+    ? ["help", "contact"] 
+    : ["hilfe", "kontakt"];
 
   return (
     <Tabs defaultValue="stats" className="w-full" value={activeTab} onValueChange={onTabChange}>

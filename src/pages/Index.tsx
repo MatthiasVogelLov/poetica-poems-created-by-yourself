@@ -5,13 +5,84 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import TellAFriend from '../components/TellAFriend';
 import { Sparkles, Heart, Star, Users, Calendar, Type } from 'lucide-react';
+import { useTranslations } from '@/hooks/use-translations';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { t, language } = useTranslations();
+  
   const goToGenerator = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    navigate('/generator');
+    navigate(language === 'en' ? '/en/generator' : '/generator');
   };
+
+  // English and German features
+  const features = [
+    {
+      icon: Users,
+      title: language === 'en' ? "For any recipient" : "Für jeden Empfänger",
+      description: language === 'en' 
+        ? "Choose from different audiences to perfectly tailor the poem to the recipient."
+        : "Wählen Sie aus verschiedenen Zielgruppen, um das Gedicht perfekt auf den Empfänger abzustimmen."
+    },
+    {
+      icon: Calendar,
+      title: language === 'en' ? "For any occasion" : "Für jeden Anlass",
+      description: language === 'en'
+        ? "From birthdays to weddings, our poems fit every special moment."
+        : "Von Geburtstagen bis Hochzeiten, unsere Gedichte passen zu jedem besonderen Moment."
+    },
+    {
+      icon: Heart,
+      title: language === 'en' ? "Various themes" : "Verschiedene Themen",
+      description: language === 'en'
+        ? "Love, friendship, nature and more - choose the theme that expresses your feelings."
+        : "Liebe, Freundschaft, Natur und mehr - wählen Sie das Thema, das Ihre Gefühle ausdrückt."
+    },
+    {
+      icon: Type,
+      title: language === 'en' ? "Diverse styles" : "Vielfältige Stile",
+      description: language === 'en'
+        ? "Classical, modern or experimental - there's something for every taste."
+        : "Klassisch, modern oder experimentell - für jeden Geschmack ist etwas dabei."
+    },
+    {
+      icon: Star,
+      title: language === 'en' ? "Personalization" : "Personalisierung",
+      description: language === 'en'
+        ? "Add personal keywords to make the poem even more individual."
+        : "Fügen Sie persönliche Schlüsselwörter hinzu, um das Gedicht noch individueller zu gestalten."
+    },
+    {
+      icon: Sparkles,
+      title: language === 'en' ? "AI-powered" : "KI-gestützt",
+      description: language === 'en'
+        ? "Our advanced AI ensures high-quality, creative results."
+        : "Unsere fortschrittliche KI sorgt für qualitativ hochwertige, kreative Ergebnisse."
+    }
+  ];
+
+  // English and German steps
+  const steps = [
+    {
+      title: language === 'en' ? "Choose options" : "Optionen wählen",
+      description: language === 'en'
+        ? "Select audience, occasion, theme, style, and length of the poem."
+        : "Wählen Sie Zielgruppe, Anlass, Thema, Stil und Länge des Gedichts aus."
+    },
+    {
+      title: language === 'en' ? "Personalize" : "Personalisieren",
+      description: language === 'en'
+        ? "Optionally add personal keywords to make the poem more individual."
+        : "Fügen Sie optional persönliche Schlüsselwörter hinzu, um das Gedicht individueller zu gestalten."
+    },
+    {
+      title: language === 'en' ? "Generate & Share" : "Generieren & Teilen",
+      description: language === 'en'
+        ? "Get your poem, save it or share it directly with your loved ones."
+        : "Erhalten Sie Ihr Gedicht, speichern Sie es oder teilen Sie direkt mit Ihren Liebsten."
+    }
+  ];
 
   return <div className="min-h-screen bg-white">
       <Header />
@@ -21,23 +92,25 @@ const Index = () => {
         <div className="container-wide">
           <div className="max-w-3xl mx-auto text-center">
             <span className="inline-block px-3 py-1 bg-primary/10 rounded-full text-primary text-sm font-medium mb-6 animate-fade-in">
-              Personalisierte Gedichte in Sekunden<br />
-              von Dir mit KI-Unterstützung geschrieben
+              {language === 'en' 
+                ? "Personalized poems in seconds\nwritten by you with AI assistance" 
+                : "Personalisierte Gedichte in Sekunden\nvon Dir mit KI-Unterstützung geschrieben"}
             </span>
             <h1 className="heading-xl mb-6 animate-slide-up" itemProp="headline">
-              Berührende Gedichte für jeden Anlass
+              {language === 'en' ? "Touching poems for every occasion" : "Berührende Gedichte für jeden Anlass"}
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-10 animate-slide-up" style={{
             animationDelay: '100ms'
           }}>
-              Erstellen Sie einzigartige, personalisierte Gedichte für Ihre Liebsten,
-              besondere Anlässe oder um Ihre Gefühle auszudrücken.
+              {language === 'en' 
+                ? "Create unique, personalized poems for your loved ones, special occasions, or to express your feelings."
+                : "Erstellen Sie einzigartige, personalisierte Gedichte für Ihre Liebsten, besondere Anlässe oder um Ihre Gefühle auszudrücken."}
             </p>
             <div className="animate-slide-up" style={{
             animationDelay: '200ms'
           }}>
               <button onClick={goToGenerator} className="btn-primary px-8 py-3 text-base">
-                Gedicht erstellen
+                {language === 'en' ? "Create poem" : "Gedicht erstellen"}
               </button>
             </div>
           </div>
@@ -48,12 +121,14 @@ const Index = () => {
       <section className="py-20 bg-white">
         <div className="container-wide">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <span className="subheading mb-4 block">Funktionen</span>
+            <span className="subheading mb-4 block">{language === 'en' ? "Features" : "Funktionen"}</span>
             <h2 className="heading-lg mb-6" itemProp="alternativeHeadline">
-              Alles was Sie brauchen
+              {language === 'en' ? "Everything you need" : "Alles was Sie brauchen"}
             </h2>
             <p className="text-muted-foreground text-lg">
-              Unsere intuitive Plattform bietet alles, was Sie für das perfekte Gedicht benötigen.
+              {language === 'en'
+                ? "Our intuitive platform provides everything you need for the perfect poem."
+                : "Unsere intuitive Plattform bietet alles, was Sie für das perfekte Gedicht benötigen."}
             </p>
           </div>
           
@@ -69,10 +144,12 @@ const Index = () => {
           <div className="max-w-3xl mx-auto text-center mb-16">
             
             <h2 className="heading-lg mb-6 py-[15px]" itemProp="knowsAbout">
-              So funktioniert es
+              {language === 'en' ? "How it works" : "So funktioniert es"}
             </h2>
             <p className="text-muted-foreground text-lg">
-              In nur wenigen einfachen Schritten zu Ihrem personalisierten Gedicht.
+              {language === 'en'
+                ? "Just a few simple steps to your personalized poem."
+                : "In nur wenigen einfachen Schritten zu Ihrem personalisierten Gedicht."}
             </p>
           </div>
           
@@ -86,14 +163,16 @@ const Index = () => {
       <section className="py-20 bg-primary text-primary-foreground">
         <div className="container-narrow text-center">
           <h2 className="heading-lg mb-6">
-            Bereit für Ihr eigenes Gedicht?
+            {language === 'en' ? "Ready for your own poem?" : "Bereit für Ihr eigenes Gedicht?"}
           </h2>
           <p className="text-primary-foreground/80 text-lg mb-10 max-w-2xl mx-auto">
-            Erstellen Sie noch heute ein einzigartiges, personalisiertes Gedicht und überraschen Sie Ihre Liebsten.
+            {language === 'en'
+              ? "Create a unique, personalized poem today and surprise your loved ones."
+              : "Erstellen Sie noch heute ein einzigartiges, personalisiertes Gedicht und überraschen Sie Ihre Liebsten."}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button onClick={goToGenerator} className="bg-white text-primary hover:bg-white/90 btn-primary px-8 py-3 text-base">
-              Jetzt starten
+              {language === 'en' ? "Start now" : "Jetzt starten"}
             </button>
             <TellAFriend />
           </div>
@@ -107,7 +186,9 @@ const Index = () => {
           "@type": "WebSite",
           "name": "PoemsLand",
           "url": window.location.origin,
-          "description": "Personalisierte Gedichte für jeden Anlass erstellen mit KI-Unterstützung",
+          "description": language === 'en'
+            ? "Create personalized poems for any occasion with AI assistance"
+            : "Personalisierte Gedichte für jeden Anlass erstellen mit KI-Unterstützung",
           "potentialAction": {
             "@type": "SearchAction",
             "target": `${window.location.origin}/poemsland?q={search_term_string}`,
@@ -154,42 +235,5 @@ const StepCard = ({
     <h3 className="text-xl font-medium mb-3">{title}</h3>
     <p className="text-muted-foreground">{description}</p>
   </div>;
-
-const features = [{
-  icon: Users,
-  title: "Für jeden Empfänger",
-  description: "Wählen Sie aus verschiedenen Zielgruppen, um das Gedicht perfekt auf den Empfänger abzustimmen."
-}, {
-  icon: Calendar,
-  title: "Für jeden Anlass",
-  description: "Von Geburtstagen bis Hochzeiten, unsere Gedichte passen zu jedem besonderen Moment."
-}, {
-  icon: Heart,
-  title: "Verschiedene Themen",
-  description: "Liebe, Freundschaft, Natur und mehr - wählen Sie das Thema, das Ihre Gefühle ausdrückt."
-}, {
-  icon: Type,
-  title: "Vielfältige Stile",
-  description: "Klassisch, modern oder experimentell - für jeden Geschmack ist etwas dabei."
-}, {
-  icon: Star,
-  title: "Personalisierung",
-  description: "Fügen Sie persönliche Schlüsselwörter hinzu, um das Gedicht noch individueller zu gestalten."
-}, {
-  icon: Sparkles,
-  title: "KI-gestützt",
-  description: "Unsere fortschrittliche KI sorgt für qualitativ hochwertige, kreative Ergebnisse."
-}];
-
-const steps = [{
-  title: "Optionen wählen",
-  description: "Wählen Sie Zielgruppe, Anlass, Thema, Stil und Länge des Gedichts aus."
-}, {
-  title: "Personalisieren",
-  description: "Fügen Sie optional persönliche Schlüsselwörter hinzu, um das Gedicht individueller zu gestalten."
-}, {
-  title: "Generieren & Teilen",
-  description: "Erhalten Sie Ihr Gedicht, speichern Sie es oder teilen Sie direkt mit Ihren Liebsten."
-}];
 
 export default Index;
