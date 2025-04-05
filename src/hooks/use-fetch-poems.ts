@@ -16,36 +16,52 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
     const fetchPoems = async () => {
       setIsLoading(true);
       try {
-        // First, get the total count
-        const { count, error: countError } = await supabase
+        // Get total count with a completely separate query
+        const countQuery = await supabase
           .from('user_poems')
-          .select('*', { count: 'exact', head: true });
+          .select('id', { count: 'exact', head: true });
         
-        if (countError) throw countError;
+        if (countQuery.error) throw countQuery.error;
         
-        // Set the total count from the count query
-        setTotalCount(count || 0);
+        // Set the total count
+        const count = countQuery.count || 0;
+        setTotalCount(count);
         
-        // Then fetch the actual data in a separate query
-        const { data, error } = await supabase
+        // Fetch the actual data with a separate, simple query
+        const dataQuery = await supabase
           .from('user_poems')
-          .select('*')
-          .eq('language', language)
-          .order('created_at', { ascending: false })
-          .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
+          .select();
         
-        if (error) throw error;
+        if (dataQuery.error) throw dataQuery.error;
         
-        // Filter the data in memory to avoid complex query chains
-        const filteredData = data ? data.filter(poem => 
-          poem.batch_created === null || 
-          poem.batch_created === true || 
-          poem.status === 'published' || 
+        // Apply filtering and pagination in memory to avoid complex query chains
+        let filteredData = dataQuery.data || [];
+        
+        // Filter by language
+        filteredData = filteredData.filter(poem => poem.language === language);
+        
+        // Sort by date (descending)
+        filteredData.sort((a, b) => {
+          const dateA = new Date(a.created_at || 0).getTime();
+          const dateB = new Date(b.created_at || 0).getTime();
+          return dateB - dateA;
+        });
+        
+        // Filter by status
+        filteredData = filteredData.filter(poem =>
+          poem.batch_created === null ||
+          poem.batch_created === true ||
+          poem.status === 'published' ||
           poem.status === 'hidden'
-        ) : [];
+        );
         
-        setPoems(filteredData);
-        setHasMore((page * poemsPerPage) < (count || 0));
+        // Apply pagination
+        const startIdx = (page - 1) * poemsPerPage;
+        const endIdx = page * poemsPerPage;
+        const paginatedData = filteredData.slice(startIdx, endIdx);
+        
+        setPoems(paginatedData);
+        setHasMore((page * poemsPerPage) < count);
       } catch (error) {
         console.error('Error fetching poems:', error);
         toast.error(language === 'en' ? 'Error loading poems' : 'Fehler beim Laden der Gedichte');
