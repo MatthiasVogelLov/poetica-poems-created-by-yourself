@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -36,32 +35,26 @@ export const usePoemsData = (): [
     const fetchPoems = async () => {
       setIsLoading(true);
       try {
-        // Get the total count using a simple query to avoid deep type instantiation
-        const countQuery = await supabase
+        // First, get total count without complex filtering to avoid type recursion
+        const { count, error: countError } = await supabase
           .from('user_poems')
-          .select('id', { count: 'exact', head: true })
+          .select('*', { count: 'exact', head: true })
           .eq('language', language);
         
-        if (countQuery.error) throw countQuery.error;
+        if (countError) throw countError;
         
-        setTotalCount(countQuery.count || 0);
-        
-        // Use a separate query for fetching the data to avoid complex chaining
-        // This approach avoids the TypeScript recursion issue
-        let query = supabase
+        // Then fetch the actual data in a separate query
+        // Without chaining complex filter methods that cause TypeScript recursion
+        const { data, error } = await supabase
           .from('user_poems')
           .select('*')
           .eq('language', language)
           .order('created_at', { ascending: false })
           .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
-          
-        // Add the filter for batch created or status manually to avoid deep nesting
-        const { data, error } = await query;
         
         if (error) throw error;
         
-        // Filter the results in memory after fetching
-        // This is more explicit and avoids the complex TypeScript nesting
+        // Filter the data in memory instead of using complex query filters
         const filteredData = data?.filter(poem => 
           poem.batch_created === null || 
           poem.batch_created === true || 
@@ -94,7 +87,7 @@ export const usePoemsData = (): [
         setSeoMetadata(metadata);
         setPoems(processedPoems);
         setFilteredPoems(processedPoems);
-        setHasMore((page * poemsPerPage) < (countQuery.count || 0));
+        setHasMore((page * poemsPerPage) < (count || 0));
         
         // Generate slugs for all poems
         const { poemSlugs, slugToId } = generatePoemSlugs(processedPoems);
