@@ -47,13 +47,23 @@ export const usePoemsData = (): [
         setTotalCount(count || 0);
         
         // Then fetch the actual page of data, filtered by language
-        const { data, error } = await supabase
+        // Split complex query into separate parts to avoid type recursion
+        let query = supabase
           .from('user_poems')
           .select('*')
-          .eq('language', language)
-          .or('batch_created.is.null,and(batch_created.eq.true,status.in.("published","hidden"))')
+          .eq('language', language);
+          
+        // Add status filter for batch created poems
+        if (true) {  // Always apply this filter
+          query = query.or('batch_created.is.null,and(batch_created.eq.true,status.in.("published","hidden"))');
+        }
+        
+        // Add ordering and pagination
+        query = query
           .order('created_at', { ascending: false })
           .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
+        
+        const { data, error } = await query;
         
         if (error) throw error;
         
