@@ -35,38 +35,35 @@ export const usePoemsData = (): [
     const fetchPoems = async () => {
       setIsLoading(true);
       try {
-        // First, get total count without complex filtering to avoid type recursion
-        const { count, error: countError } = await supabase
+        // Use a simple query to get the count without any complex filtering
+        const countResponse = await supabase
           .from('user_poems')
-          .select('*', { count: 'exact', head: true })
-          .eq('language', language);
+          .select('id', { count: 'exact', head: true });
         
-        if (countError) throw countError;
+        if (countResponse.error) throw countResponse.error;
+        const totalCount = countResponse.count || 0;
         
-        // Then fetch the actual data in a separate query
-        // Without chaining complex filter methods that cause TypeScript recursion
-        const { data, error } = await supabase
+        // Separate query for data retrieval with minimal chaining
+        const dataResponse = await supabase
           .from('user_poems')
-          .select('*')
+          .select()
           .eq('language', language)
           .order('created_at', { ascending: false })
           .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
         
-        if (error) throw error;
+        if (dataResponse.error) throw dataResponse.error;
         
-        // Filter the data in memory instead of using complex query filters
-        const filteredData = data?.filter(poem => 
+        // Filter in memory to avoid complex query chains
+        const filteredData = (dataResponse.data || []).filter(poem => 
           poem.batch_created === null || 
           poem.batch_created === true || 
           poem.status === 'published' || 
           poem.status === 'hidden'
-        ) || [];
+        );
         
-        // Pre-process poems for SEO metadata
-        const processedPoems = filteredData;
+        // Process poem data for SEO
         const metadata: {[key: string]: {description: string, keywords: string[]}} = {};
-        
-        processedPoems.forEach(poem => {
+        filteredData.forEach(poem => {
           // Generate SEO description from poem content (first 160 chars)
           const description = poem.content
             ? poem.content.substring(0, 160).trim() + (poem.content.length > 160 ? '...' : '')
@@ -85,12 +82,12 @@ export const usePoemsData = (): [
         });
         
         setSeoMetadata(metadata);
-        setPoems(processedPoems);
-        setFilteredPoems(processedPoems);
-        setHasMore((page * poemsPerPage) < (count || 0));
+        setPoems(filteredData);
+        setFilteredPoems(filteredData);
+        setHasMore((page * poemsPerPage) < totalCount);
         
         // Generate slugs for all poems
-        const { poemSlugs, slugToId } = generatePoemSlugs(processedPoems);
+        const { poemSlugs, slugToId } = generatePoemSlugs(filteredData);
         setPoemSlugs(poemSlugs);
         setSlugToId(slugToId);
       } catch (error) {
