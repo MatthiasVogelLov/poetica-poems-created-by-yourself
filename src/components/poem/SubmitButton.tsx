@@ -1,12 +1,17 @@
 
 import React from 'react';
 import { Sparkles } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface SubmitButtonProps {
   isLoading: boolean;
 }
 
 const SubmitButton: React.FC<SubmitButtonProps> = ({ isLoading }) => {
+  const { language } = useLanguage();
+  const { t } = useTranslations();
+
   return (
     <div className="pt-4">
       <button
@@ -17,12 +22,12 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ isLoading }) => {
         {isLoading ? (
           <>
             <div className="h-5 w-5 rounded-full border-2 border-white/20 border-t-white/100 animate-spin"></div>
-            <span>Gedicht wird erstellt...</span>
+            <span>{language === 'en' ? 'Creating poem...' : 'Gedicht wird erstellt...'}</span>
           </>
         ) : (
           <>
             <Sparkles size={18} />
-            <span>Gedicht erstellen</span>
+            <span>{t('generator.generate')}</span>
           </>
         )}
       </button>
