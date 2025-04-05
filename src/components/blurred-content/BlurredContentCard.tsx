@@ -6,7 +6,6 @@ import { LockIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslations } from '@/hooks/use-translations';
 import PaymentError from './PaymentError';
-import PayPalFooter from './paypal/PayPalFooter';
 import { Badge } from '@/components/ui/badge';
 
 interface BlurredContentCardProps {
@@ -66,8 +65,6 @@ const BlurredContentCard: React.FC<BlurredContentCardProps> = ({ isLoading, erro
         </div>
 
         {error ? <PaymentError error={error} /> : renderPaymentButtons()}
-        
-        <PayPalFooter isLoading={isLoading} onPayPalClick={() => onPaymentClick('paypal')} />
       </CardContent>
     </Card>
   );

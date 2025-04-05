@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Poem, PoemHookState } from '@/types/poem-types';
 import { generatePoemSlugs } from '@/utils/poem-slug-utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Hook to fetch and manage poem data
 export const usePoemsData = (): [
@@ -11,6 +12,7 @@ export const usePoemsData = (): [
   React.Dispatch<React.SetStateAction<Poem[]>>,
   React.Dispatch<React.SetStateAction<string | null>>
 ] => {
+  const { language } = useLanguage();
   const [poems, setPoems] = useState<Poem[]>([]);
   const [filteredPoems, setFilteredPoems] = useState<Poem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,20 +36,22 @@ export const usePoemsData = (): [
     const fetchPoems = async () => {
       setIsLoading(true);
       try {
-        // First get the total count for pagination
+        // First get the total count for pagination, filtered by language
         const { count, error: countError } = await supabase
           .from('user_poems')
           .select('*', { count: 'exact', head: true })
+          .eq('language', language)
           .or('batch_created.is.null,and(batch_created.eq.true,status.in.("published","hidden"))');
         
         if (countError) throw countError;
         
         setTotalCount(count || 0);
         
-        // Then fetch the actual page of data
+        // Then fetch the actual page of data, filtered by language
         const { data, error } = await supabase
           .from('user_poems')
           .select('*')
+          .eq('language', language)
           .or('batch_created.is.null,and(batch_created.eq.true,status.in.("published","hidden"))')
           .order('created_at', { ascending: false })
           .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
@@ -87,14 +91,14 @@ export const usePoemsData = (): [
         setSlugToId(slugToId);
       } catch (error) {
         console.error('Error fetching poems:', error);
-        toast.error('Fehler beim Laden der Gedichte');
+        toast.error(language === 'en' ? 'Error loading poems' : 'Fehler beim Laden der Gedichte');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchPoems();
-  }, [page]);
+  }, [page, language]);
 
   // Fetch a single poem when selected by ID
   useEffect(() => {
@@ -140,7 +144,7 @@ export const usePoemsData = (): [
           setSelectedPoem(data);
         } catch (error) {
           console.error('Error fetching poem:', error);
-          toast.error('Fehler beim Laden des Gedichts');
+          toast.error(language === 'en' ? 'Error loading poem' : 'Fehler beim Laden des Gedichts');
           setSelectedPoem(null);
         } finally {
           setIsLoading(false);
@@ -151,7 +155,7 @@ export const usePoemsData = (): [
     } else {
       setSelectedPoem(null);
     }
-  }, [selectedPoemId]);
+  }, [selectedPoemId, language]);
 
   // Method to get SEO metadata for a specific poem
   const getPoemSeoMetadata = (poemId: string) => {
