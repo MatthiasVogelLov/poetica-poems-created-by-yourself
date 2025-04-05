@@ -37,38 +37,35 @@ export const usePoemsData = (): [
       setIsLoading(true);
       try {
         // First get the total count for pagination, filtered by language
-        const { count, error: countError } = await supabase
+        const countResult = await supabase
           .from('user_poems')
           .select('*', { count: 'exact', head: true })
           .eq('language', language);
         
-        if (countError) throw countError;
+        if (countResult.error) throw countResult.error;
         
-        setTotalCount(count || 0);
+        const count = countResult.count || 0;
+        setTotalCount(count);
         
-        // Then fetch the actual page of data, filtered by language
-        // Split complex query into separate parts to avoid type recursion
-        let query = supabase
+        // Then fetch the actual page of data with a simplified approach
+        // to avoid TypeScript type recursion
+        
+        // 1. First build the SQL condition for batch created poems
+        const batchCreatedFilter = 'batch_created.is.null,and(batch_created.eq.true,status.in.("published","hidden"))';
+        
+        // 2. Use the base query with language filter
+        const dataResult = await supabase
           .from('user_poems')
           .select('*')
-          .eq('language', language);
-          
-        // Add status filter for batch created poems
-        if (true) {  // Always apply this filter
-          query = query.or('batch_created.is.null,and(batch_created.eq.true,status.in.("published","hidden"))');
-        }
-        
-        // Add ordering and pagination
-        query = query
+          .eq('language', language)
+          .or(batchCreatedFilter)
           .order('created_at', { ascending: false })
           .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
         
-        const { data, error } = await query;
-        
-        if (error) throw error;
+        if (dataResult.error) throw dataResult.error;
         
         // Pre-process poems for SEO metadata
-        const processedPoems = data || [];
+        const processedPoems = dataResult.data || [];
         const metadata: {[key: string]: {description: string, keywords: string[]}} = {};
         
         processedPoems.forEach(poem => {
@@ -92,7 +89,7 @@ export const usePoemsData = (): [
         setSeoMetadata(metadata);
         setPoems(processedPoems);
         setFilteredPoems(processedPoems);
-        setHasMore((page * poemsPerPage) < (count || 0));
+        setHasMore((page * poemsPerPage) < count);
         
         // Generate slugs for all poems
         const { poemSlugs, slugToId } = generatePoemSlugs(processedPoems);
