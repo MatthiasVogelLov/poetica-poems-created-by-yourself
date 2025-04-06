@@ -24,7 +24,7 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
       try {
         console.log(`Fetching poems for interface language: ${language}`);
         
-        // Fetch all poems without language filtering (since the column doesn't exist)
+        // Fetch all poems without language filtering (we'll filter client-side)
         const result: SimplePoemResponse = await supabase
           .from('user_poems')
           .select('*') as SimplePoemResponse;

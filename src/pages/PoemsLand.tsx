@@ -11,11 +11,13 @@ import PoemsListView from '@/components/poems-land/PoemsListView';
 import PoemsLandSEO from '@/components/poems-land/PoemsLandSEO';
 import { usePoemNavigation } from '@/hooks/use-poem-navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslations } from '@/hooks/use-translations';
 
 const PoemsLand = () => {
   const { poemSlug } = useParams();
   const location = useLocation();
   const { language } = useLanguage();
+  const { t } = useTranslations();
   
   // Set language-specific filters based on URL
   const isEnglishRoute = location.pathname.startsWith('/en/');
@@ -64,10 +66,10 @@ const PoemsLand = () => {
   
   // Filter poems based on the current language
   const filteredPoems = isEnglishRoute ? 
-    // For English route, show placeholder until we have English poems
-    [] : 
-    // For German route, show all poems for now
-    allPoems;
+    // For English route, filter poems with language='en' or empty language (for backward compatibility)
+    allPoems.filter(poem => poem.language === 'en' || !poem.language) : 
+    // For German route, filter poems with language='de' or empty language (for backward compatibility)
+    allPoems.filter(poem => poem.language === 'de' || !poem.language);
 
   // Custom hook for poem navigation
   const {

@@ -17,7 +17,7 @@ const ContentManagementTabs: React.FC<ContentManagementTabsProps> = ({
 }) => {
   const { t, language } = useTranslations();
   
-  // Get content from localStorage
+  // Get content from localStorage with language-specific key
   const getStoredContent = (section: string) => {
     return localStorage.getItem(`admin_${section}_${language}`) || '';
   };
