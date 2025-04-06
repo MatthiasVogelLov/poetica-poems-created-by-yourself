@@ -5,6 +5,12 @@ import { toast } from 'sonner';
 import { Poem } from '@/types/poem-types';
 import { useLanguage } from '@/contexts/LanguageContext';
 
+// Define a custom type to avoid deep type recursion
+type SimplePoemResponse = {
+  data: Poem[] | null;
+  error: Error | null;
+};
+
 export const useFetchPoems = (page: number, poemsPerPage: number) => {
   const { language } = useLanguage();
   const [poems, setPoems] = useState<Poem[]>([]);
@@ -18,16 +24,15 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
       try {
         console.log(`Fetching poems with language: ${language}`);
         
-        // Simplify the query structure to avoid TypeScript depth issues
-        // First get all poems with the language filter without count
-        const { data, error } = await supabase
+        // Use a simpler approach with explicit typing to avoid deep recursion
+        const result: SimplePoemResponse = await supabase
           .from('user_poems')
           .select('*')
-          .eq('language', language);
+          .eq('language', language) as SimplePoemResponse;
         
-        if (error) throw error;
+        if (result.error) throw result.error;
         
-        const allData = data || [];
+        const allData = result.data || [];
         console.log(`Retrieved ${allData.length} total poems with language: ${language}`);
         
         // Filter by status
