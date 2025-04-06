@@ -37,9 +37,6 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
         // Apply filtering and pagination in memory to avoid complex query chains
         let filteredData = dataQuery.data || [];
         
-        // Filter by language
-        filteredData = filteredData.filter(poem => poem.language === language);
-        
         // Sort by date (descending)
         filteredData.sort((a, b) => {
           const dateA = new Date(a.created_at || 0).getTime();
