@@ -27,7 +27,7 @@ const PoemsLand = () => {
   }, [language, location.pathname]);
   
   const {
-    filteredPoems,
+    filteredPoems: allPoems,
     isLoading,
     selectedPoemId,
     selectedPoem,
@@ -61,6 +61,13 @@ const PoemsLand = () => {
     prevPage,
     poemsPerPage
   } = usePoems();
+  
+  // Filter poems based on the current language
+  const filteredPoems = isEnglishRoute ? 
+    // For English route, show placeholder until we have English poems
+    [] : 
+    // For German route, show all poems for now
+    allPoems;
 
   // Custom hook for poem navigation
   const {

@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Poem } from '@/types/poem-types';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-// Define a custom type to avoid deep type recursion
+// Define a custom type for simplified response handling
 type SimplePoemResponse = {
   data: Poem[] | null;
   error: Error | null;
@@ -22,18 +22,17 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
     const fetchPoems = async () => {
       setIsLoading(true);
       try {
-        console.log(`Fetching poems with language: ${language}`);
+        console.log(`Fetching poems for interface language: ${language}`);
         
-        // Use a simpler approach with explicit typing to avoid deep recursion
+        // Fetch all poems without language filtering (since the column doesn't exist)
         const result: SimplePoemResponse = await supabase
           .from('user_poems')
-          .select('*')
-          .eq('language', language) as SimplePoemResponse;
+          .select('*') as SimplePoemResponse;
         
         if (result.error) throw result.error;
         
         const allData = result.data || [];
-        console.log(`Retrieved ${allData.length} total poems with language: ${language}`);
+        console.log(`Retrieved ${allData.length} total poems`);
         
         // Filter by status
         const filteredByStatus = allData.filter(poem =>
