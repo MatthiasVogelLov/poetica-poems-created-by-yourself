@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface PoemFiltersProps {
   occasionFilter: string;
@@ -53,6 +54,8 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
   getStyleDisplay,
   getAudienceDisplay
 }) => {
+  const { t, language } = useTranslations();
+  
   const filtersActive = (
     occasionFilter !== 'all' || 
     contentTypeFilter !== 'all' || 
@@ -71,16 +74,16 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
         <div className="flex items-center">
           <Filter size={18} className="mr-2 text-muted-foreground" />
-          <span className="text-sm font-medium">Filter:</span>
+          <span className="text-sm font-medium">{t('poemsland.filters')}:</span>
         </div>
         
         <div className="flex flex-wrap gap-4 flex-1">
           <Select value={occasionFilter} onValueChange={setOccasionFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Anlass" />
+              <SelectValue placeholder={t('poemsland.occasion')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Anlässe</SelectItem>
+              <SelectItem value="all">{t('poemsland.occasion')}</SelectItem>
               {occasions.map(occasion => (
                 <SelectItem key={occasion} value={occasion}>
                   {getOccasionDisplay(occasion)}
@@ -91,10 +94,10 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
           
           <Select value={contentTypeFilter} onValueChange={setContentTypeFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Thema" />
+              <SelectValue placeholder={t('poemsland.contentType')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Themen</SelectItem>
+              <SelectItem value="all">{t('poemsland.contentType')}</SelectItem>
               {contentTypes.map(contentType => (
                 <SelectItem key={contentType} value={contentType}>
                   {getContentTypeDisplay(contentType)}
@@ -105,10 +108,10 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
           
           <Select value={styleFilter} onValueChange={setStyleFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Stil" />
+              <SelectValue placeholder={t('poemsland.style')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Stile</SelectItem>
+              <SelectItem value="all">{t('poemsland.style')}</SelectItem>
               {styles.map(style => (
                 <SelectItem key={style} value={style}>
                   {getStyleDisplay(style)}
@@ -119,10 +122,10 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
           
           <Select value={audienceFilter} onValueChange={setAudienceFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Zielgruppe" />
+              <SelectValue placeholder={t('poemsland.audience')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Zielgruppen</SelectItem>
+              <SelectItem value="all">{t('poemsland.audience')}</SelectItem>
               {audiences.map(audience => (
                 <SelectItem key={audience} value={audience}>
                   {getAudienceDisplay(audience)}
@@ -133,7 +136,7 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
           
           {filtersActive && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
-              Filter zurücksetzen
+              {language === 'en' ? 'Reset filters' : 'Filter zurücksetzen'}
             </Button>
           )}
         </div>
@@ -143,7 +146,7 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
         <div className="flex flex-wrap items-center gap-2 ml-1">
           <div className="flex items-center">
             <Tag size={14} className="text-muted-foreground mr-2" />
-            <span className="text-sm">Schlagwörter:</span>
+            <span className="text-sm">{language === 'en' ? 'Keywords:' : 'Schlagwörter:'}</span>
           </div>
           <div className="flex flex-wrap gap-1">
             {keywordFilters.map(keyword => (
@@ -172,7 +175,7 @@ const PoemFilters: React.FC<PoemFiltersProps> = ({
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Gedichte durchsuchen..."
+          placeholder={language === 'en' ? "Search poems..." : "Gedichte durchsuchen..."}
           value={searchQuery}
           onChange={handleSearchChange}
           className="pl-10 w-full"

@@ -16,26 +16,30 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
     const fetchPoems = async () => {
       setIsLoading(true);
       try {
-        // Get total count with a completely separate query
-        const countQuery = await supabase
-          .from('user_poems')
-          .select('id', { count: 'exact', head: true });
+        console.log(`Fetching poems with language: ${language}`);
         
-        if (countQuery.error) throw countQuery.error;
+        // Get total count with a language filter
+        const { count, error: countError } = await supabase
+          .from('user_poems')
+          .select('*', { count: 'exact', head: true })
+          .eq('language', language);
+        
+        if (countError) throw countError;
         
         // Set the total count
-        const count = countQuery.count || 0;
-        setTotalCount(count);
+        const totalPoemCount = count || 0;
+        setTotalCount(totalPoemCount);
         
-        // Fetch the actual data with a separate, simple query
-        const dataQuery = await supabase
+        // Fetch the actual data with language filter
+        const { data, error } = await supabase
           .from('user_poems')
-          .select();
+          .select('*')
+          .eq('language', language);
         
-        if (dataQuery.error) throw dataQuery.error;
+        if (error) throw error;
         
         // Apply filtering and pagination in memory to avoid complex query chains
-        let filteredData = dataQuery.data || [];
+        let filteredData = data || [];
         
         // Sort by date (descending)
         filteredData.sort((a, b) => {
@@ -58,7 +62,8 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
         const paginatedData = filteredData.slice(startIdx, endIdx);
         
         setPoems(paginatedData);
-        setHasMore((page * poemsPerPage) < count);
+        setHasMore((page * poemsPerPage) < totalPoemCount);
+        console.log(`Found ${paginatedData.length} poems with language: ${language}`);
       } catch (error) {
         console.error('Error fetching poems:', error);
         toast.error(language === 'en' ? 'Error loading poems' : 'Fehler beim Laden der Gedichte');
