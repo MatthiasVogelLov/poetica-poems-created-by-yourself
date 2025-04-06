@@ -18,11 +18,13 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
       try {
         console.log(`Fetching poems with language: ${language}`);
         
-        // Get total count with a language filter
-        const { count, error: countError } = await supabase
+        // Count query - simplified to avoid excessive type instantiation
+        const countQuery = supabase
           .from('user_poems')
-          .select('*', { count: 'exact', head: true })
-          .eq('language', language);
+          .select('*', { count: 'exact', head: true });
+          
+        // Add language filter if it's available in the schema
+        const { count, error: countError } = await countQuery.eq('language', language);
         
         if (countError) throw countError;
         
@@ -30,11 +32,13 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
         const totalPoemCount = count || 0;
         setTotalCount(totalPoemCount);
         
-        // Fetch the actual data with language filter
-        const { data, error } = await supabase
+        // Data query - simplified to avoid excessive type instantiation
+        const dataQuery = supabase
           .from('user_poems')
-          .select('*')
-          .eq('language', language);
+          .select('*');
+          
+        // Add language filter if it's available in the schema
+        const { data, error } = await dataQuery.eq('language', language);
         
         if (error) throw error;
         
