@@ -19,9 +19,6 @@ const PoemsLand = () => {
   const { language } = useLanguage();
   const { t } = useTranslations();
   
-  // Set language-specific filters based on URL
-  const isEnglishRoute = location.pathname.startsWith('/en/');
-  
   // Update language in context based on route if needed
   useEffect(() => {
     // This ensures poems are filtered by language correctly
@@ -29,7 +26,7 @@ const PoemsLand = () => {
   }, [language, location.pathname]);
   
   const {
-    filteredPoems: allPoems,
+    filteredPoems,
     isLoading,
     selectedPoemId,
     selectedPoem,
@@ -64,12 +61,7 @@ const PoemsLand = () => {
     poemsPerPage
   } = usePoems();
   
-  // Filter poems based on the current language
-  const filteredPoems = isEnglishRoute ? 
-    // For English route, filter poems with language='en' or empty language (for backward compatibility)
-    allPoems.filter(poem => poem.language === 'en' || !poem.language) : 
-    // For German route, filter poems with language='de' or empty language (for backward compatibility)
-    allPoems.filter(poem => poem.language === 'de' || !poem.language);
+  // No need to refilter poems here as they're already filtered by language in useFetchPoems
 
   // Custom hook for poem navigation
   const {

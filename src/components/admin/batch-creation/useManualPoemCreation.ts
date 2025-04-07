@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ManualPoemData {
   title: string;
@@ -20,6 +21,7 @@ interface ManualPoemData {
 }
 
 export const useManualPoemCreation = (onSuccess: () => void) => {
+  const { language } = useLanguage();
   const [isGenerating, setIsGenerating] = useState(false);
   const [manualPoemData, setManualPoemData] = useState<ManualPoemData>({
     title: '',
@@ -32,7 +34,8 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
     length: 'mittel',
     keywords: '',
     generateContent: true,
-    publishAfterCreation: false
+    publishAfterCreation: false,
+    language: language // Initialize with current language
   });
 
   const handleManualChange = (field: string, value: any) => {
@@ -42,7 +45,7 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
   const generatePoemContent = async (data: Partial<ManualPoemData> = {}) => {
     setIsGenerating(true);
     try {
-      const currentData = { ...manualPoemData, ...data };
+      const currentData = { ...manualPoemData, ...data, language };
 
       // Generate poem content using the edge function
       const { data: generationResult, error: generationError } = await supabase.functions.invoke('generate-poem', {
@@ -82,7 +85,7 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
   const createManualPoem = async (data: Partial<ManualPoemData> = {}) => {
     setIsGenerating(true);
     try {
-      const currentData = { ...manualPoemData, ...data };
+      const currentData = { ...manualPoemData, ...data, language };
 
       // If generateContent is true and content is empty, generate content first
       if (currentData.generateContent && !currentData.content) {

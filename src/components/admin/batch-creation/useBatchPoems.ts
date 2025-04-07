@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export const useBatchPoems = () => {
+  const { language } = useLanguage();
   const [batchPoems, setBatchPoems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [publishing, setPublishing] = useState<Record<string, boolean>>({});
@@ -17,7 +19,7 @@ export const useBatchPoems = () => {
   // Fetch batch poems on component mount
   useEffect(() => {
     fetchBatchPoems();
-  }, [page]);
+  }, [page, language]);
 
   const fetchBatchPoems = async () => {
     setIsLoading(true);
@@ -26,7 +28,8 @@ export const useBatchPoems = () => {
       const { count: totalCountResult, error: countError } = await supabase
         .from('user_poems')
         .select('*', { count: 'exact', head: true })
-        .eq('batch_created', true);
+        .eq('batch_created', true)
+        .eq('language', language);
       
       if (countError) throw countError;
       
@@ -37,6 +40,7 @@ export const useBatchPoems = () => {
         .from('user_poems')
         .select('*', { count: 'exact', head: true })
         .eq('batch_created', true)
+        .eq('language', language)
         .not('status', 'in', '("deleted","hidden")');
       
       if (visibleCountError) throw visibleCountError;
@@ -65,6 +69,7 @@ export const useBatchPoems = () => {
         .from('user_poems')
         .select('*')
         .eq('batch_created', true)
+        .eq('language', language)
         .not('status', 'in', '("deleted","hidden")')
         .order('created_at', { ascending: false })
         .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);

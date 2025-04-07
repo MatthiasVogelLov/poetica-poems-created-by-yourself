@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Style, VerseType, Length } from '@/types/poem';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PoemEntry {
   title: string;
@@ -23,6 +24,7 @@ interface MassUploadData {
 }
 
 export const useMassUpload = (onSuccess: () => void) => {
+  const { language } = useLanguage();
   const [isGenerating, setIsGenerating] = useState(false);
   const [massUploadData, setMassUploadData] = useState<MassUploadData>({
     style: 'klassisch',
@@ -30,7 +32,8 @@ export const useMassUpload = (onSuccess: () => void) => {
     length: 'mittel',
     useRandomOptions: false,
     publishToPoemsLand: false,
-    poemEntries: [{ title: '', content: '', occasion: 'geburtstag', contentType: 'liebe', keywords: '' }]
+    poemEntries: [{ title: '', content: '', occasion: 'geburtstag', contentType: 'liebe', keywords: '' }],
+    language: language // Initialize with current language
   });
 
   const handleStyleChange = (value: Style) => {
@@ -64,7 +67,7 @@ export const useMassUpload = (onSuccess: () => void) => {
   const generateMassUploadPoems = async (data: Partial<MassUploadData> = {}) => {
     setIsGenerating(true);
     try {
-      const currentData = { ...massUploadData, ...data };
+      const currentData = { ...massUploadData, ...data, language };
       
       // Check if there are entries to process
       if (currentData.poemEntries.length === 0) {

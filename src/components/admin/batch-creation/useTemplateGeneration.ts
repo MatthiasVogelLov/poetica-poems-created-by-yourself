@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
 import { getRandomOption } from './poemUtils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface TemplateData {
   count: number;
@@ -19,6 +20,7 @@ interface TemplateData {
 }
 
 export const useTemplateGeneration = (onSuccess: () => void) => {
+  const { language } = useLanguage();
   const [isGenerating, setIsGenerating] = useState(false);
   const [templateData, setTemplateData] = useState<TemplateData>({
     count: 5,
@@ -29,7 +31,8 @@ export const useTemplateGeneration = (onSuccess: () => void) => {
     verseType: 'kreuzreim',
     length: 'mittel',
     keywords: '',
-    useRandomOptions: false
+    useRandomOptions: false,
+    language: language // Initialize with current language
   });
 
   const handleTemplateChange = (field: string, value: any) => {
@@ -39,7 +42,7 @@ export const useTemplateGeneration = (onSuccess: () => void) => {
   const generateTemplatePoems = async (data: TemplateData = templateData) => {
     setIsGenerating(true);
     try {
-      const currentData = { ...templateData, ...data };
+      const currentData = { ...templateData, ...data, language };
       
       for (let i = 0; i < currentData.count; i++) {
         // Use either the selected values or random values based on useRandomOptions

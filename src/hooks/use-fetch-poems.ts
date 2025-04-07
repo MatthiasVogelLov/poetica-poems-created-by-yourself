@@ -22,17 +22,18 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
     const fetchPoems = async () => {
       setIsLoading(true);
       try {
-        console.log(`Fetching poems for interface language: ${language}`);
+        console.log(`Fetching poems for language: ${language}`);
         
-        // Fetch all poems without language filtering (we'll filter client-side)
+        // Query with language filter
         const result: SimplePoemResponse = await supabase
           .from('user_poems')
-          .select('*') as SimplePoemResponse;
+          .select('*')
+          .eq('language', language) as SimplePoemResponse;
         
         if (result.error) throw result.error;
         
         const allData = result.data || [];
-        console.log(`Retrieved ${allData.length} total poems`);
+        console.log(`Retrieved ${allData.length} poems with language: ${language}`);
         
         // Filter by status
         const filteredByStatus = allData.filter(poem =>
