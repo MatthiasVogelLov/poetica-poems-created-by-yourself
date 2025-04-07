@@ -37,13 +37,17 @@ export const useBatchPoems = () => {
       
       // Get count of visible poems (not deleted and not hidden)
       // Using simple filters instead of complex "not in" to avoid TypeScript issues
-      const { count: visibleCountResult, error: visibleCountError } = await supabase
+      const visibleCountQuery = supabase
         .from('user_poems')
         .select('*', { count: 'exact', head: true })
         .eq('batch_created', true)
-        .eq('language', language)
-        .neq('status', 'deleted')
-        .neq('status', 'hidden');
+        .eq('language', language);
+      
+      // Apply status filters separately
+      // This approach avoids complex type instantiation
+      visibleCountQuery.or('status.is.null,status.neq.deleted,status.neq.hidden');
+      
+      const { count: visibleCountResult, error: visibleCountError } = await visibleCountQuery;
       
       if (visibleCountError) throw visibleCountError;
       
@@ -67,16 +71,21 @@ export const useBatchPoems = () => {
       }
       
       // Then fetch the actual page of data, excluding deleted and hidden poems
-      // Using simple filters instead of complex "not in" to avoid TypeScript issues
-      const { data, error } = await supabase
+      // Create query using simplest possible approach to avoid TypeScript complexity
+      const dataQuery = supabase
         .from('user_poems')
         .select('*')
         .eq('batch_created', true)
-        .eq('language', language)
-        .neq('status', 'deleted')
-        .neq('status', 'hidden')
-        .order('created_at', { ascending: false })
+        .eq('language', language);
+      
+      // Apply status filters in a simplified way
+      dataQuery.or('status.is.null,status.neq.deleted,status.neq.hidden');
+      
+      // Add ordering and pagination
+      dataQuery.order('created_at', { ascending: false })
         .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
+      
+      const { data, error } = await dataQuery;
       
       if (error) throw error;
       
