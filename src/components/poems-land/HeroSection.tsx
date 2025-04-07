@@ -23,7 +23,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
   // Force background image reload on component mount
   useEffect(() => {
     const img = new Image();
-    img.src = '/lovable-uploads/4045edd2-4676-46be-8fd9-26ab8e3a633f.png';
+    img.src = '/lovable-uploads/9fea3f06-b55f-44cf-9604-e377bc579c4f.png';
   }, []);
 
   return (
@@ -32,7 +32,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
       <div 
         className="fixed inset-0 bg-cover bg-center z-[-1]"
         style={{ 
-          backgroundImage: "url('/lovable-uploads/4045edd2-4676-46be-8fd9-26ab8e3a633f.png')", 
+          backgroundImage: "url('/lovable-uploads/9fea3f06-b55f-44cf-9604-e377bc579c4f.png')", 
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
