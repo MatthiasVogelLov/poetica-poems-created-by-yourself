@@ -33,7 +33,16 @@ export const useFetchSinglePoem = (poemId: string | null) => {
         }
         
         console.log('Poem data received:', data);
-        setPoem(data);
+        
+        // Format the poem data to match the Poem interface
+        // Convert keywords string to array if it's a string
+        const formattedPoem: Poem = {
+          ...data,
+          keywords: data.keywords ? 
+            (typeof data.keywords === 'string' ? data.keywords : data.keywords) : undefined
+        };
+        
+        setPoem(formattedPoem);
       } catch (error) {
         console.error('Error fetching poem:', error);
         toast.error(language === 'en' ? 'Error loading poem' : 'Fehler beim Laden des Gedichts');

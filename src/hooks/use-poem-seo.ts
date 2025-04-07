@@ -19,11 +19,18 @@ export const usePoemSeo = (poems: Poem[]) => {
         ? poem.content.substring(0, 160).trim() + (poem.content.length > 160 ? '...' : '')
         : '';
         
-      // Extract keywords from poem keywords field or content
-      const keywordsString = poem.keywords || '';
-      const extractedKeywords = keywordsString.split(',')
-        .map(k => k.trim())
-        .filter(k => k.length > 0);
+      // Extract keywords from poem keywords field
+      let extractedKeywords: string[] = [];
+      
+      if (poem.keywords) {
+        if (typeof poem.keywords === 'string') {
+          extractedKeywords = poem.keywords.split(',')
+            .map(k => k.trim())
+            .filter(k => k.length > 0);
+        } else if (Array.isArray(poem.keywords)) {
+          extractedKeywords = poem.keywords.filter(k => k.length > 0);
+        }
+      }
         
       metadata[poem.id] = {
         description,

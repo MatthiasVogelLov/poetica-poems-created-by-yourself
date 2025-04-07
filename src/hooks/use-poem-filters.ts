@@ -19,7 +19,11 @@ export const usePoemFilters = (poems: Poem[]) => {
     
     poems.forEach(poem => {
       if (poem.keywords) {
-        const keywordList = poem.keywords.split(',').map(k => k.trim());
+        // Handle both string and array keywords
+        const keywordList = typeof poem.keywords === 'string' 
+          ? poem.keywords.split(',').map(k => k.trim())
+          : poem.keywords;
+          
         keywordList.forEach(keyword => {
           if (keyword) {
             // Capitalize first letter for consistent display
@@ -55,7 +59,11 @@ export const usePoemFilters = (poems: Poem[]) => {
       result = result.filter(poem => {
         if (!poem.keywords) return false;
         
-        const poemKeywords = poem.keywords.toLowerCase().split(',').map(k => k.trim());
+        // Handle both string and array keywords
+        const poemKeywords = typeof poem.keywords === 'string'
+          ? poem.keywords.toLowerCase().split(',').map(k => k.trim())
+          : poem.keywords.map(k => k.toLowerCase());
+          
         return keywordFilters.some(filter => 
           poemKeywords.includes(filter.toLowerCase())
         );

@@ -9,7 +9,7 @@ export interface Poem {
   verse_type?: string;
   length?: string;
   audience?: string;
-  keywords?: string[];
+  keywords?: string | string[];
   created_at: string;
   status?: string;
   batch_created?: boolean | null;
@@ -47,3 +47,13 @@ export const createPoemSlug = (poem: Poem) => {
     .replace(/^-+/, '') // Trim - from start of text
     .replace(/-+$/, ''); // Trim - from end of text
 };
+
+// Add missing PoemFilters interface
+export interface PoemFilters {
+  occasionFilter: string;
+  contentTypeFilter: string;
+  styleFilter: string;
+  audienceFilter: string;
+  searchQuery: string;
+  keywordFilters?: string[];
+}

@@ -59,16 +59,37 @@ const BatchCreation = () => {
     generateMassUploadPoems
   } = useMassUpload(fetchBatchPoems);
 
-  // Store language with batch poem data to ensure language separation
-  const handleSubmitWithLanguage = (callback: Function) => {
-    return (data: any) => {
-      // Add language to the data being passed
-      const dataWithLanguage = {
-        ...data,
-        language: language
-      };
-      return callback(dataWithLanguage);
+  // Properly handle hook calls without passing language parameter
+  const generateTemplateWithLanguage = () => {
+    const dataWithLanguage = {
+      ...templateData,
+      language
     };
+    generateTemplatePoems(dataWithLanguage);
+  };
+
+  const createManualPoemWithLanguage = () => {
+    const dataWithLanguage = {
+      ...manualPoemData,
+      language
+    };
+    createManualPoem(dataWithLanguage);
+  };
+
+  const generatePoemContentWithLanguage = () => {
+    const dataWithLanguage = {
+      ...manualPoemData,
+      language
+    };
+    generatePoemContent(dataWithLanguage);
+  };
+
+  const generateMassUploadWithLanguage = () => {
+    const dataWithLanguage = {
+      ...massUploadData,
+      language
+    };
+    generateMassUploadPoems(dataWithLanguage);
   };
 
   return (
@@ -93,13 +114,7 @@ const BatchCreation = () => {
                 <TemplateForm 
                   templateData={templateData}
                   onFieldChange={handleTemplateChange}
-                  onGenerate={() => {
-                    const dataWithLanguage = {
-                      ...templateData,
-                      language
-                    };
-                    generateTemplatePoems(dataWithLanguage);
-                  }}
+                  onGenerate={generateTemplateWithLanguage}
                   isGenerating={isGeneratingTemplate}
                 />
               </TabsContent>
@@ -108,20 +123,8 @@ const BatchCreation = () => {
                 <ManualForm 
                   poemData={manualPoemData}
                   onFieldChange={handleManualChange}
-                  onSubmit={() => {
-                    const dataWithLanguage = {
-                      ...manualPoemData,
-                      language
-                    };
-                    createManualPoem(dataWithLanguage);
-                  }}
-                  onGenerateContent={() => {
-                    const dataWithLanguage = {
-                      ...manualPoemData,
-                      language
-                    };
-                    generatePoemContent(dataWithLanguage);
-                  }}
+                  onSubmit={createManualPoemWithLanguage}
+                  onGenerateContent={generatePoemContentWithLanguage}
                   isGenerating={isGeneratingManual}
                 />
               </TabsContent>
@@ -140,13 +143,7 @@ const BatchCreation = () => {
                   onRandomOptionsChange={handleRandomOptionsChange}
                   onPublishToPoemsLandChange={handlePublishToPoemsLandChange}
                   onPoemEntryChange={handlePoemEntryChange}
-                  onGenerate={() => {
-                    const dataWithLanguage = {
-                      ...massUploadData,
-                      language
-                    };
-                    generateMassUploadPoems(dataWithLanguage);
-                  }}
+                  onGenerate={generateMassUploadWithLanguage}
                   isGenerating={isGeneratingMassUpload}
                 />
               </TabsContent>
