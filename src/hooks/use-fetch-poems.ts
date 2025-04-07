@@ -5,12 +5,6 @@ import { toast } from 'sonner';
 import { Poem } from '@/types/poem-types';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-// Define a custom type for simplified response handling
-type SimplePoemResponse = {
-  data: Poem[] | null;
-  error: Error | null;
-};
-
 export const useFetchPoems = (page: number, poemsPerPage: number) => {
   const { language } = useLanguage();
   const [poems, setPoems] = useState<Poem[]>([]);
@@ -24,43 +18,37 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
       try {
         console.log(`Fetching poems for language: ${language}`);
         
-        // Query with language filter
-        const result: SimplePoemResponse = await supabase
+        // Define allowed statuses for consistency
+        const allowedStatuses = [null, 'draft', 'published'];
+        
+        // Get total count with language and status filters
+        const countQuery = supabase
+          .from('user_poems')
+          .select('*', { count: 'exact', head: true })
+          .eq('language', language)
+          .in('status', allowedStatuses);
+        
+        const { count: totalCount, error: countError } = await countQuery;
+        
+        if (countError) throw countError;
+        
+        setTotalCount(totalCount || 0);
+        console.log(`Total poems for language ${language}: ${totalCount}`);
+        
+        // Fetch the poems with pagination
+        const { data, error } = await supabase
           .from('user_poems')
           .select('*')
-          .eq('language', language) as SimplePoemResponse;
+          .eq('language', language)
+          .in('status', allowedStatuses)
+          .order('created_at', { ascending: false })
+          .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
         
-        if (result.error) throw result.error;
+        if (error) throw error;
         
-        const allData = result.data || [];
-        console.log(`Retrieved ${allData.length} poems with language: ${language}`);
-        
-        // Filter by status
-        const filteredByStatus = allData.filter(poem =>
-          poem.batch_created === null ||
-          poem.batch_created === true ||
-          poem.status === 'published' ||
-          poem.status === 'hidden'
-        );
-        
-        // Set total count for pagination
-        setTotalCount(filteredByStatus.length);
-        
-        // Sort by date (descending)
-        filteredByStatus.sort((a, b) => {
-          const dateA = new Date(a.created_at || 0).getTime();
-          const dateB = new Date(b.created_at || 0).getTime();
-          return dateB - dateA;
-        });
-        
-        // Apply pagination
-        const startIdx = (page - 1) * poemsPerPage;
-        const endIdx = page * poemsPerPage;
-        const paginatedData = filteredByStatus.slice(startIdx, endIdx);
-        
-        setPoems(paginatedData);
-        setHasMore(endIdx < filteredByStatus.length);
-        console.log(`Filtered to ${paginatedData.length} poems for display`);
+        setPoems(data || []);
+        setHasMore((page * poemsPerPage) < (totalCount || 0));
+        console.log(`Fetched ${data?.length || 0} poems for display`);
       } catch (error) {
         console.error('Error fetching poems:', error);
         toast.error(language === 'en' ? 'Error loading poems' : 'Fehler beim Laden der Gedichte');

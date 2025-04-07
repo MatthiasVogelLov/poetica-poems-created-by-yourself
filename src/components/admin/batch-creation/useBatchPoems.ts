@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -34,14 +35,16 @@ export const useBatchPoems = () => {
       
       setTotalCount(totalCountResult || 0);
       
-      // Get count of visible poems (not deleted and not hidden)
-      // Using array of allowed status values instead of complex filters
+      // Define allowed statuses as an array to simplify query
+      const allowedStatuses = [null, 'draft', 'published'];
+      
+      // Get count of visible poems with allowed statuses
       const { count: visibleCountResult, error: visibleCountError } = await supabase
         .from('user_poems')
         .select('*', { count: 'exact', head: true })
         .eq('batch_created', true)
         .eq('language', language)
-        .in('status', [null, 'draft', 'published']);
+        .in('status', allowedStatuses);
       
       if (visibleCountError) throw visibleCountError;
       
@@ -64,13 +67,13 @@ export const useBatchPoems = () => {
         return;
       }
       
-      // Then fetch the actual page of data, using the same simplified filtering approach
+      // Fetch the actual page of data using the same approach
       const { data, error } = await supabase
         .from('user_poems')
         .select('*')
         .eq('batch_created', true)
         .eq('language', language)
-        .in('status', [null, 'draft', 'published'])
+        .in('status', allowedStatuses)
         .order('created_at', { ascending: false })
         .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
       
