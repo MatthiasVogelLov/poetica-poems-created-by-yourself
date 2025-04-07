@@ -24,6 +24,9 @@ export const useBatchPoems = () => {
   const fetchBatchPoems = async () => {
     setIsLoading(true);
     try {
+      // Define allowed statuses as an array
+      const allowedStatuses = ['draft', 'published', null];
+      
       // First get the total count for pagination info
       const { count: totalCountResult, error: countError } = await supabase
         .from('user_poems')
@@ -34,9 +37,6 @@ export const useBatchPoems = () => {
       if (countError) throw countError;
       
       setTotalCount(totalCountResult || 0);
-      
-      // Define allowed statuses as an array to simplify query
-      const allowedStatuses = [null, 'draft', 'published'];
       
       // Get count of visible poems with allowed statuses
       const { count: visibleCountResult, error: visibleCountError } = await supabase

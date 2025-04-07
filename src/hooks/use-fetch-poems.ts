@@ -18,8 +18,8 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
       try {
         console.log(`Fetching poems for language: ${language}`);
         
-        // Define allowed statuses for consistency
-        const allowedStatuses = [null, 'draft', 'published'];
+        // Define allowed statuses as a simple array
+        const allowedStatuses = ['draft', 'published', null];
         
         // Get total count with language and status filters
         const countQuery = supabase
