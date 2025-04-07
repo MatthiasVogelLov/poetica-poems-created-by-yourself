@@ -1,11 +1,14 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Style, VerseType, Length } from '@/types/poem';
-import { generateRandomOptions } from './poemUtils';
 
 interface PoemEntry {
   title: string;
+  content: string;
+  occasion: string;
+  contentType: string;
   keywords: string;
 }
 
@@ -14,183 +17,119 @@ interface MassUploadData {
   verseType: VerseType;
   length: Length;
   useRandomOptions: boolean;
-  poemEntries: PoemEntry[];
   publishToPoemsLand: boolean;
+  poemEntries: PoemEntry[];
+  language?: string;
 }
 
-// Default to 5 empty poem entries
-const initialPoemEntries = Array(5).fill({
-  title: '',
-  keywords: ''
-}).map(() => ({ title: '', keywords: '' }));
-
-export const useMassUpload = (onCompletion: () => void) => {
+export const useMassUpload = (onSuccess: () => void) => {
+  const [isGenerating, setIsGenerating] = useState(false);
   const [massUploadData, setMassUploadData] = useState<MassUploadData>({
     style: 'klassisch',
     verseType: 'kreuzreim',
     length: 'mittel',
     useRandomOptions: false,
-    poemEntries: initialPoemEntries,
-    publishToPoemsLand: true
+    publishToPoemsLand: false,
+    poemEntries: [{ title: '', content: '', occasion: 'geburtstag', contentType: 'liebe', keywords: '' }]
   });
-  
-  const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleStyleChange = (style: Style) => {
-    setMassUploadData(prev => ({ ...prev, style }));
+  const handleStyleChange = (value: Style) => {
+    setMassUploadData(prev => ({ ...prev, style: value }));
   };
 
-  const handleVerseTypeChange = (verseType: VerseType) => {
-    setMassUploadData(prev => ({ ...prev, verseType }));
+  const handleVerseTypeChange = (value: VerseType) => {
+    setMassUploadData(prev => ({ ...prev, verseType: value }));
   };
 
-  const handleLengthChange = (length: Length) => {
-    setMassUploadData(prev => ({ ...prev, length }));
+  const handleLengthChange = (value: Length) => {
+    setMassUploadData(prev => ({ ...prev, length: value }));
   };
 
-  const handleRandomOptionsChange = (useRandomOptions: boolean) => {
-    setMassUploadData(prev => ({ ...prev, useRandomOptions }));
+  const handleRandomOptionsChange = (value: boolean) => {
+    setMassUploadData(prev => ({ ...prev, useRandomOptions: value }));
   };
 
-  const handlePublishToPoemsLandChange = (publishToPoemsLand: boolean) => {
-    setMassUploadData(prev => ({ ...prev, publishToPoemsLand }));
+  const handlePublishToPoemsLandChange = (value: boolean) => {
+    setMassUploadData(prev => ({ ...prev, publishToPoemsLand: value }));
   };
 
-  const handlePoemEntryChange = (index: number, field: 'title' | 'keywords', value: string) => {
+  const handlePoemEntryChange = (index: number, field: string, value: string) => {
     setMassUploadData(prev => {
-      const updatedEntries = [...prev.poemEntries];
-      
-      // Handle the case when index is beyond the current array length
-      // This happens when uploading an Excel file with more entries than we currently have
-      if (index >= updatedEntries.length) {
-        // Add empty entries up to the index
-        for (let i = updatedEntries.length; i <= index; i++) {
-          updatedEntries.push({ title: '', keywords: '' });
-        }
-      }
-      
-      // Now update the entry at the specified index
-      updatedEntries[index] = { ...updatedEntries[index], [field]: value };
-      
-      return { ...prev, poemEntries: updatedEntries };
+      const newEntries = [...prev.poemEntries];
+      newEntries[index] = { ...newEntries[index], [field]: value };
+      return { ...prev, poemEntries: newEntries };
     });
   };
 
-  const generateMassUploadPoems = async () => {
-    // Filter out empty entries
-    const validEntries = massUploadData.poemEntries.filter(entry => entry.title.trim());
-    
-    if (validEntries.length === 0) {
-      toast.error('Bitte geben Sie mindestens einen Titel ein.');
-      return;
-    }
-
+  const generateMassUploadPoems = async (data: Partial<MassUploadData> = {}) => {
     setIsGenerating(true);
-    
     try {
-      // Create an array to track failed entries
-      const failedEntries: { title: string, error: string }[] = [];
-      const successfulEntries: string[] = [];
+      const currentData = { ...massUploadData, ...data };
       
-      // Process entries sequentially to avoid overwhelming the API
-      for (const entry of validEntries) {
-        let poemOptions = {
-          style: massUploadData.style,
-          verseType: massUploadData.verseType,
-          length: massUploadData.length
-        };
+      // Check if there are entries to process
+      if (currentData.poemEntries.length === 0) {
+        throw new Error('No poem entries to generate');
+      }
 
-        // Use random options if enabled
-        if (massUploadData.useRandomOptions) {
-          const randomOpts = generateRandomOptions();
-          poemOptions = {
-            style: randomOpts.style,
-            verseType: randomOpts.verseType,
-            length: randomOpts.length
-          };
+      // Process each poem entry
+      for (let entry of currentData.poemEntries) {
+        if (!entry.title.trim()) {
+          continue; // Skip entries without a title
         }
 
-        try {
-          // Call the generate-poem edge function
-          const { data, error } = await supabase.functions.invoke('generate-poem', {
+        // Generate poem content if needed
+        let poemContent = entry.content;
+        if (!poemContent.trim()) {
+          const { data: generationResult, error: generationError } = await supabase.functions.invoke('generate-poem', {
             body: {
-              ...poemOptions,
               title: entry.title,
+              occasion: entry.occasion,
+              contentType: entry.contentType,
+              style: currentData.style,
+              verseType: currentData.verseType,
+              length: currentData.length,
               keywords: entry.keywords,
-              audience: 'erwachsene',
-              occasion: 'andere',
-              contentType: 'natur'
+              language: currentData.language
             }
           });
-
-          if (error) {
-            failedEntries.push({ title: entry.title, error: error.message });
+          
+          if (generationError) {
+            console.error(`Error generating content for poem "${entry.title}":`, generationError);
             continue;
           }
           
-          if (!data) {
-            failedEntries.push({ title: entry.title, error: 'Keine Daten vom Server erhalten' });
-            continue;
-          }
-          
-          // Save the generated poem to the database
-          const { error: saveError } = await supabase
-            .from('user_poems')
-            .insert({
-              title: entry.title,
-              content: data.poem,
-              style: poemOptions.style,
-              verse_type: poemOptions.verseType,
-              occasion: 'andere',
-              content_type: 'natur',
-              audience: 'erwachsene',
-              status: massUploadData.publishToPoemsLand ? 'published' : 'draft',
-              keywords: entry.keywords,
-              length: poemOptions.length,
-              batch_created: true
-            });
-
-          if (saveError) {
-            failedEntries.push({ title: entry.title, error: saveError.message });
-          } else {
-            successfulEntries.push(entry.title);
-          }
-        } catch (entryError) {
-          console.error(`Error processing entry "${entry.title}":`, entryError);
-          failedEntries.push({ title: entry.title, error: entryError instanceof Error ? entryError.message : 'Unbekannter Fehler' });
+          poemContent = generationResult.poem;
         }
-        
-        // Add a small delay between API calls to prevent rate limiting
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
 
-      // Report results
-      if (successfulEntries.length > 0) {
-        toast.success(`${successfulEntries.length} Gedichte wurden erfolgreich erstellt.`);
+        // Save the poem to the database
+        const { error } = await supabase
+          .from('user_poems')
+          .insert({
+            title: entry.title,
+            content: poemContent,
+            occasion: entry.occasion,
+            content_type: entry.contentType,
+            style: currentData.style,
+            verse_type: currentData.verseType,
+            length: currentData.length,
+            keywords: entry.keywords,
+            batch_created: true,
+            status: currentData.publishToPoemsLand ? 'published' : 'draft',
+            language: currentData.language
+          });
+          
+        if (error) {
+          console.error(`Error saving poem "${entry.title}":`, error);
+        }
       }
       
-      if (failedEntries.length > 0) {
-        console.error('Failed entries:', failedEntries);
-        toast.error(`${failedEntries.length} Gedichte konnten nicht erstellt werden.`, {
-          description: "Bitte versuchen Sie es später erneut oder reduzieren Sie die Anzahl der gleichzeitigen Anfragen."
-        });
-      }
-      
-      // Reset form entries but keep the style settings if at least one poem was successful
-      if (successfulEntries.length > 0) {
-        setMassUploadData(prev => ({
-          ...prev,
-          poemEntries: initialPoemEntries
-        }));
-      }
-      
-      // Trigger callback to refresh poem list
-      onCompletion();
+      toast.success(currentData.language === 'en' 
+        ? 'Poems uploaded successfully' 
+        : 'Gedichte erfolgreich hochgeladen');
+      onSuccess();
     } catch (error) {
-      console.error('Error generating mass upload poems:', error);
-      toast.error('Fehler beim Erstellen der Gedichte. Bitte versuchen Sie es später erneut.', {
-        description: error instanceof Error ? error.message : 'Unbekannter Fehler'
-      });
+      console.error('Error in mass upload:', error);
+      toast.error('Fehler beim Hochladen der Gedichte: ' + (error.message || 'Unbekannter Fehler'));
     } finally {
       setIsGenerating(false);
     }

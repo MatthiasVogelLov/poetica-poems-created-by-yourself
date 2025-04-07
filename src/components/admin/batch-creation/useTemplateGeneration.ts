@@ -15,6 +15,7 @@ interface TemplateData {
   length: Length;
   keywords: string;
   useRandomOptions: boolean;
+  language?: string;
 }
 
 export const useTemplateGeneration = (onSuccess: () => void) => {
@@ -35,23 +36,25 @@ export const useTemplateGeneration = (onSuccess: () => void) => {
     setTemplateData(prev => ({ ...prev, [field]: value }));
   };
 
-  const generateTemplatePoems = async () => {
+  const generateTemplatePoems = async (data: TemplateData = templateData) => {
     setIsGenerating(true);
     try {
-      for (let i = 0; i < templateData.count; i++) {
+      const currentData = { ...templateData, ...data };
+      
+      for (let i = 0; i < currentData.count; i++) {
         // Use either the selected values or random values based on useRandomOptions
-        const audience = templateData.useRandomOptions ? 
-          getRandomOption('audience') : templateData.audience;
-        const occasion = templateData.useRandomOptions ? 
-          getRandomOption('occasion') : templateData.occasion;
-        const contentType = templateData.useRandomOptions ? 
-          getRandomOption('contentType') : templateData.contentType;
-        const style = templateData.useRandomOptions ? 
-          getRandomOption('style') : templateData.style;
-        const verseType = templateData.useRandomOptions ? 
-          getRandomOption('verseType') : templateData.verseType;
-        const length = templateData.useRandomOptions ? 
-          getRandomOption('length') : templateData.length;
+        const audience = currentData.useRandomOptions ? 
+          getRandomOption('audience') : currentData.audience;
+        const occasion = currentData.useRandomOptions ? 
+          getRandomOption('occasion') : currentData.occasion;
+        const contentType = currentData.useRandomOptions ? 
+          getRandomOption('contentType') : currentData.contentType;
+        const style = currentData.useRandomOptions ? 
+          getRandomOption('style') : currentData.style;
+        const verseType = currentData.useRandomOptions ? 
+          getRandomOption('verseType') : currentData.verseType;
+        const length = currentData.useRandomOptions ? 
+          getRandomOption('length') : currentData.length;
 
         // Call the generate-poem edge function to create a real poem
         const { data: generationResult, error: generationError } = await supabase.functions.invoke('generate-poem', {
@@ -62,7 +65,8 @@ export const useTemplateGeneration = (onSuccess: () => void) => {
             style: style,
             verseType: verseType,
             length: length,
-            keywords: templateData.keywords
+            keywords: currentData.keywords,
+            language: currentData.language
           }
         });
         
@@ -83,13 +87,16 @@ export const useTemplateGeneration = (onSuccess: () => void) => {
             verse_type: verseType,
             length: length,
             batch_created: true,
-            status: 'draft'
+            status: 'draft',
+            language: currentData.language
           });
           
         if (error) throw error;
       }
       
-      toast.success(`${templateData.count} Gedichte wurden erstellt`);
+      toast.success(currentData.language === 'en' 
+        ? `${currentData.count} poems have been created` 
+        : `${currentData.count} Gedichte wurden erstellt`);
       onSuccess();
     } catch (error) {
       console.error('Error generating poems:', error);
