@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -36,18 +35,13 @@ export const useBatchPoems = () => {
       setTotalCount(totalCountResult || 0);
       
       // Get count of visible poems (not deleted and not hidden)
-      // Using simple filters instead of complex "not in" to avoid TypeScript issues
-      const visibleCountQuery = supabase
+      // Using a string filter expression to avoid TypeScript complexity
+      const { count: visibleCountResult, error: visibleCountError } = await supabase
         .from('user_poems')
         .select('*', { count: 'exact', head: true })
         .eq('batch_created', true)
-        .eq('language', language);
-      
-      // Apply status filters separately
-      // This approach avoids complex type instantiation
-      visibleCountQuery.or('status.is.null,status.neq.deleted,status.neq.hidden');
-      
-      const { count: visibleCountResult, error: visibleCountError } = await visibleCountQuery;
+        .eq('language', language)
+        .or('status.is.null,status.eq.draft,status.eq.published');
       
       if (visibleCountError) throw visibleCountError;
       
@@ -70,22 +64,15 @@ export const useBatchPoems = () => {
         return;
       }
       
-      // Then fetch the actual page of data, excluding deleted and hidden poems
-      // Create query using simplest possible approach to avoid TypeScript complexity
-      const dataQuery = supabase
+      // Then fetch the actual page of data, using the same filter approach
+      const { data, error } = await supabase
         .from('user_poems')
         .select('*')
         .eq('batch_created', true)
-        .eq('language', language);
-      
-      // Apply status filters in a simplified way
-      dataQuery.or('status.is.null,status.neq.deleted,status.neq.hidden');
-      
-      // Add ordering and pagination
-      dataQuery.order('created_at', { ascending: false })
+        .eq('language', language)
+        .or('status.is.null,status.eq.draft,status.eq.published')
+        .order('created_at', { ascending: false })
         .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
-      
-      const { data, error } = await dataQuery;
       
       if (error) throw error;
       
