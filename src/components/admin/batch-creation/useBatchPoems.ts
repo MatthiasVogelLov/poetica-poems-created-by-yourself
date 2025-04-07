@@ -35,13 +35,13 @@ export const useBatchPoems = () => {
       setTotalCount(totalCountResult || 0);
       
       // Get count of visible poems (not deleted and not hidden)
-      // Using a string filter expression to avoid TypeScript complexity
+      // Using array of allowed status values instead of complex filters
       const { count: visibleCountResult, error: visibleCountError } = await supabase
         .from('user_poems')
         .select('*', { count: 'exact', head: true })
         .eq('batch_created', true)
         .eq('language', language)
-        .or('status.is.null,status.eq.draft,status.eq.published');
+        .in('status', [null, 'draft', 'published']);
       
       if (visibleCountError) throw visibleCountError;
       
@@ -64,13 +64,13 @@ export const useBatchPoems = () => {
         return;
       }
       
-      // Then fetch the actual page of data, using the same filter approach
+      // Then fetch the actual page of data, using the same simplified filtering approach
       const { data, error } = await supabase
         .from('user_poems')
         .select('*')
         .eq('batch_created', true)
         .eq('language', language)
-        .or('status.is.null,status.eq.draft,status.eq.published')
+        .in('status', [null, 'draft', 'published'])
         .order('created_at', { ascending: false })
         .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
       
