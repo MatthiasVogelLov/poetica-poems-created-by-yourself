@@ -1,4 +1,5 @@
 
+// Types specific to the poems functionality
 export interface Poem {
   id: string;
   title: string;
@@ -6,14 +7,25 @@ export interface Poem {
   occasion: string;
   content_type: string;
   style?: string;
-  verse_type?: string;
-  length?: string;
-  audience?: string;
-  keywords?: string | string[];
   created_at: string;
   status?: string;
-  batch_created?: boolean | null;
-  language?: string;
+  batch_created?: boolean;
+  audience?: string;
+  keywords?: string;
+}
+
+export interface PoemFilters {
+  occasionFilter: string;
+  contentTypeFilter: string;
+  styleFilter: string;
+  audienceFilter?: string;
+  searchQuery?: string;
+  keywordFilters?: string[];
+}
+
+export interface PoemSeoMetadata {
+  description: string;
+  keywords: string[];
 }
 
 export interface PoemHookState {
@@ -25,35 +37,35 @@ export interface PoemHookState {
   occasionFilter: string;
   contentTypeFilter: string;
   styleFilter: string;
-  audienceFilter: string;
-  searchQuery: string;
+  audienceFilter?: string;
+  searchQuery?: string;
   keywordFilters?: string[];
-  poemSlugs: Record<string, string>;
-  slugToId: Record<string, string>;
+  poemSlugs: {[key: string]: string};
+  slugToId: {[key: string]: string};
   page: number;
   totalCount: number;
   hasMore: boolean;
   poemsPerPage: number;
   nextPage: () => void;
   prevPage: () => void;
-  getPoemSeoMetadata?: (poemId: string) => { description: string; keywords: string[] };
+  getPoemSeoMetadata?: (poemId: string) => PoemSeoMetadata;
 }
 
-export const createPoemSlug = (poem: Poem) => {
-  const title = poem.title.toLowerCase();
-  return title
-    .replace(/[^\w\s-]/g, '') // Remove all non-word chars
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/^-+/, '') // Trim - from start of text
-    .replace(/-+$/, ''); // Trim - from end of text
-};
-
-// Add missing PoemFilters interface
-export interface PoemFilters {
-  occasionFilter: string;
-  contentTypeFilter: string;
-  styleFilter: string;
-  audienceFilter: string;
-  searchQuery: string;
-  keywordFilters?: string[];
+export interface PoemHookActions {
+  setSelectedPoemId: (id: string | null) => void;
+  setOccasionFilter: (filter: string) => void;
+  setContentTypeFilter: (filter: string) => void;
+  setStyleFilter: (filter: string) => void;
+  setAudienceFilter?: (filter: string) => void;
+  setSearchQuery?: (query: string) => void;
+  toggleKeywordFilter?: (keyword: string) => void;
+  clearKeywordFilters?: () => void;
+  handleDeletePoem: (id: string, e: React.MouseEvent) => void;
+  clearFilters: () => void;
+  getUniqueOccasions: () => string[];
+  getUniqueContentTypes: () => string[];
+  getUniqueStyles: () => string[];
+  getUniqueAudiences?: () => string[];
+  findPoemBySlug: (slug: string) => string | null;
+  getSlugForPoemId: (id: string) => string | null;
 }

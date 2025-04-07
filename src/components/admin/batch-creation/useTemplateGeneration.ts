@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
 import { getRandomOption } from './poemUtils';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 interface TemplateData {
   count: number;
@@ -16,11 +15,9 @@ interface TemplateData {
   length: Length;
   keywords: string;
   useRandomOptions: boolean;
-  language?: string;
 }
 
 export const useTemplateGeneration = (onSuccess: () => void) => {
-  const { language } = useLanguage();
   const [isGenerating, setIsGenerating] = useState(false);
   const [templateData, setTemplateData] = useState<TemplateData>({
     count: 5,
@@ -31,33 +28,30 @@ export const useTemplateGeneration = (onSuccess: () => void) => {
     verseType: 'kreuzreim',
     length: 'mittel',
     keywords: '',
-    useRandomOptions: false,
-    language: language // Initialize with current language
+    useRandomOptions: false
   });
 
   const handleTemplateChange = (field: string, value: any) => {
     setTemplateData(prev => ({ ...prev, [field]: value }));
   };
 
-  const generateTemplatePoems = async (data: TemplateData = templateData) => {
+  const generateTemplatePoems = async () => {
     setIsGenerating(true);
     try {
-      const currentData = { ...templateData, ...data, language };
-      
-      for (let i = 0; i < currentData.count; i++) {
+      for (let i = 0; i < templateData.count; i++) {
         // Use either the selected values or random values based on useRandomOptions
-        const audience = currentData.useRandomOptions ? 
-          getRandomOption('audience') : currentData.audience;
-        const occasion = currentData.useRandomOptions ? 
-          getRandomOption('occasion') : currentData.occasion;
-        const contentType = currentData.useRandomOptions ? 
-          getRandomOption('contentType') : currentData.contentType;
-        const style = currentData.useRandomOptions ? 
-          getRandomOption('style') : currentData.style;
-        const verseType = currentData.useRandomOptions ? 
-          getRandomOption('verseType') : currentData.verseType;
-        const length = currentData.useRandomOptions ? 
-          getRandomOption('length') : currentData.length;
+        const audience = templateData.useRandomOptions ? 
+          getRandomOption('audience') : templateData.audience;
+        const occasion = templateData.useRandomOptions ? 
+          getRandomOption('occasion') : templateData.occasion;
+        const contentType = templateData.useRandomOptions ? 
+          getRandomOption('contentType') : templateData.contentType;
+        const style = templateData.useRandomOptions ? 
+          getRandomOption('style') : templateData.style;
+        const verseType = templateData.useRandomOptions ? 
+          getRandomOption('verseType') : templateData.verseType;
+        const length = templateData.useRandomOptions ? 
+          getRandomOption('length') : templateData.length;
 
         // Call the generate-poem edge function to create a real poem
         const { data: generationResult, error: generationError } = await supabase.functions.invoke('generate-poem', {
@@ -68,8 +62,7 @@ export const useTemplateGeneration = (onSuccess: () => void) => {
             style: style,
             verseType: verseType,
             length: length,
-            keywords: currentData.keywords,
-            language: currentData.language
+            keywords: templateData.keywords
           }
         });
         
@@ -90,16 +83,13 @@ export const useTemplateGeneration = (onSuccess: () => void) => {
             verse_type: verseType,
             length: length,
             batch_created: true,
-            status: 'draft',
-            language: currentData.language
+            status: 'draft'
           });
           
         if (error) throw error;
       }
       
-      toast.success(currentData.language === 'en' 
-        ? `${currentData.count} poems have been created` 
-        : `${currentData.count} Gedichte wurden erstellt`);
+      toast.success(`${templateData.count} Gedichte wurden erstellt`);
       onSuccess();
     } catch (error) {
       console.error('Error generating poems:', error);

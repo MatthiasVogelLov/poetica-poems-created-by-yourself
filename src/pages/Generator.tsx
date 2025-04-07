@@ -7,11 +7,9 @@ import Footer from '../components/Footer';
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 const Generator = () => {
   const location = useLocation();
-  const { language } = useLanguage();
   
   // Send notification to admin when a poem is generated
   useEffect(() => {
@@ -32,10 +30,7 @@ const Generator = () => {
             body: {
               poemTitle: location.state.generatedPoem.title,
               poemContent: location.state.generatedPoem.poem,
-              formData: {
-                ...location.state.formData,
-                language // Add language to the notification
-              },
+              formData: location.state.formData,
               editorPreferences: parsedPreferences
             }
           });
@@ -54,10 +49,9 @@ const Generator = () => {
       }
     };
     notifyAdmin();
-  }, [location.state, language]);
+  }, [location.state]);
   
-  return (
-    <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white">
       <Header />
       
       <div className="pt-32 pb-20 bg-white">
@@ -68,8 +62,7 @@ const Generator = () => {
       </div>
       
       <Footer />
-    </div>
-  );
+    </div>;
 };
 
 export default Generator;

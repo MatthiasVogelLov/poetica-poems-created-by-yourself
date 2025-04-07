@@ -11,11 +11,8 @@ import { useManualPoemCreation } from './batch-creation/useManualPoemCreation';
 import BatchCreationErrorBoundary from './batch-creation/BatchCreationErrorBoundary';
 import MassUploadForm from './batch-creation/mass-upload/MassUploadForm';
 import { useMassUpload } from './batch-creation/useMassUpload';
-import { useTranslations } from '@/hooks/use-translations';
 
 const BatchCreation = () => {
-  const { t, language } = useTranslations();
-  
   const { 
     batchPoems, 
     isLoading, 
@@ -59,62 +56,29 @@ const BatchCreation = () => {
     generateMassUploadPoems
   } = useMassUpload(fetchBatchPoems);
 
-  // Properly handle hook calls without passing language parameter
-  const generateTemplateWithLanguage = () => {
-    const dataWithLanguage = {
-      ...templateData,
-      language
-    };
-    generateTemplatePoems(dataWithLanguage);
-  };
-
-  const createManualPoemWithLanguage = () => {
-    const dataWithLanguage = {
-      ...manualPoemData,
-      language
-    };
-    createManualPoem(dataWithLanguage);
-  };
-
-  const generatePoemContentWithLanguage = () => {
-    const dataWithLanguage = {
-      ...manualPoemData,
-      language
-    };
-    generatePoemContent(dataWithLanguage);
-  };
-
-  const generateMassUploadWithLanguage = () => {
-    const dataWithLanguage = {
-      ...massUploadData,
-      language
-    };
-    generateMassUploadPoems(dataWithLanguage);
-  };
-
   return (
     <div className="space-y-6">
       <BatchCreationErrorBoundary>
         <Card>
           <CardHeader>
-            <CardTitle>{t('admin.batchCreation.title')}</CardTitle>
+            <CardTitle>Batch Gedichterstellung</CardTitle>
             <CardDescription>
-              {t('admin.batchCreation.description')}
+              Erstellen Sie mehrere Gedichte auf einmal oder manuell für PoemsLand
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="template">
               <TabsList className="grid w-full grid-cols-3 mb-6">
-                <TabsTrigger value="template">{t('admin.batchCreation.templateBased')}</TabsTrigger>
-                <TabsTrigger value="manual">{t('admin.batchCreation.manual')}</TabsTrigger>
-                <TabsTrigger value="massupload">{t('admin.batchCreation.massUpload')}</TabsTrigger>
+                <TabsTrigger value="template">Template-basiert</TabsTrigger>
+                <TabsTrigger value="manual">Manuell</TabsTrigger>
+                <TabsTrigger value="massupload">Mass Upload</TabsTrigger>
               </TabsList>
               
               <TabsContent value="template">
                 <TemplateForm 
                   templateData={templateData}
                   onFieldChange={handleTemplateChange}
-                  onGenerate={generateTemplateWithLanguage}
+                  onGenerate={generateTemplatePoems}
                   isGenerating={isGeneratingTemplate}
                 />
               </TabsContent>
@@ -123,8 +87,8 @@ const BatchCreation = () => {
                 <ManualForm 
                   poemData={manualPoemData}
                   onFieldChange={handleManualChange}
-                  onSubmit={createManualPoemWithLanguage}
-                  onGenerateContent={generatePoemContentWithLanguage}
+                  onSubmit={createManualPoem}
+                  onGenerateContent={generatePoemContent}
                   isGenerating={isGeneratingManual}
                 />
               </TabsContent>
@@ -143,7 +107,7 @@ const BatchCreation = () => {
                   onRandomOptionsChange={handleRandomOptionsChange}
                   onPublishToPoemsLandChange={handlePublishToPoemsLandChange}
                   onPoemEntryChange={handlePoemEntryChange}
-                  onGenerate={generateMassUploadWithLanguage}
+                  onGenerate={generateMassUploadPoems}
                   isGenerating={isGeneratingMassUpload}
                 />
               </TabsContent>
@@ -152,7 +116,7 @@ const BatchCreation = () => {
         </Card>
         
         <BatchPoemsList 
-          poems={batchPoems.filter(poem => poem.language === language || !poem.language)} 
+          poems={batchPoems} 
           isLoading={isLoading} 
           onStatusChange={handleStatusChange} 
           onRefresh={fetchBatchPoems}

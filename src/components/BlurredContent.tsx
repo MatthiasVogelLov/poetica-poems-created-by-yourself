@@ -33,8 +33,8 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       console.log('User returned from PayPal payment with transaction ID:', transactionId);
       
       if (location.pathname === '/preview') {
-        toast.success(`Payment successful (PayPal)`, {
-          description: "Your poem has been successfully unlocked."
+        toast.success(`Zahlung erfolgreich (PayPal)`, {
+          description: "Ihr Gedicht wurde erfolgreich freigeschaltet."
         });
         
         if (!isPaid) {
@@ -64,8 +64,8 @@ const BlurredContent = ({ children }: BlurredContentProps) => {
       });
       
       if (location.pathname === '/preview') {
-        toast.success(`Payment successful (PayPal)`, {
-          description: "Your poem has been successfully unlocked."
+        toast.success(`Zahlung erfolgreich (PayPal)`, {
+          description: "Ihr Gedicht wurde erfolgreich freigeschaltet."
         });
       } else {
         navigate('/preview?paid=true&payment_provider=paypal', { replace: true });

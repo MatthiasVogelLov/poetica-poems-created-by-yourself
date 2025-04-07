@@ -8,10 +8,8 @@ import StatsLoadingState from './StatsLoadingState';
 import StatsErrorState from './StatsErrorState';
 import DownloadButton from './DownloadButton';
 import { Card, CardContent } from '@/components/ui/card';
-import { useTranslations } from '@/hooks/use-translations';
 
 const StatsGrid = () => {
-  const { t } = useTranslations();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const { stats, loading, error } = useStatsData({ startDate, endDate });
@@ -32,7 +30,7 @@ const StatsGrid = () => {
   // Prepare subscriber data
   const subscriberData = [
     { 
-      name: t('admin.subscribers'), 
+      name: 'Abonnenten', 
       value: stats.subscribersCount || 0, 
       todayValue: stats.subscribersTodayCount || 0 
     }
@@ -41,7 +39,7 @@ const StatsGrid = () => {
   return (
     <div className="w-full space-y-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold">{t('admin.statsSection.title')}</h2>
+        <h2 className="text-2xl font-semibold">Statistiken</h2>
         <DownloadButton allStats={stats} />
       </div>
       
@@ -65,7 +63,7 @@ const StatsGrid = () => {
 
       <Card className="mb-6">
         <CardContent className="p-6">
-          <h3 className="text-xl font-medium mb-4">{t('admin.completeStats')}</h3>
+          <h3 className="text-xl font-medium mb-4">Vollständige Statistiken</h3>
           <UnifiedStatsTable 
             featureData={stats.featureData}
             audienceData={stats.audienceData}
@@ -74,7 +72,7 @@ const StatsGrid = () => {
             lengthData={stats.lengthData}
             keywordsData={[
               { 
-                name: t('admin.keywordsUsed'), 
+                name: 'Mit Schlüsselwörtern', 
                 value: stats.keywordsUsed, 
                 todayValue: stats.keywordsTodayUsed 
               }

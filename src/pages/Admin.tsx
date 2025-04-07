@@ -6,7 +6,6 @@ import AdminLoginForm from '@/components/admin/AdminLoginForm';
 import ContentManagementTabs from '@/components/admin/ContentManagementTabs';
 import AdminHeader from '@/components/admin/AdminHeader';
 import AdminFooter from '@/components/admin/AdminFooter';
-import { useTranslations } from '@/hooks/use-translations';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("stats");
@@ -17,7 +16,6 @@ const Admin = () => {
     handleLogin, 
     handleLogout 
   } = useAdminAuth();
-  const { t } = useTranslations();
 
   return (
     <div className="min-h-screen bg-white">
@@ -35,7 +33,7 @@ const Admin = () => {
             <div className="max-w-5xl mx-auto">
               <AdminHeader handleLogout={handleLogout} />
               
-              <h1 className="heading-lg mb-6 sm:mb-10">{t('admin.title')}</h1>
+              <h1 className="heading-lg mb-6 sm:mb-10">Admin-Bereich</h1>
               
               <ContentManagementTabs 
                 activeTab={activeTab}

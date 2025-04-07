@@ -12,7 +12,6 @@ import Hilfe from "./pages/Hilfe";
 import Admin from "./pages/Admin";
 import PoemsLand from "./pages/PoemsLand";
 import NotFound from "./pages/NotFound";
-import { LanguageProvider } from "./contexts/LanguageContext";
 
 // Create a new query client instance
 const queryClient = new QueryClient({
@@ -27,38 +26,23 @@ const queryClient = new QueryClient({
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <HashRouter>
-            <Routes>
-              {/* German routes (default) */}
-              <Route path="/" element={<Index />} />
-              <Route path="/generator" element={<Generator />} />
-              <Route path="/preview" element={<Preview />} />
-              <Route path="/kontakt" element={<Kontakt />} />
-              <Route path="/hilfe" element={<Hilfe />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/poemsland" element={<PoemsLand />} />
-              <Route path="/poemsland/:poemSlug" element={<PoemsLand />} />
-              
-              {/* English routes (these will be the same components with different language context) */}
-              <Route path="/en" element={<Index />} />
-              <Route path="/en/generator" element={<Generator />} />
-              <Route path="/en/preview" element={<Preview />} />
-              <Route path="/en/contact" element={<Kontakt />} />
-              <Route path="/en/help" element={<Hilfe />} />
-              <Route path="/en/admin" element={<Admin />} />
-              <Route path="/en/poemsland" element={<PoemsLand />} />
-              <Route path="/en/poemsland/:poemSlug" element={<PoemsLand />} />
-              
-              {/* Not Found route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </HashRouter>
-        </TooltipProvider>
-      </LanguageProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <HashRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/generator" element={<Generator />} />
+            <Route path="/preview" element={<Preview />} />
+            <Route path="/kontakt" element={<Kontakt />} />
+            <Route path="/hilfe" element={<Hilfe />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/poemsland" element={<PoemsLand />} />
+            <Route path="/poemsland/:poemSlug" element={<PoemsLand />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </HashRouter>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 };

@@ -1,9 +1,7 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Audience, Occasion, ContentType, Style, VerseType, Length } from '@/types/poem';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ManualPoemData {
   title: string;
@@ -14,15 +12,14 @@ interface ManualPoemData {
   style: Style;
   verseType: VerseType;
   length: Length;
-  keywords: string;
-  generateContent: boolean;
-  publishAfterCreation: boolean;
-  language?: string;
+  keywords?: string;
+  generateContent?: boolean;
+  publishAfterCreation?: boolean;
 }
 
 export const useManualPoemCreation = (onSuccess: () => void) => {
-  const { language } = useLanguage();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [manualPoemData, setManualPoemData] = useState<ManualPoemData>({
     title: '',
     content: '',
@@ -33,108 +30,166 @@ export const useManualPoemCreation = (onSuccess: () => void) => {
     verseType: 'kreuzreim',
     length: 'mittel',
     keywords: '',
-    generateContent: true,
-    publishAfterCreation: false,
-    language: language // Initialize with current language
+    generateContent: false,
+    publishAfterCreation: false
   });
 
   const handleManualChange = (field: string, value: any) => {
     setManualPoemData(prev => ({ ...prev, [field]: value }));
   };
 
-  const generatePoemContent = async (data: Partial<ManualPoemData> = {}) => {
+  const generatePoemContent = async () => {
     setIsGenerating(true);
     try {
-      const currentData = { ...manualPoemData, ...data, language };
-
-      // Generate poem content using the edge function
+      const keywords = manualPoemData.keywords?.trim() || '';
+      
       const { data: generationResult, error: generationError } = await supabase.functions.invoke('generate-poem', {
         body: {
-          audience: currentData.audience,
-          occasion: currentData.occasion,
-          contentType: currentData.contentType,
-          style: currentData.style,
-          verseType: currentData.verseType,
-          length: currentData.length,
-          keywords: currentData.keywords,
-          language: currentData.language
+          audience: manualPoemData.audience,
+          occasion: manualPoemData.occasion,
+          contentType: manualPoemData.contentType,
+          style: manualPoemData.style,
+          verseType: manualPoemData.verseType,
+          length: manualPoemData.length,
+          keywords: keywords
         }
       });
       
       if (generationError) {
-        console.error('Error generating poem content:', generationError);
+        console.error('Error generating poem:', generationError);
         throw generationError;
       }
       
-      // Update manual poem data with the generated content
-      handleManualChange('content', generationResult.poem);
+      const title = manualPoemData.title.trim() || generationResult.title;
       
-      // If title is empty, use the generated title
-      if (!currentData.title) {
-        handleManualChange('title', generationResult.title);
-      }
+      setManualPoemData(prev => ({
+        ...prev,
+        title: title,
+        content: generationResult.poem
+      }));
       
+      return { title, content: generationResult.poem };
     } catch (error) {
       console.error('Error generating poem content:', error);
       toast.error('Fehler bei der Gedichterstellung: ' + (error.message || 'Unbekannter Fehler'));
+      throw error;
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const createManualPoem = async (data: Partial<ManualPoemData> = {}) => {
-    setIsGenerating(true);
+  const publishPoem = async (poemId: string) => {
+    setIsPublishing(true);
     try {
-      const currentData = { ...manualPoemData, ...data, language };
-
-      // If generateContent is true and content is empty, generate content first
-      if (currentData.generateContent && !currentData.content) {
-        await generatePoemContent(currentData);
-      }
-      
-      // Create the poem in the database
-      const { error } = await supabase
-        .from('user_poems')
-        .insert({
-          title: currentData.title,
-          content: currentData.content,
-          occasion: currentData.occasion,
-          content_type: currentData.contentType,
-          style: currentData.style,
-          verse_type: currentData.verseType,
-          length: currentData.length,
-          keywords: currentData.keywords,
-          batch_created: true,
-          status: currentData.publishAfterCreation ? 'published' : 'draft',
-          language: currentData.language
-        });
-        
-      if (error) throw error;
-      
-      // Reset the form
-      setManualPoemData({
-        ...manualPoemData,
-        title: '',
-        content: ''
+      const { error } = await supabase.functions.invoke('manage-poem', {
+        body: {
+          action: 'update',
+          poemId: poemId,
+          poemData: { status: 'published' }
+        }
       });
       
-      toast.success(currentData.language === 'en' 
-        ? 'Poem created successfully' 
-        : 'Gedicht erfolgreich erstellt');
+      if (error) throw error;
+      toast.success('Gedicht wurde veröffentlicht');
+      return true;
+    } catch (error) {
+      console.error('Error publishing poem:', error);
+      toast.error('Fehler bei der Veröffentlichung: ' + (error.message || 'Unbekannter Fehler'));
+      return false;
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const createManualPoem = async () => {
+    try {
+      let title = manualPoemData.title.trim();
+      let content = manualPoemData.content;
+      
+      if (manualPoemData.generateContent && !content) {
+        setIsGenerating(true);
+        try {
+          const result = await generatePoemContent();
+          title = title || result.title;
+          content = result.content;
+        } catch (error) {
+          setIsGenerating(false);
+          return;
+        }
+        setIsGenerating(false);
+      }
+      
+      if (!title) {
+        toast.error('Bitte einen Titel eingeben');
+        return;
+      }
+      
+      if (!content) {
+        toast.error('Kein Gedichtinhalt vorhanden. Bitte generieren Sie Inhalt oder geben Sie ihn manuell ein.');
+        return;
+      }
+
+      const keywords = manualPoemData.keywords?.trim() || null;
+      
+      const initialStatus = manualPoemData.publishAfterCreation ? 'published' : 'draft';
+      
+      const { data, error } = await supabase
+        .from('user_poems')
+        .insert({
+          title: title,
+          content: content,
+          audience: manualPoemData.audience,
+          occasion: manualPoemData.occasion,
+          content_type: manualPoemData.contentType,
+          style: manualPoemData.style,
+          verse_type: manualPoemData.verseType,
+          length: manualPoemData.length,
+          batch_created: true,
+          status: initialStatus,
+          keywords: keywords
+        })
+        .select('id')
+        .single();
+        
+      if (error) {
+        console.error('Database insertion error:', error);
+        throw error;
+      }
+      
+      if (manualPoemData.publishAfterCreation) {
+        toast.success('Gedicht wurde erstellt und veröffentlicht');
+      } else {
+        toast.success('Gedicht wurde als Entwurf erstellt');
+      }
+      
+      setManualPoemData({
+        title: '',
+        content: '',
+        audience: 'erwachsene',
+        occasion: 'geburtstag',
+        contentType: 'liebe',
+        style: 'klassisch',
+        verseType: 'kreuzreim',
+        length: 'mittel',
+        keywords: '',
+        generateContent: manualPoemData.generateContent,
+        publishAfterCreation: manualPoemData.publishAfterCreation
+      });
+      
       onSuccess();
     } catch (error) {
-      console.error('Error creating manual poem:', error);
-      toast.error('Fehler beim Erstellen des Gedichts: ' + (error.message || 'Unbekannter Fehler'));
-    } finally {
-      setIsGenerating(false);
+      console.error('Error creating poem:', error);
+      toast.error('Fehler bei der Gedichterstellung: ' + (error.message || 'Unbekannter Fehler'));
     }
   };
 
   return {
     manualPoemData,
-    isGenerating,
     handleManualChange,
     createManualPoem,
-    generatePoemContent
+    generatePoemContent,
+    publishPoem,
+    isGenerating,
+    isPublishing
   };
 };

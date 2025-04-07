@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useTranslations } from '@/hooks/use-translations';
 
 interface FilterSectionProps {
   occasionFilter: string;
@@ -45,8 +44,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   searchQuery,
   keywordFilters,
 }) => {
-  const { t, language } = useTranslations();
-  
   const hasActiveFilters = occasionFilter !== 'all' || 
     contentTypeFilter !== 'all' || 
     styleFilter !== 'all' || 
@@ -56,7 +53,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     
   return (
     <div className="bg-white p-4 rounded-lg border shadow-sm">
-      <h3 className="font-medium mb-4">{t('poemsland.filters')}</h3>
+      <h3 className="font-medium mb-4">Filter</h3>
       
       <div className="space-y-3">
         <select
@@ -64,7 +61,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           onChange={(e) => setOccasionFilter(e.target.value)}
           className="w-full p-2 border rounded-md text-sm"
         >
-          <option value="all">{t('poemsland.occasion')}</option>
+          <option value="all">Anlässe</option>
           {getUniqueOccasions().map(occasion => (
             <option key={occasion} value={occasion}>
               {getOccasionDisplay(occasion)}
@@ -77,7 +74,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           onChange={(e) => setContentTypeFilter(e.target.value)}
           className="w-full p-2 border rounded-md text-sm"
         >
-          <option value="all">{t('poemsland.contentType')}</option>
+          <option value="all">Themen</option>
           {getUniqueContentTypes().map(contentType => (
             <option key={contentType} value={contentType}>
               {getContentTypeDisplay(contentType)}
@@ -90,7 +87,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           onChange={(e) => setStyleFilter(e.target.value)}
           className="w-full p-2 border rounded-md text-sm"
         >
-          <option value="all">{t('poemsland.style')}</option>
+          <option value="all">Stile</option>
           {getUniqueStyles().map(style => (
             <option key={style} value={style}>
               {getStyleDisplay(style)}
@@ -103,7 +100,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           onChange={(e) => setAudienceFilter(e.target.value)}
           className="w-full p-2 border rounded-md text-sm"
         >
-          <option value="all">{t('poemsland.audience')}</option>
+          <option value="all">Zielgruppen</option>
           {getUniqueAudiences().map(audience => (
             <option key={audience} value={audience}>
               {getAudienceDisplay(audience)}
@@ -116,7 +113,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             onClick={clearFilters}
             className="w-full text-sm py-1.5 text-blue-600 hover:text-blue-800"
           >
-            {language === 'en' ? 'Reset filters' : 'Filter zurücksetzen'}
+            Filter zurücksetzen
           </button>
         )}
       </div>

@@ -2,10 +2,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 export const useBatchPoems = () => {
-  const { language } = useLanguage();
   const [batchPoems, setBatchPoems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [publishing, setPublishing] = useState<Record<string, boolean>>({});
@@ -16,51 +14,45 @@ export const useBatchPoems = () => {
   const [hasMore, setHasMore] = useState(true);
   const poemsPerPage = 10;
 
+  // Fetch batch poems on component mount
   useEffect(() => {
     fetchBatchPoems();
-  }, [page, language]);
+  }, [page]);
 
   const fetchBatchPoems = async () => {
     setIsLoading(true);
     try {
-      // Use string literals to avoid type inference issues
-      const allowedStatusValues = ['draft', 'published', null];
-      
-      // Get total count of all batch poems regardless of status
+      // First get the total count for pagination info
       const { count: totalCountResult, error: countError } = await supabase
         .from('user_poems')
         .select('*', { count: 'exact', head: true })
-        .eq('batch_created', true)
-        .eq('language', language);
+        .eq('batch_created', true);
       
       if (countError) throw countError;
       
       setTotalCount(totalCountResult || 0);
       
-      // Get count of visible poems with allowed statuses
-      // Create the query and add the in condition separately to avoid TypeScript issues
-      let visibleCountQuery = supabase
+      // Get count of visible poems (not deleted and not hidden)
+      const { count: visibleCountResult, error: visibleCountError } = await supabase
         .from('user_poems')
         .select('*', { count: 'exact', head: true })
         .eq('batch_created', true)
-        .eq('language', language);
-        
-      // Add the in condition with explicit type casting
-      visibleCountQuery = visibleCountQuery.in('status', allowedStatusValues as any[]);
-      
-      const { count: visibleCountResult, error: visibleCountError } = await visibleCountQuery;
+        .not('status', 'in', '("deleted","hidden")');
       
       if (visibleCountError) throw visibleCountError;
       
       setVisibleCount(visibleCountResult || 0);
       
+      // Check if we need to adjust the page (if we're on a page that no longer exists)
       const totalPages = Math.ceil((visibleCountResult || 0) / poemsPerPage);
       if (page > totalPages && totalPages > 0 && page !== 1) {
         setPage(totalPages);
+        // The useEffect will trigger fetchBatchPoems again with the correct page
         setIsLoading(false);
         return;
       }
       
+      // Handle case when count is 0
       if (visibleCountResult === 0) {
         setBatchPoems([]);
         setHasMore(false);
@@ -68,19 +60,14 @@ export const useBatchPoems = () => {
         return;
       }
       
-      // Create the query for fetching poems
-      let poemsQuery = supabase
+      // Then fetch the actual page of data, excluding deleted and hidden poems
+      const { data, error } = await supabase
         .from('user_poems')
         .select('*')
         .eq('batch_created', true)
-        .eq('language', language);
-        
-      // Add the in condition with explicit type casting
-      poemsQuery = poemsQuery.in('status', allowedStatusValues as any[])
+        .not('status', 'in', '("deleted","hidden")')
         .order('created_at', { ascending: false })
         .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
-      
-      const { data, error } = await poemsQuery;
       
       if (error) throw error;
       
@@ -95,17 +82,20 @@ export const useBatchPoems = () => {
   };
 
   const handleStatusChange = async (poemId: string, newStatus: 'published' | 'hidden' | 'deleted') => {
+    // Prevent multiple clicks by checking if we're already processing this poem
     if (publishing[poemId] || hiding[poemId]) {
       return;
     }
     
     try {
+      // Mark this poem as being published/hidden
       if (newStatus === 'hidden') {
         setHiding(prev => ({ ...prev, [poemId]: true }));
       } else {
         setPublishing(prev => ({ ...prev, [poemId]: true }));
       }
       
+      // Use the manage-poem edge function to update the poem status
       const { error } = await supabase.functions.invoke('manage-poem', {
         body: {
           action: 'update',
@@ -116,13 +106,16 @@ export const useBatchPoems = () => {
       
       if (error) throw error;
       
+      // For hidden or deleted status, remove the poem from local state
       if (newStatus === 'hidden' || newStatus === 'deleted') {
         setBatchPoems(prev => prev.filter(poem => poem.id !== poemId));
+        // Update visible count
         setVisibleCount(prev => prev - 1);
         
         const actionText = newStatus === 'hidden' ? 'ausgeblendet' : 'gelöscht';
         toast.success(`Gedicht ${actionText}`);
       } else {
+        // For published status, update the poem in local state
         setBatchPoems(prev => 
           prev.map(poem => 
             poem.id === poemId ? { ...poem, status: newStatus } : poem
@@ -134,6 +127,7 @@ export const useBatchPoems = () => {
       console.error('Error updating poem status:', error);
       toast.error('Fehler beim Aktualisieren des Status');
     } finally {
+      // Reset processing states
       if (newStatus === 'hidden') {
         setHiding(prev => ({ ...prev, [poemId]: false }));
       } else {

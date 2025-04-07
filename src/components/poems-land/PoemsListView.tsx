@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PoemsList from './PoemsList';
 import CreatePoemButton from './CreatePoemButton';
@@ -7,8 +6,6 @@ import SearchBar from './SearchBar';
 import FilterSection from './FilterSection';
 import HeroSection from './HeroSection';
 import type { Poem } from '@/types/poem-types';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useTranslations } from '@/hooks/use-translations';
 
 interface PoemsListViewProps {
   filteredPoems: Poem[];
@@ -83,9 +80,6 @@ const PoemsListView: React.FC<PoemsListViewProps> = ({
   prevPage,
   poemsPerPage = 12,
 }) => {
-  const { language } = useLanguage();
-  const { t } = useTranslations();
-  
   const getFeaturedPoem = () => {
     if (filteredPoems.length === 0) return null;
     
