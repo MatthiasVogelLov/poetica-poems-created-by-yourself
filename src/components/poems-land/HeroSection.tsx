@@ -20,32 +20,26 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     });
   };
 
-  // Force background image reload on component mount
-  useEffect(() => {
-    const img = new Image();
-    img.src = '/lovable-uploads/9fea3f06-b55f-44cf-9604-e377bc579c4f.png';
-  }, []);
-
   return (
     <div className="w-full min-h-screen relative overflow-hidden">
       {/* Background Image */}
       <div 
         className="fixed inset-0 bg-cover bg-center z-[-1]"
         style={{ 
-          backgroundImage: "url('/lovable-uploads/9fea3f06-b55f-44cf-9604-e377bc579c4f.png')", 
+          backgroundImage: "url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2274&auto=format&fit=crop')", 
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
         }}
       />
       
-      {/* Very subtle overlay to ensure text readability */}
-      <div className="fixed inset-0 bg-black/5 z-[-1]" />
+      {/* Subtle overlay to ensure text readability */}
+      <div className="fixed inset-0 bg-black/20 z-[-1]" />
       
       <div className="relative pt-24 pb-16">
         <div className="container max-w-5xl mx-auto px-4">
           {/* PoemsLand title positioned above the poem box with text shadow for better visibility */}
-          <h1 className="text-4xl font-serif mb-10 text-black font-bold text-center drop-shadow-md">PoemsLand</h1>
+          <h1 className="text-5xl font-serif mb-10 text-white font-bold text-center drop-shadow-lg">PoemsLand</h1>
           
           {featuredPoem && (
             <div className="flex justify-start">
@@ -62,7 +56,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         className="absolute bottom-10 left-10 animate-bounce cursor-pointer"
         onClick={scrollToContent}
       >
-        <ArrowDown size={36} className="text-black drop-shadow-md" />
+        <ArrowDown size={36} className="text-white drop-shadow-lg" />
       </div>
     </div>
   );
