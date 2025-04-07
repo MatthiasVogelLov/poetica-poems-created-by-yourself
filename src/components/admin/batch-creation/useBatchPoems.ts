@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -22,7 +23,10 @@ export const useBatchPoems = () => {
   const fetchBatchPoems = async () => {
     setIsLoading(true);
     try {
-      const allowedStatuses: (string | null)[] = ['draft', 'published', null];
+      // Use string literals to avoid type inference issues
+      const allowedStatusValues = ['draft', 'published', null];
+      
+      // Get total count of all batch poems regardless of status
       const { count: totalCountResult, error: countError } = await supabase
         .from('user_poems')
         .select('*', { count: 'exact', head: true })
@@ -33,12 +37,18 @@ export const useBatchPoems = () => {
       
       setTotalCount(totalCountResult || 0);
       
-      const { count: visibleCountResult, error: visibleCountError } = await supabase
+      // Get count of visible poems with allowed statuses
+      // Create the query and add the in condition separately to avoid TypeScript issues
+      let visibleCountQuery = supabase
         .from('user_poems')
         .select('*', { count: 'exact', head: true })
         .eq('batch_created', true)
-        .eq('language', language)
-        .in('status', allowedStatuses);
+        .eq('language', language);
+        
+      // Add the in condition with explicit type casting
+      visibleCountQuery = visibleCountQuery.in('status', allowedStatusValues as any[]);
+      
+      const { count: visibleCountResult, error: visibleCountError } = await visibleCountQuery;
       
       if (visibleCountError) throw visibleCountError;
       
@@ -58,14 +68,19 @@ export const useBatchPoems = () => {
         return;
       }
       
-      const { data, error } = await supabase
+      // Create the query for fetching poems
+      let poemsQuery = supabase
         .from('user_poems')
         .select('*')
         .eq('batch_created', true)
-        .eq('language', language)
-        .in('status', allowedStatuses)
+        .eq('language', language);
+        
+      // Add the in condition with explicit type casting
+      poemsQuery = poemsQuery.in('status', allowedStatusValues as any[])
         .order('created_at', { ascending: false })
         .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
+      
+      const { data, error } = await poemsQuery;
       
       if (error) throw error;
       

@@ -18,15 +18,17 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
       try {
         console.log(`Fetching poems for language: ${language}`);
         
-        // Define allowed statuses with explicit type
-        const allowedStatuses: (string | null)[] = ['draft', 'published', null];
+        // Use string literals to avoid type inference issues
+        const allowedStatusValues = ['draft', 'published', null];
         
         // Get total count with language and status filters
-        const countQuery = supabase
+        let countQuery = supabase
           .from('user_poems')
           .select('*', { count: 'exact', head: true })
-          .eq('language', language)
-          .in('status', allowedStatuses);
+          .eq('language', language);
+        
+        // Add the in condition with explicit type casting
+        countQuery = countQuery.in('status', allowedStatusValues as any[]);
         
         const { count: totalCount, error: countError } = await countQuery;
         
@@ -36,13 +38,17 @@ export const useFetchPoems = (page: number, poemsPerPage: number) => {
         console.log(`Total poems for language ${language}: ${totalCount}`);
         
         // Fetch the poems with pagination
-        const { data, error } = await supabase
+        let poemsQuery = supabase
           .from('user_poems')
           .select('*')
-          .eq('language', language)
-          .in('status', allowedStatuses)
+          .eq('language', language);
+          
+        // Add the in condition with explicit type casting
+        poemsQuery = poemsQuery.in('status', allowedStatusValues as any[])
           .order('created_at', { ascending: false })
           .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
+        
+        const { data, error } = await poemsQuery;
         
         if (error) throw error;
         
