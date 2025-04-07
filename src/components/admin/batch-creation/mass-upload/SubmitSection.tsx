@@ -21,19 +21,19 @@ const SubmitSection: React.FC<SubmitSectionProps> = ({
   publishToPoemsLand,
   onPublishToPoemsLandChange
 }) => {
-  const { language } = useTranslations();
+  const { t, language } = useTranslations();
   
-  const publishText = language === 'de' 
-    ? "Automatisch auf PoemsLand publizieren" 
-    : "Automatically publish to PoemsLand";
+  const publishText = language === 'en' 
+    ? "Automatically publish to PoemsLand" 
+    : "Automatisch auf PoemsLand publizieren";
     
-  const generateText = language === 'de'
-    ? "Gedichte generieren"
-    : "Generate Poems";
+  const generateText = language === 'en'
+    ? "Generate Poems"
+    : "Gedichte generieren";
     
-  const generatingText = language === 'de'
-    ? "Generiere Gedichte..."
-    : "Generating poems...";
+  const generatingText = language === 'en'
+    ? "Generating poems..."
+    : "Generiere Gedichte...";
     
   return (
     <div className="flex justify-end pt-4">

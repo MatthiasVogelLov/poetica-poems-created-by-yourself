@@ -61,13 +61,13 @@ const BatchCreation = () => {
 
   // Store language with batch poem data to ensure language separation
   const handleSubmitWithLanguage = (callback: Function) => {
-    return (...args: any[]) => {
+    return (data: any) => {
       // Add language to the data being passed
       const dataWithLanguage = {
-        ...(args[0] || {}),
+        ...data,
         language: language
       };
-      return callback(dataWithLanguage, ...args.slice(1));
+      return callback(dataWithLanguage);
     };
   };
 
@@ -91,19 +91,37 @@ const BatchCreation = () => {
               
               <TabsContent value="template">
                 <TemplateForm 
-                  templateData={{...templateData, language}}
+                  templateData={templateData}
                   onFieldChange={handleTemplateChange}
-                  onGenerate={handleSubmitWithLanguage(generateTemplatePoems)}
+                  onGenerate={() => {
+                    const dataWithLanguage = {
+                      ...templateData,
+                      language
+                    };
+                    generateTemplatePoems(dataWithLanguage);
+                  }}
                   isGenerating={isGeneratingTemplate}
                 />
               </TabsContent>
               
               <TabsContent value="manual">
                 <ManualForm 
-                  poemData={{...manualPoemData, language}}
+                  poemData={manualPoemData}
                   onFieldChange={handleManualChange}
-                  onSubmit={handleSubmitWithLanguage(createManualPoem)}
-                  onGenerateContent={handleSubmitWithLanguage(generatePoemContent)}
+                  onSubmit={() => {
+                    const dataWithLanguage = {
+                      ...manualPoemData,
+                      language
+                    };
+                    createManualPoem(dataWithLanguage);
+                  }}
+                  onGenerateContent={() => {
+                    const dataWithLanguage = {
+                      ...manualPoemData,
+                      language
+                    };
+                    generatePoemContent(dataWithLanguage);
+                  }}
                   isGenerating={isGeneratingManual}
                 />
               </TabsContent>
@@ -122,7 +140,13 @@ const BatchCreation = () => {
                   onRandomOptionsChange={handleRandomOptionsChange}
                   onPublishToPoemsLandChange={handlePublishToPoemsLandChange}
                   onPoemEntryChange={handlePoemEntryChange}
-                  onGenerate={(data: any) => generateMassUploadPoems({...data, language})}
+                  onGenerate={() => {
+                    const dataWithLanguage = {
+                      ...massUploadData,
+                      language
+                    };
+                    generateMassUploadPoems(dataWithLanguage);
+                  }}
                   isGenerating={isGeneratingMassUpload}
                 />
               </TabsContent>

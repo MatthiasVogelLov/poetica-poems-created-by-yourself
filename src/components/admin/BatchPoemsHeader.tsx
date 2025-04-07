@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import DownloadButton from './DownloadButton';
 import { getOccasionDisplay, getContentTypeDisplay } from '@/utils/poem-display-helpers';
+import { useTranslations } from '@/hooks/use-translations';
 
 interface BatchPoemsHeaderProps {
   poemsCount: number;
@@ -18,15 +19,17 @@ const BatchPoemsHeader: React.FC<BatchPoemsHeaderProps> = ({
   onRefresh, 
   poems 
 }) => {
+  const { t, language } = useTranslations();
+
   return (
     <div className="flex justify-between items-center">
       <h2 className="text-xl font-medium">
-        Batch-Gedichte ({visibleCount} sichtbar von {poemsCount} insgesamt)
+        {t('admin.batchCreation.poemsList')} ({visibleCount} {t('admin.visible')} {t('admin.of')} {poemsCount} {t('admin.total')})
       </h2>
       <div className="flex gap-2">
         <Button variant="outline" onClick={onRefresh} size="sm">
           <RefreshCw size={16} className="mr-2" />
-          Aktualisieren
+          {t('admin.refresh')}
         </Button>
         
         <DownloadButton 
