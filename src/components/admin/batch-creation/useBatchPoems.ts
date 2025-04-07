@@ -41,7 +41,8 @@ export const useBatchPoems = () => {
         .select('*', { count: 'exact', head: true })
         .eq('batch_created', true)
         .eq('language', language)
-        .not('status', 'in', '("deleted","hidden")');
+        .not('status', 'eq', 'deleted')
+        .not('status', 'eq', 'hidden');
       
       if (visibleCountError) throw visibleCountError;
       
@@ -70,7 +71,8 @@ export const useBatchPoems = () => {
         .select('*')
         .eq('batch_created', true)
         .eq('language', language)
-        .not('status', 'in', '("deleted","hidden")')
+        .not('status', 'eq', 'deleted')
+        .not('status', 'eq', 'hidden')
         .order('created_at', { ascending: false })
         .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
       
