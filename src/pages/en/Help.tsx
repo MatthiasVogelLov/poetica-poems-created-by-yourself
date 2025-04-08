@@ -1,8 +1,8 @@
 
 import React from 'react';
-import Header from '../components/en/Header';
-import Footer from '../components/en/Footer';
 import { Link } from 'react-router-dom';
+import Header from '../../components/en/Header';
+import Footer from '../../components/en/Footer';
 import {
   Accordion,
   AccordionContent,

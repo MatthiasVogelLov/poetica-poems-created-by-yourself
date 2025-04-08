@@ -1,8 +1,9 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import Header from '../components/en/Header';
-import PoemPreview from '../components/PoemPreview';
+import Header from '../../components/en/Header';
+import Footer from '../../components/en/Footer';
+import PoemPreview from '../../components/PoemPreview';
 import { usePoemLoader } from '@/hooks/use-poem-loader';
 import LoadingIndicator from '@/components/preview/LoadingIndicator';
 import { Button } from '@/components/ui/button';
@@ -65,9 +66,9 @@ const Preview = () => {
         try {
           console.log('Saving English poem to database:', poemTitle);
           
-          // Save poem to user_poems table
+          // Save poem to user_poems table with language field set to 'english'
           const { error } = await supabase
-            .from('en_user_poems')
+            .from('user_poems')
             .insert([
               {
                 title: poemTitle,

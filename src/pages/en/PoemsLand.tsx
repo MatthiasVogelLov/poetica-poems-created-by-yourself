@@ -1,8 +1,8 @@
 
 import React from 'react';
-import Header from '../components/en/Header';
-import Footer from '../components/en/Footer';
 import { useParams } from 'react-router-dom';
+import Header from '../../components/en/Header';
+import Footer from '../../components/en/Footer';
 import SinglePoemView from '@/components/poems-land/SinglePoemView';
 import { usePoems } from '@/hooks/use-poems';
 import { getOccasionDisplay, getContentTypeDisplay, getAudienceDisplay, getStyleDisplay } from '@/utils/poem-display-helpers';
@@ -10,7 +10,6 @@ import PoemSEO from '@/components/poems-land/PoemSEO';
 import PoemsListView from '@/components/poems-land/PoemsListView';
 import PoemsLandSEO from '@/components/poems-land/PoemsLandSEO';
 import { usePoemNavigation } from '@/hooks/use-poem-navigation';
-import HeroSection from '../components/en/poems-land/HeroSection';
 
 const PoemsLand = () => {
   const { poemSlug } = useParams();
@@ -187,12 +186,6 @@ const PoemsLand = () => {
               nextPage={nextPage}
               prevPage={prevPage}
               poemsPerPage={poemsPerPage}
-              customHeroSection={
-                <HeroSection 
-                  featuredPoem={filteredPoems.length > 0 ? filteredPoems[0] : null} 
-                  onPoemClick={navigateToPoemDetail} 
-                />
-              }
             />
           )}
         </div>

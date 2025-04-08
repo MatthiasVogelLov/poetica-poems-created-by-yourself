@@ -11,9 +11,9 @@ import { toast } from 'sonner';
 const PoemForm: React.FC = () => {
   const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const form = usePoemForm();
+  const { form, isLoading, handleSubmit: originalHandleSubmit } = usePoemForm();
   
-  const handleSubmit = async (formData: any) => {
+  const handleFormSubmit = form.handleSubmit(async (formData) => {
     setIsGenerating(true);
     
     try {
@@ -65,11 +65,11 @@ const PoemForm: React.FC = () => {
     } finally {
       setIsGenerating(false);
     }
-  };
+  });
   
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-2xl mx-auto">
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={handleFormSubmit} className="space-y-6">
         <FormFields form={form} />
         
         <div className="pt-4">

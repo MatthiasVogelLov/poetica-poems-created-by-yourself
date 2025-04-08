@@ -2,7 +2,7 @@
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { PoemFormData } from '@/types/poem';
-import KeywordsField from '@/components/poem/fields/KeywordsField';
+import KeywordsField from '../fields/KeywordsField';
 
 interface BottomFieldGroupProps {
   form: UseFormReturn<PoemFormData>;

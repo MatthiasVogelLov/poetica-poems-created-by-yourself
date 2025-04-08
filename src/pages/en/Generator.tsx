@@ -1,11 +1,11 @@
 
 import React, { useEffect } from 'react';
-import Header from '../components/en/Header';
-import PoemForm from '../components/en/PoemForm';
-import HeaderContent from '../components/en/generator/HeaderContent';
-import Footer from '../components/en/Footer';
-import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from 'react-router-dom';
+import Header from '../../components/en/Header';
+import PoemForm from '../../components/en/PoemForm';
+import HeaderContent from '../../components/en/generator/HeaderContent';
+import Footer from '../../components/en/Footer';
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
 
 const Generator = () => {
