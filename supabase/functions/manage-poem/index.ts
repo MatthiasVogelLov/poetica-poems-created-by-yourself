@@ -53,7 +53,7 @@ serve(async (req) => {
           // First check if the poem is published or not
           const { data: poemInfo, error: poemInfoError } = await supabase
             .from('user_poems')
-            .select('status, batch_created')
+            .select('status, batch_created, language')
             .eq('id', poemId)
             .single();
             
@@ -106,7 +106,7 @@ serve(async (req) => {
         // Check if the poem is published before actually deleting it
         const { data: poemToDelete, error: checkError } = await supabase
           .from('user_poems')
-          .select('status')
+          .select('status, language')
           .eq('id', poemId)
           .single();
           

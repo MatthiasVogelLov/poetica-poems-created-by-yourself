@@ -1,4 +1,3 @@
-
 // Types specific to the poems functionality
 export interface Poem {
   id: string;
@@ -12,6 +11,7 @@ export interface Poem {
   batch_created?: boolean;
   audience?: string;
   keywords?: string;
+  language?: 'en' | 'de';
 }
 
 export interface PoemFilters {

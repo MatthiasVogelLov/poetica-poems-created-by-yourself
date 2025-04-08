@@ -21,13 +21,30 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({ className = '' }) => {
   const handleToggle = () => {
     const currentPath = location.pathname;
     
+    // Extract poem slug from path if present
+    const poemSlugMatch = currentPath.match(/\/poemsland\/([^\/]+)/);
+    const poemSlug = poemSlugMatch ? poemSlugMatch[1] : null;
+    
     if (isEnglish) {
       // Switch from English to German
-      const germanPath = currentPath.replace(/^\/en/, '');
+      let germanPath = currentPath.replace(/^\/en/, '');
+      
+      // Special case for admin - redirect to German admin
+      if (currentPath === '/en/admin') {
+        germanPath = '/admin';
+      }
+      
       navigate(germanPath || '/');
     } else {
       // Switch from German to English
-      navigate(`/en${currentPath}`);
+      let englishPath = `/en${currentPath}`;
+      
+      // Special case for admin - redirect to English admin
+      if (currentPath === '/admin') {
+        englishPath = '/en/admin';
+      }
+      
+      navigate(englishPath);
     }
   };
 

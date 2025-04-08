@@ -9,8 +9,8 @@ import type { Poem, PoemHookState } from '@/types/poem-types';
 export type { Poem } from '@/types/poem-types';
 export { createSlug } from '@/utils/poem-slug-utils';
 
-export const usePoems = () => {
-  const [state, setPoems, setSelectedPoemId] = usePoemsData();
+export const usePoems = (language: 'en' | 'de' = 'de') => {
+  const [state, setPoems, setSelectedPoemId] = usePoemsData(language);
   
   const { 
     filteredPoems: filteredPoemsByFilters,

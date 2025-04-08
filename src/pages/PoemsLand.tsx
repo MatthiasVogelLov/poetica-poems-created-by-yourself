@@ -47,7 +47,8 @@ const PoemsLand = () => {
     nextPage,
     prevPage,
     poemsPerPage
-  } = usePoems();
+  // Pass 'de' for German version
+  } = usePoems('de');
 
   // Custom hook for poem navigation
   const {

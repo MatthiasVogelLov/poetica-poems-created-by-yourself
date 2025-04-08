@@ -6,7 +6,7 @@ import { Poem, PoemHookState } from '@/types/poem-types';
 import { generatePoemSlugs } from '@/utils/poem-slug-utils';
 
 // Hook to fetch and manage poem data
-export const usePoemsData = (): [
+export const usePoemsData = (language: 'en' | 'de' = 'de'): [
   PoemHookState,
   React.Dispatch<React.SetStateAction<Poem[]>>,
   React.Dispatch<React.SetStateAction<string | null>>
@@ -35,22 +35,41 @@ export const usePoemsData = (): [
       setIsLoading(true);
       try {
         // First get the total count for pagination
-        const { count, error: countError } = await supabase
+        const query = supabase
           .from('user_poems')
           .select('*', { count: 'exact', head: true })
           .or('batch_created.is.null,and(batch_created.eq.true,status.in.("published","hidden"))');
+        
+        // Add language filter
+        if (language === 'en') {
+          query.eq('language', 'en');
+        } else {
+          // For German, either get poems with language=de or ones without language field (legacy data)
+          query.or('language.eq.de,language.is.null');
+        }
+        
+        const { count, error: countError } = await query;
         
         if (countError) throw countError;
         
         setTotalCount(count || 0);
         
         // Then fetch the actual page of data
-        const { data, error } = await supabase
+        const dataQuery = supabase
           .from('user_poems')
           .select('*')
           .or('batch_created.is.null,and(batch_created.eq.true,status.in.("published","hidden"))')
           .order('created_at', { ascending: false })
           .range((page - 1) * poemsPerPage, page * poemsPerPage - 1);
+        
+        // Add the same language filter
+        if (language === 'en') {
+          dataQuery.eq('language', 'en');
+        } else {
+          dataQuery.or('language.eq.de,language.is.null');
+        }
+        
+        const { data, error } = await dataQuery;
         
         if (error) throw error;
         
@@ -87,14 +106,15 @@ export const usePoemsData = (): [
         setSlugToId(slugToId);
       } catch (error) {
         console.error('Error fetching poems:', error);
-        toast.error('Fehler beim Laden der Gedichte');
+        const errorMsg = language === 'en' ? 'Error loading poems' : 'Fehler beim Laden der Gedichte';
+        toast.error(errorMsg);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchPoems();
-  }, [page]);
+  }, [page, language]);
 
   // Fetch a single poem when selected by ID
   useEffect(() => {
@@ -140,7 +160,8 @@ export const usePoemsData = (): [
           setSelectedPoem(data);
         } catch (error) {
           console.error('Error fetching poem:', error);
-          toast.error('Fehler beim Laden des Gedichts');
+          const errorMsg = language === 'en' ? 'Error loading poem' : 'Fehler beim Laden des Gedichts';
+          toast.error(errorMsg);
           setSelectedPoem(null);
         } finally {
           setIsLoading(false);
@@ -151,7 +172,7 @@ export const usePoemsData = (): [
     } else {
       setSelectedPoem(null);
     }
-  }, [selectedPoemId]);
+  }, [selectedPoemId, language]);
 
   // Method to get SEO metadata for a specific poem
   const getPoemSeoMetadata = (poemId: string) => {

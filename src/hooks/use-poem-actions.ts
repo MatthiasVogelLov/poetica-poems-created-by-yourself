@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
-import { Poem } from '@/types/poem-types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Poem } from '@/types/poem-types';
 
 export const usePoemActions = (
   poems: Poem[],
@@ -11,46 +11,71 @@ export const usePoemActions = (
   poemSlugs: {[key: string]: string},
   slugToId: {[key: string]: string}
 ) => {
-  // Handle deleting a poem
-  const handleDeletePoem = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (!confirm('Möchten Sie dieses Gedicht wirklich löschen?')) {
-      return;
-    }
-    
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Save a poem to the database
+  const savePoem = async (poemData: Omit<Poem, 'id' | 'created_at'>, language: 'en' | 'de' = 'de') => {
+    setIsSaving(true);
     try {
-      const { error } = await supabase
+      // Add language field to the poem data
+      const poemWithLanguage = { ...poemData, language };
+      
+      const { data, error } = await supabase
         .from('user_poems')
-        .delete()
-        .eq('id', id);
+        .insert([poemWithLanguage])
+        .select()
+        .single();
       
       if (error) throw error;
       
-      setPoems(poems.filter(poem => poem.id !== id));
-      toast.success('Gedicht wurde gelöscht');
+      const newPoem = data as Poem;
+      setPoems(prevPoems => [newPoem, ...prevPoems]);
       
-      if (setSelectedPoemId) {
-        setSelectedPoemId(null);
-      }
+      const successMsg = language === 'en' ? 'Poem saved successfully' : 'Gedicht erfolgreich gespeichert';
+      toast.success(successMsg);
+      return newPoem;
     } catch (error) {
-      console.error('Error deleting poem:', error);
-      toast.error('Fehler beim Löschen des Gedichts');
+      console.error('Error saving poem:', error);
+      const errorMsg = language === 'en' ? 'Error saving poem' : 'Fehler beim Speichern des Gedichts';
+      toast.error(errorMsg);
+      return null;
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  // Find poem by slug
+  // Delete a poem from the database
+  const handleDeletePoem = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (window.confirm('Are you sure you want to delete this poem?')) {
+      try {
+        await supabase.functions.invoke('manage-poem', {
+          body: { action: 'delete', poemId: id }
+        });
+        
+        setPoems(prevPoems => prevPoems.filter(poem => poem.id !== id));
+        toast.success('Poem deleted successfully');
+      } catch (error) {
+        console.error('Error deleting poem:', error);
+        toast.error('Error deleting the poem');
+      }
+    }
+  };
+  
+  // Helper methods for slug-based navigation
   const findPoemBySlug = (slug: string): string | null => {
     return slugToId[slug] || null;
   };
-
-  // Get slug for a poem ID
+  
   const getSlugForPoemId = (id: string): string | null => {
     return poemSlugs[id] || null;
   };
 
   return {
+    savePoem,
     handleDeletePoem,
+    isSaving,
     findPoemBySlug,
     getSlugForPoemId
   };
