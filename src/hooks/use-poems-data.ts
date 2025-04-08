@@ -1,18 +1,38 @@
 
 import { useState } from 'react';
-import { usePoemFetching } from './use-poem-fetching';
+import { usePoemFetching, PoemFetchingResult } from './use-poem-fetching';
 import { usePoemSelection } from './use-poem-selection';
-import { Poem, PoemHookState } from '@/types/poem-types';
+import { Poem } from '@/types/poem-types';
 
 // Define a simpler return type that doesn't cause infinite recursion
-type UsePoemsDataReturn = [
-  PoemHookState,
-  React.Dispatch<React.SetStateAction<Poem[]>>,
-  React.Dispatch<React.SetStateAction<string | null>>
-];
+export interface PoemsDataResult {
+  poems: Poem[];
+  filteredPoems: Poem[];
+  isLoading: boolean;
+  selectedPoemId: string | null;
+  selectedPoem: Poem | null;
+  occasionFilter: string;
+  contentTypeFilter: string;
+  styleFilter: string;
+  audienceFilter: string;
+  searchQuery: string;
+  poemSlugs: {[key: string]: string};
+  slugToId: {[key: string]: string};
+  page: number;
+  hasMore: boolean;
+  totalCount: number;
+  poemsPerPage: number;
+  nextPage: () => void;
+  prevPage: () => void;
+  getPoemSeoMetadata: (poemId: string) => {description: string, keywords: string[]};
+}
 
 // Hook to fetch and manage poem data
-export const usePoemsData = (language: 'en' | 'de' = 'de'): UsePoemsDataReturn => {
+export const usePoemsData = (language: 'en' | 'de' = 'de'): [
+  PoemsDataResult,
+  React.Dispatch<React.SetStateAction<Poem[]>>,
+  React.Dispatch<React.SetStateAction<string | null>>
+] => {
   const {
     poems,
     isLoading: isFetchingLoading,
@@ -43,7 +63,7 @@ export const usePoemsData = (language: 'en' | 'de' = 'de'): UsePoemsDataReturn =
   const isLoading = isFetchingLoading || isSelectionLoading;
 
   // Create the state object
-  const state: PoemHookState = {
+  const state: PoemsDataResult = {
     poems,
     filteredPoems,
     isLoading,

@@ -5,8 +5,8 @@ import { toast } from 'sonner';
 import { Poem } from '@/types/poem-types';
 import { generatePoemSlugs } from '@/utils/poem-slug-utils';
 
-// Define a simpler return type to avoid infinite recursion
-interface PoemFetchingReturn {
+// Define a simpler interface for the return value to avoid infinite recursion
+export interface PoemFetchingResult {
   poems: Poem[];
   isLoading: boolean;
   poemSlugs: {[key: string]: string};
@@ -20,7 +20,7 @@ interface PoemFetchingReturn {
   getPoemSeoMetadata: (poemId: string) => {description: string, keywords: string[]};
 }
 
-export const usePoemFetching = (language: 'en' | 'de' = 'de'): PoemFetchingReturn => {
+export const usePoemFetching = (language: 'en' | 'de' = 'de'): PoemFetchingResult => {
   const [poems, setPoems] = useState<Poem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [poemSlugs, setPoemSlugs] = useState<{[key: string]: string}>({});
