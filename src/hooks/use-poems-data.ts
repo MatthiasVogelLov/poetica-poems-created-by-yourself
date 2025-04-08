@@ -3,14 +3,16 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Poem, PoemHookState } from '@/types/poem-types';
-import { generatePoemSlugs } from '@/utils/poem-slug-utils';
 
-// Hook to fetch and manage poem data
-export const usePoemsData = (language: 'en' | 'de' = 'de'): [
+// Define a simpler return type that doesn't cause infinite recursion
+type UsePoemsDataReturn = [
   PoemHookState,
   React.Dispatch<React.SetStateAction<Poem[]>>,
   React.Dispatch<React.SetStateAction<string | null>>
-] => {
+];
+
+// Hook to fetch and manage poem data
+export const usePoemsData = (language: 'en' | 'de' = 'de'): UsePoemsDataReturn => {
   const [poems, setPoems] = useState<Poem[]>([]);
   const [filteredPoems, setFilteredPoems] = useState<Poem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
