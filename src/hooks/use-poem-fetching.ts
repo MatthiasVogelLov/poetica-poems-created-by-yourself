@@ -5,7 +5,8 @@ import { toast } from 'sonner';
 import { Poem } from '@/types/poem-types';
 import { generatePoemSlugs } from '@/utils/poem-slug-utils';
 
-export interface PoemFetchingState {
+// Define a simpler return type to avoid infinite recursion
+interface PoemFetchingReturn {
   poems: Poem[];
   isLoading: boolean;
   poemSlugs: {[key: string]: string};
@@ -14,13 +15,12 @@ export interface PoemFetchingState {
   hasMore: boolean;
   totalCount: number;
   poemsPerPage: number;
-  seoMetadata: {[key: string]: {description: string, keywords: string[]}};
   nextPage: () => void;
   prevPage: () => void;
   getPoemSeoMetadata: (poemId: string) => {description: string, keywords: string[]};
 }
 
-export const usePoemFetching = (language: 'en' | 'de' = 'de'): PoemFetchingState => {
+export const usePoemFetching = (language: 'en' | 'de' = 'de'): PoemFetchingReturn => {
   const [poems, setPoems] = useState<Poem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [poemSlugs, setPoemSlugs] = useState<{[key: string]: string}>({});
@@ -28,7 +28,7 @@ export const usePoemFetching = (language: 'en' | 'de' = 'de'): PoemFetchingState
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [seoMetadata, setSeoMetadata] = useState<{[key: string]: {description: string, keywords: string[]}}>({}); 
+  const [seoMetadata, setSeoMetadata] = useState<{[key: string]: {description: string, keywords: string[]}}>({});
   const poemsPerPage = 12;
 
   // Fetch poems from Supabase
@@ -143,7 +143,6 @@ export const usePoemFetching = (language: 'en' | 'de' = 'de'): PoemFetchingState
     hasMore,
     totalCount,
     poemsPerPage,
-    seoMetadata,
     nextPage,
     prevPage,
     getPoemSeoMetadata

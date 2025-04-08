@@ -2,8 +2,41 @@
 import { useState, useEffect } from 'react';
 import { Poem, PoemFilters } from '@/types/poem-types';
 import { filterPoems, getUniqueValues } from '@/utils/poem-filter-utils';
+import { extractPopularKeywords, filterPoemsByKeywords } from '@/utils/keyword-utils';
 
-export const usePoemFilters = (poems: Poem[]) => {
+export interface FiltersState {
+  occasionFilter: string;
+  contentTypeFilter: string;
+  styleFilter: string;
+  audienceFilter: string;
+  searchQuery: string;
+  keywordFilters: string[];
+}
+
+export interface FilterActions {
+  setOccasionFilter: (filter: string) => void;
+  setContentTypeFilter: (filter: string) => void;
+  setStyleFilter: (filter: string) => void;
+  setAudienceFilter: (filter: string) => void;
+  setSearchQuery: (query: string) => void;
+  toggleKeywordFilter: (keyword: string) => void;
+  clearKeywordFilters: () => void;
+  clearFilters: () => void;
+  getUniqueOccasions: () => string[];
+  getUniqueContentTypes: () => string[];
+  getUniqueStyles: () => string[];
+  getUniqueAudiences: () => string[];
+}
+
+export interface UseFiltersResult {
+  filteredPoems: Poem[];
+  filters: FiltersState;
+  popularKeywords: string[];
+  actions: FilterActions;
+}
+
+export const usePoemFilters = (poems: Poem[]): UseFiltersResult => {
+  // Filter state
   const [occasionFilter, setOccasionFilter] = useState<string>('all');
   const [contentTypeFilter, setContentTypeFilter] = useState<string>('all');
   const [styleFilter, setStyleFilter] = useState<string>('all');
@@ -13,34 +46,15 @@ export const usePoemFilters = (poems: Poem[]) => {
   const [filteredPoems, setFilteredPoems] = useState<Poem[]>(poems);
   const [popularKeywords, setPopularKeywords] = useState<string[]>([]);
 
-  // Extract and count keywords from all poems
+  // Extract popular keywords when poems change
   useEffect(() => {
-    const keywordMap: Record<string, number> = {};
-    
-    poems.forEach(poem => {
-      if (poem.keywords) {
-        const keywordList = poem.keywords.split(',').map(k => k.trim());
-        keywordList.forEach(keyword => {
-          if (keyword) {
-            // Capitalize first letter for consistent display
-            const formattedKeyword = keyword.charAt(0).toUpperCase() + keyword.slice(1);
-            keywordMap[formattedKeyword] = (keywordMap[formattedKeyword] || 0) + 1;
-          }
-        });
-      }
-    });
-    
-    // Sort keywords by frequency and take top 15
-    const sortedKeywords = Object.entries(keywordMap)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 15)
-      .map(entry => entry[0]);
-      
-    setPopularKeywords(sortedKeywords);
+    const extractedKeywords = extractPopularKeywords(poems, 15);
+    setPopularKeywords(extractedKeywords);
   }, [poems]);
 
-  // Apply filters when they change
+  // Apply all filters when any filter changes
   useEffect(() => {
+    // First apply basic filters
     let result = filterPoems(
       poems, 
       occasionFilter, 
@@ -50,21 +64,13 @@ export const usePoemFilters = (poems: Poem[]) => {
       searchQuery
     );
     
-    // Apply keyword filters if selected
-    if (keywordFilters.length > 0) {
-      result = result.filter(poem => {
-        if (!poem.keywords) return false;
-        
-        const poemKeywords = poem.keywords.toLowerCase().split(',').map(k => k.trim());
-        return keywordFilters.some(filter => 
-          poemKeywords.includes(filter.toLowerCase())
-        );
-      });
-    }
+    // Then apply keyword filters
+    result = filterPoemsByKeywords(result, keywordFilters);
     
     setFilteredPoems(result);
   }, [poems, occasionFilter, contentTypeFilter, styleFilter, audienceFilter, searchQuery, keywordFilters]);
 
+  // Keyword filter actions
   const toggleKeywordFilter = (keyword: string) => {
     setKeywordFilters(prev => {
       if (prev.includes(keyword)) {
@@ -79,6 +85,7 @@ export const usePoemFilters = (poems: Poem[]) => {
     setKeywordFilters([]);
   };
 
+  // Reset all filters
   const clearFilters = () => {
     setOccasionFilter('all');
     setContentTypeFilter('all');
@@ -88,6 +95,7 @@ export const usePoemFilters = (poems: Poem[]) => {
     setKeywordFilters([]);
   };
 
+  // Helper methods to get unique values for dropdowns
   const getUniqueOccasions = () => getUniqueValues(poems, 'occasion');
   const getUniqueContentTypes = () => getUniqueValues(poems, 'content_type');
   const getUniqueStyles = () => getUniqueValues(poems, 'style');
