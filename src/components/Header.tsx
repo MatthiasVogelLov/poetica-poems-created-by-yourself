@@ -29,7 +29,7 @@ const Header = () => {
       <div className="container-wide flex items-center justify-between">
         <NavLink 
           to="/" 
-          className="font-serif text-xl md:text-2xl font-medium transition-all duration-300 hover:opacity-70 text-black font-bold"
+          className="font-serif text-xl md:text-2xl font-medium transition-all duration-300 hover:opacity-70 text-black"
           onClick={scrollToTop}
         >
           Poetica

@@ -8,7 +8,7 @@ const Header: React.FC = () => {
       <div className="container max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo / Brand */}
-          <Link to="/en" className="text-xl font-bold">Poetica</Link>
+          <Link to="/en" className="text-xl font-serif font-medium text-black">Poetica</Link>
         </div>
       </div>
     </header>
