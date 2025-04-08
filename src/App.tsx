@@ -13,6 +13,14 @@ import Admin from "./pages/Admin";
 import PoemsLand from "./pages/PoemsLand";
 import NotFound from "./pages/NotFound";
 
+// English Pages
+import EnIndex from "./pages/en/Index";
+import EnGenerator from "./pages/en/Generator";
+import EnPreview from "./pages/en/Preview";
+import EnContact from "./pages/en/Contact";
+import EnHelp from "./pages/en/Help";
+import EnPoemsLand from "./pages/en/PoemsLand";
+
 // Create a new query client instance
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +39,7 @@ const App = () => {
         <Sonner />
         <HashRouter>
           <Routes>
+            {/* German Routes (Original) */}
             <Route path="/" element={<Index />} />
             <Route path="/generator" element={<Generator />} />
             <Route path="/preview" element={<Preview />} />
@@ -39,6 +48,17 @@ const App = () => {
             <Route path="/admin" element={<Admin />} />
             <Route path="/poemsland" element={<PoemsLand />} />
             <Route path="/poemsland/:poemSlug" element={<PoemsLand />} />
+            
+            {/* English Routes */}
+            <Route path="/en" element={<EnIndex />} />
+            <Route path="/en/generator" element={<EnGenerator />} />
+            <Route path="/en/preview" element={<EnPreview />} />
+            <Route path="/en/contact" element={<EnContact />} />
+            <Route path="/en/help" element={<EnHelp />} />
+            <Route path="/en/poemsland" element={<EnPoemsLand />} />
+            <Route path="/en/poemsland/:poemSlug" element={<EnPoemsLand />} />
+            
+            {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </HashRouter>

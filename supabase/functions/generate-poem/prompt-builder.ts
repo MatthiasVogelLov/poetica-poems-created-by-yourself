@@ -1,5 +1,5 @@
 
-interface PromptParams {
+export interface PoemOptions {
   audience: string;
   occasion: string;
   contentType: string;
@@ -7,73 +7,86 @@ interface PromptParams {
   verseType: string;
   length: string;
   keywords?: string;
+  language?: string; // Added language option
 }
 
-// Generate the system prompt
-export function generateSystemPrompt() {
-  let systemPrompt = "Du bist ein preisgekrönter deutscher Dichter, der hochwertige, personalisierte Gedichte auf Deutsch erstellt. ";
-  systemPrompt += "Deine Gedichte zeichnen sich durch folgende Qualitätsmerkmale aus:\n";
-  systemPrompt += "- Nutze ausschließlich korrekte deutsche Wörter und Grammatik\n";
-  systemPrompt += "- Verwende natürliche, präzise und elegante Reime (keine erzwungenen oder konstruierten Reime)\n";
-  systemPrompt += "- Achte auf ein konsistentes Metrum und Rhythmus, der zum gewählten Stil passt\n";
-  systemPrompt += "- Kreiere inhaltlich kohärente Strophen mit logischem Gedankenfluss und thematischem Zusammenhalt\n";
-  systemPrompt += "- Wähle präzise, ausdrucksstarke und zum Thema passende Vokabeln mit besonderem Augenmerk auf Klang und Bildhaftigkeit\n";
-  systemPrompt += "- Halte dich streng an das angegebene Reimschema und achte besonders auf die korrekte Umsetzung\n\n";
-  
-  systemPrompt += "Du beherrschst verschiedene deutsche Gedichtformen wie Sonett, Ballade, Ode, Hymne, Epigramm, Haiku, Tanka, Freie Verse und Elfchen. ";
-  systemPrompt += "Wichtig: Markiere keine Reimschema-Indikatoren wie (A), (B) usw. am Ende der Zeilen. ";
-  systemPrompt += "Überprüfe dein Gedicht sorgfältig auf korrekten Sprachgebrauch und passende Reime, bevor du es abschließt.";
-  
-  return systemPrompt;
-}
+export const buildPrompt = (options: PoemOptions): string => {
+  const {
+    audience,
+    occasion,
+    contentType,
+    style,
+    verseType,
+    length,
+    keywords,
+    language = 'german' // Default to German
+  } = options;
 
-// Generate the user prompt based on form data
-export function generateUserPrompt({ audience, occasion, contentType, style, verseType, length, keywords }: PromptParams) {
-  let userPrompt = `Erstelle ein Gedicht mit folgenden Eigenschaften:\n`;
-  userPrompt += `- Zielgruppe: ${audience}\n`;
-  userPrompt += `- Anlass: ${occasion}\n`;
-  userPrompt += `- Thema: ${contentType}\n`;
-  userPrompt += `- Stil: ${style}\n`;
+  // Base prompt instruction based on language
+  const baseInstruction = language === 'english'
+    ? `Write a beautiful original poem in English for a ${audience} about ${contentType}`
+    : `Schreibe ein schönes originelles Gedicht auf Deutsch für einen ${audience} über ${contentType}`;
   
-  // Add verse type specification with clearer guidance
-  if (verseType === 'frei') {
-    userPrompt += `- Versart: Freie Verse (kein festes Reimschema, aber achte auf Rhythmus und Klang)\n`;
-  } else if (verseType === 'paarreim') {
-    userPrompt += `- Versart: Paarreim (AABB Reimschema - aufeinanderfolgende Verse reimen sich, z.B. "Haus/Maus" und dann "Wein/fein")\n`;
-    userPrompt += `  Achte besonders darauf, dass sich immer zwei aufeinanderfolgende Zeilen reimen.\n`;
-  } else if (verseType === 'kreuzreim') {
-    userPrompt += `- Versart: Kreuzreim (ABAB Reimschema - abwechselnde Verse reimen sich, z.B. "Nacht/erwacht" und "Licht/Gesicht")\n`;
-    userPrompt += `  Achte besonders darauf, dass sich die Zeilen 1 und 3, 2 und 4 usw. reimen.\n`;
-  } else if (verseType === 'umarmenderreim') {
-    userPrompt += `- Versart: Umarmender Reim (ABBA Reimschema - die äußeren und inneren Verse reimen sich, z.B. "Traum/Leben/geben/Raum")\n`;
-    userPrompt += `  Achte besonders darauf, dass sich die Zeilen 1 und 4, 2 und 3 usw. reimen.\n`;
-  }
+  // Length instruction
+  const lengthInstruction = language === 'english'
+    ? (length === 'kurz' ? 'Keep it short with about 8-12 lines.' : 
+       length === 'mittel' ? 'Make it medium length with about 12-20 lines.' : 
+       'Make it longer with about 20-30 lines.')
+    : (length === 'kurz' ? 'Halte es kurz mit etwa 8-12 Zeilen.' : 
+       length === 'mittel' ? 'Mache es mittellang mit etwa 12-20 Zeilen.' : 
+       'Mache es länger mit etwa 20-30 Zeilen.');
   
-  // Add length specification
-  if (length === 'kurz') {
-    userPrompt += `- Länge: Kurz (4-8 Zeilen)\n`;
-  } else if (length === 'mittel') {
-    userPrompt += `- Länge: Mittel (8-16 Zeilen)\n`;
-  } else if (length === 'lang') {
-    userPrompt += `- Länge: Lang (16-24 Zeilen)\n`;
-  }
+  // Style instruction
+  const styleInstruction = language === 'english'
+    ? `The style should be ${style}.`
+    : `Der Stil sollte ${style} sein.`;
   
-  // Add enhanced keyword integration instructions
-  if (keywords && keywords.trim()) {
-    userPrompt += `- Verwende folgende Schlüsselwörter: ${keywords}\n`;
-    userPrompt += `  Integriere diese Wörter natürlich und sinnvoll in den Text, ohne den Fluss zu stören.\n`;
-    userPrompt += `  Die Wörter sollten an thematisch passenden Stellen vorkommen und nicht erzwungen wirken.\n`;
-  }
+  // Verse type instruction
+  const verseInstruction = language === 'english'
+    ? (verseType === 'frei' ? 'Use free verse.' : 
+       verseType === 'paarreim' ? 'Use couplets (AABB rhyme scheme).' : 
+       verseType === 'kreuzreim' ? 'Use alternating rhyme (ABAB rhyme scheme).' : 
+       'Use enclosed rhyme (ABBA rhyme scheme).')
+    : (verseType === 'frei' ? 'Verwende freie Verse.' : 
+       verseType === 'paarreim' ? 'Verwende Paarreime (AABB Reimschema).' : 
+       verseType === 'kreuzreim' ? 'Verwende Kreuzreime (ABAB Reimschema).' : 
+       'Verwende umarmende Reime (ABBA Reimschema).');
   
-  userPrompt += `\nBeispielreime für Inspiration (nutze diese nur als Anregung, nicht als direkte Vorlage):\n`;
-  userPrompt += `- Liebe/bliebe, Herz/Schmerz, Glück/zurück, Leben/geben, Zeit/weit\n`;
-  userPrompt += `- Träume/Räume, Nacht/Macht, Licht/Gesicht, Freude/Weite, Hand/Band\n`;
-  userPrompt += `- Sterne/Ferne, Welt/fällt, groß/los, klein/sein, Tag/mag\n`;
+  // Occasion instruction
+  const occasionInstruction = language === 'english'
+    ? `It's for a/an ${occasion} occasion.`
+    : `Es ist für einen ${occasion} Anlass.`;
   
-  userPrompt += `\nDas Gedicht sollte emotionale Tiefe haben und die Schlüsselwörter, falls angegeben, natürlich einbinden. Halte dich streng an die gewählte Gedichtform, den Stil und das Reimschema.`;
-  userPrompt += `\nWichtig: Füge KEINE Reimschema-Indikatoren wie (A), (B) usw. am Ende der Zeilen hinzu.`;
-  userPrompt += `\nÜberprüfe jeden Vers auf korrekte Grammatik, Rechtschreibung und sinnvolle Reime bevor du das Gedicht abschließt.`;
-  userPrompt += `\nAchte darauf, dass du exakt das angegebene Reimschema einhältst, damit der Lesefluss und die poetische Struktur optimal sind.`;
+  // Keywords instruction
+  const keywordsInstruction = keywords && keywords.trim() !== ''
+    ? (language === 'english'
+       ? `Try to incorporate the following keywords naturally: ${keywords}.`
+       : `Versuche, die folgenden Schlüsselwörter natürlich einzubauen: ${keywords}.`)
+    : '';
+  
+  // Final instruction
+  const finalInstruction = language === 'english'
+    ? 'Make it emotionally resonant, meaningful, and original. The poem should be high quality and something someone would be happy to pay for.'
+    : 'Mache es emotional ansprechend, bedeutungsvoll und originell. Das Gedicht sollte von hoher Qualität sein und etwas, wofür jemand gerne bezahlen würde.';
 
-  return userPrompt;
-}
+  // Combine all instructions
+  const fullPrompt = [
+    baseInstruction,
+    occasionInstruction,
+    styleInstruction,
+    verseInstruction,
+    lengthInstruction,
+    keywordsInstruction,
+    finalInstruction
+  ].filter(Boolean).join(' ');
+
+  return fullPrompt;
+};
+
+export const buildTitlePrompt = (options: PoemOptions): string => {
+  const { audience, occasion, contentType, language = 'german' } = options;
+  
+  return language === 'english'
+    ? `Create a short, elegant title for a poem about ${contentType} for a ${audience} for a ${occasion} occasion. Return only the title, no quotes or explanations.`
+    : `Erstelle einen kurzen, eleganten Titel für ein Gedicht über ${contentType} für einen ${audience} für einen ${occasion} Anlass. Gib nur den Titel zurück, keine Anführungszeichen oder Erklärungen.`;
+};
