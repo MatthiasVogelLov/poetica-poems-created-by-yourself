@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram } from 'lucide-react';
+import LanguageToggle from './LanguageToggle';
 
 const Footer = () => {
   // Function to scroll to top when clicking on certain links
@@ -28,6 +29,7 @@ const Footer = () => {
             <a href="https://www.instagram.com/poetica_poems_by_yourself/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors flex items-center gap-1">
               <Instagram size={16} className="text-primary" />
             </a>
+            <LanguageToggle />
           </div>
         </div>
       </div>

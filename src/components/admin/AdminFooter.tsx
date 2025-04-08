@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Instagram } from 'lucide-react';
+import LanguageToggle from '../LanguageToggle';
 
 const AdminFooter: React.FC = () => {
   return (
@@ -8,7 +9,7 @@ const AdminFooter: React.FC = () => {
       <div className="container-wide">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-6 md:mb-0">
-            
+            <LanguageToggle />
           </div>
           <div className="flex flex-col md:flex-row gap-6 md:gap-10 text-sm text-muted-foreground">
             <a href="/hilfe" className="hover:text-foreground transition-colors">Hilfe</a>

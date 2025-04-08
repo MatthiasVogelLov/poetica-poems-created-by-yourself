@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import LanguageToggle from '../LanguageToggle';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -39,6 +40,7 @@ const Footer: React.FC = () => {
               <li><Link to="/en/imprint" className="text-sm text-gray-600 hover:text-primary">Imprint</Link></li>
               <li><Link to="/en/privacy" className="text-sm text-gray-600 hover:text-primary">Privacy Policy</Link></li>
               <li><Link to="/en/terms" className="text-sm text-gray-600 hover:text-primary">Terms & Conditions</Link></li>
+              <li><LanguageToggle className="mt-4" /></li>
             </ul>
           </div>
         </div>
