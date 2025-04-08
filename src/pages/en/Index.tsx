@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Header from '../../components/en/Header';
 import Footer from '../../components/en/Footer';
-import TellAFriend from '../../components/TellAFriend';
+import TellAFriend from '../../components/en/TellAFriend';
 import { Sparkles, Heart, Star, Users, Calendar, Type } from 'lucide-react';
 
 const Index = () => {
