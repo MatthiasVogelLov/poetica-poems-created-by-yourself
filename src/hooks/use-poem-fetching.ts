@@ -2,10 +2,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Poem } from '@/types/poem-types';
+import { Poem, PoemSeoMetadata } from '@/types/poem-types';
 import { generatePoemSlugs } from '@/utils/poem-slug-utils';
 
-// Define a simpler interface for the return value to avoid infinite recursion
+// Define a completely flat interface without any references to other hook return types
 export interface PoemFetchingResult {
   poems: Poem[];
   isLoading: boolean;
@@ -17,7 +17,7 @@ export interface PoemFetchingResult {
   poemsPerPage: number;
   nextPage: () => void;
   prevPage: () => void;
-  getPoemSeoMetadata: (poemId: string) => {description: string, keywords: string[]};
+  getPoemSeoMetadata: (poemId: string) => PoemSeoMetadata;
 }
 
 export const usePoemFetching = (language: 'en' | 'de' = 'de'): PoemFetchingResult => {
@@ -28,7 +28,7 @@ export const usePoemFetching = (language: 'en' | 'de' = 'de'): PoemFetchingResul
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [totalCount, setTotalCount] = useState<number>(0);
-  const [seoMetadata, setSeoMetadata] = useState<{[key: string]: {description: string, keywords: string[]}}>({});
+  const [seoMetadata, setSeoMetadata] = useState<{[key: string]: PoemSeoMetadata}>({});
   const poemsPerPage = 12;
 
   // Fetch poems from Supabase
@@ -118,7 +118,7 @@ export const usePoemFetching = (language: 'en' | 'de' = 'de'): PoemFetchingResul
   }, [page, language]);
 
   // Method to get SEO metadata for a specific poem
-  const getPoemSeoMetadata = (poemId: string) => {
+  const getPoemSeoMetadata = (poemId: string): PoemSeoMetadata => {
     return seoMetadata[poemId] || { description: '', keywords: [] };
   };
 

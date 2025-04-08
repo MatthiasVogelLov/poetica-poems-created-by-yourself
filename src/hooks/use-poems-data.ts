@@ -1,10 +1,10 @@
 
 import { useState } from 'react';
-import { usePoemFetching, PoemFetchingResult } from './use-poem-fetching';
+import { usePoemFetching } from './use-poem-fetching';
 import { usePoemSelection } from './use-poem-selection';
-import { Poem } from '@/types/poem-types';
+import { Poem, PoemSeoMetadata } from '@/types/poem-types';
 
-// Define a simpler return type that doesn't cause infinite recursion
+// Define a completely flat interface to avoid recursion
 export interface PoemsDataResult {
   poems: Poem[];
   filteredPoems: Poem[];
@@ -24,7 +24,7 @@ export interface PoemsDataResult {
   poemsPerPage: number;
   nextPage: () => void;
   prevPage: () => void;
-  getPoemSeoMetadata: (poemId: string) => {description: string, keywords: string[]};
+  getPoemSeoMetadata: (poemId: string) => PoemSeoMetadata;
 }
 
 // Hook to fetch and manage poem data
