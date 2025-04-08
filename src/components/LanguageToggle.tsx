@@ -13,7 +13,7 @@ interface LanguageToggleProps {
 const LanguageToggle: React.FC<LanguageToggleProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdminLoggedIn } = useAdminBypass();
+  const { isAuthenticated } = useAdminAuth();
   
   // Check if the current path is in English
   const isEnglish = location.pathname.startsWith('/en');
@@ -33,7 +33,7 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({ className = '' }) => {
   };
 
   // Only render if admin is logged in
-  if (!isAdminLoggedIn()) {
+  if (!isAuthenticated) {
     return null;
   }
 
