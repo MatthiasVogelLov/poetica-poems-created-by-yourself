@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
-import { usePoemFetching } from './use-poem-fetching';
+import { usePoemFetching, PoemSeoMetadata } from './use-poem-fetching';
 import { usePoemSelection } from './use-poem-selection';
-import { Poem, PoemSeoMetadata } from '@/types/poem-types';
+import { Poem } from '@/types/poem-types';
 
 // Define a completely flat interface to avoid recursion
 export interface PoemsDataResult {

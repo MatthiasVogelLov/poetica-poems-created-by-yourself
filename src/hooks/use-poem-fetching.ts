@@ -2,8 +2,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Poem, PoemSeoMetadata } from '@/types/poem-types';
+import { Poem } from '@/types/poem-types';
 import { generatePoemSlugs } from '@/utils/poem-slug-utils';
+
+// Define SeoMetadata inline to break circular references
+export interface PoemSeoMetadata {
+  description: string;
+  keywords: string[];
+}
 
 // Define a completely flat interface without any references to other hook return types
 export interface PoemFetchingResult {
@@ -77,7 +83,7 @@ export const usePoemFetching = (language: 'en' | 'de' = 'de'): PoemFetchingResul
         
         // Pre-process poems for SEO metadata
         const processedPoems = data || [];
-        const metadata: {[key: string]: {description: string, keywords: string[]}} = {};
+        const metadata: {[key: string]: PoemSeoMetadata} = {};
         
         processedPoems.forEach(poem => {
           // Generate SEO description from poem content (first 160 chars)
